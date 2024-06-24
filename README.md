@@ -40,6 +40,17 @@ project/
 │   │   ├── Figure4.Rmd
 │   │   └── Figure5.Rmd
 │   └── utils/
+│       ├── biomarkers/
+│       │   ├── data.R
+│       │   ├── feature-importance.R
+│       │   ├── sv-importance-patch.R
+│       │   ├── train-eval.R 
+│       │   └── run-all.R
+│       ├── umap/
+│       │   ├── data.R
+│       │   ├── project.R
+│       │   ├── cluster-analysis.R
+│       │   └── run-all.R
 │       ├── csv2fasta.sh
 │       ├── csv2tsv.sh
 │       ├── qiime2r.sh
