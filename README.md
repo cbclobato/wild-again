@@ -40,7 +40,8 @@ project/
 - scripts/
   - qiime2/  This subdirectory contains the pipeline used for:
       - demultiplexing with CUTADAPT v4.2,
-      - importing into QIIME2 v2023.5 and the further bioinformatic processing steps using the DADA2 pipeline and the VSEARCH algorithm using the SILVA v138 reference database, which generated the feature table and taxonomy file.
+      - importing into QIIME2 v2023.5 and the further bioinformatic processing steps using the DADA2 pipeline and the VSEARCH algorithm using the SILVA v138 reference database, which generated the feature table, taxonomy file, representative sequences and phylogenetic tree
+      - exporting from QIIME2
     
   - r/  This subdirectory contains the scripts used in R to create the phyloseq objects, preprocess the data and prepare the figures in the manuscript.
     
