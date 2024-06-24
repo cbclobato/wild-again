@@ -13,24 +13,25 @@ library(tidyverse)
 library(stats)
 library(asremlPlus)
 library(cowplot)
-library(grid)
-library(ggtext)
 ```
 
 # Diversity Metrics
 
 ```{r, echo = FALSE}
-load("outputs/r/supplementary/bh-raref.RData")
+load("outputs/r/setup/bh-raref.RData")
 
-bh_new <- subset_samples(bh, domestication != ""); bh_new
+bh_new <- subset_samples(bh_raref, domestication != ""); bh_new #chemotype2 
 bh_new <- prune_taxa(taxa_sums(bh_new) > 0, bh_new); bh_new
-bh_new <- subset_samples(bh_raref, provider == "Sensi Seeds"); bh_new
 check <- unique(bh_new@sam_data[["replicates"]]);check
 
+bh_prov <- subset_samples(bh_raref, provider == "Sensi Seeds"); bh_prov
+bh_prov <- prune_taxa(taxa_sums(bh_prov) > 0, bh_prov); bh_prov
+check <- unique(bh_prov@sam_data[["replicates"]]);check
+
 richness <- phyloseq::estimate_richness(
-  bh_new, # bh_raref
+  bh_new, #bh_raref, bh_prov
   measures = c("Observed", "Shannon"))
-head(richness) # returns a data.frame
+head(richness)
 summary(richness)
 
 # Check distribution
@@ -39,39 +40,23 @@ hist(richness$Shannon, main = "Shannon index", xlab = "")
 
 # Correlation between a given sample and the normal distribution.
 ggpubr::ggqqplot(richness$Observed) 
-ggpubr::ggqqplot(richness$Shannon) 
+ggpubr::ggqqplot(richness$Shannon)
 
 # Normality test: p < 0.05 implies sign. differences from the normal dist.
-shapiro.test(richness$Observed) # p = 8.341e-15
-shapiro.test(richness$Shannon) # p = 8.651e-10
+shapiro.test(richness$Observed)
+shapiro.test(richness$Shannon)
 
 # Non-parametric
-alpha <- cbind(sample_data(bh_new), richness); alpha #bh_raref
+alpha <- cbind(sample_data(bh_new), richness); alpha #bh_raref, bh_prov
+summary(alpha) # 402 samples
 
-kt_obs <- kruskal.test(Observed ~ domestication, alpha); kt_obs 
-kt_sh <- kruskal.test(Shannon ~ domestication, alpha); kt_sh 
+kt_obs <- kruskal.test(Observed ~ domestication, alpha); kt_obs #genotype, chemotype2, provider
+kt_sh <- kruskal.test(Shannon ~ domestication, alpha); kt_sh #genotype, chemotype2, provider
 ```
 
 ## Mean and Std. Error
 
 ```{r}
-se <- function(x) {
-  n <- length(x)
-  sd(x)/sqrt(n)
-}
-
-alpha_x <- alpha %>% 
-  group_by(chemotype2) %>% # domestication
-  dplyr::summarise_at(vars(Observed, Shannon),
-                      list(median = median, # median
-                           quantile = quantile))
-
-write.table(alpha_x,
-            "outputs/r/fig_1/alpha-stat-chem.csv",
-            sep = "\t",
-            row.names = T,
-            quote = FALSE)
-
 # IQR, report Q3-Q1
 stats::IQR(richness$Observed)
 stats::quantile(richness$Observed)
@@ -79,9 +64,17 @@ stats::quantile(richness$Observed)
 stats::IQR(richness$Shannon)
 stats::quantile(richness$Shannon)
 
-summary(alpha) # 402 samples
-sd(alpha$Observed)/sqrt(402) # 1.186414
-sd(alpha$Shannon)/sqrt(402) # 0.03268286
+alpha_x <- alpha %>% 
+  group_by(domestication) %>% #genotype, chemotype2
+  dplyr::summarise_at(vars(Observed, Shannon),
+                      list(median = median,
+                           quantile = quantile))
+
+write.table(alpha_x,
+            "outputs/r/fig_1/alpha-stat-dom.csv", #change
+            sep = "\t",
+            row.names = T,
+            quote = FALSE)
 ```
 
 ### Significance
@@ -92,7 +85,7 @@ sd(alpha$Shannon)/sqrt(402) # 0.03268286
 # Pairwise Observed
 wt_obs <- pairwise.wilcox.test(
   alpha$Observed,
-  as.factor(alpha$chemotype2), # domestication
+  as.factor(alpha$domestication), #genotype, chemotype2
   p.adjust.method = "bonf"); wt_obs 
 
 wt_obs <- as.data.frame(wt_obs[["p.value"]])
@@ -107,7 +100,7 @@ summary(wt_obs_long)
 # Pairwise Shannon
 wt_sh <- pairwise.wilcox.test(
   alpha$Shannon,
-  as.factor(alpha$chemotype2), # domestication
+  as.factor(alpha$domestication), #genotype, chemotype2
   p.adjust.method = "bonf"); wt_sh
 
 wt_sh <- as.data.frame(wt_sh[["p.value"]])
@@ -121,9 +114,9 @@ summary(wt_sh_long)
 
 # save
 save(wt_obs_long,
-     file = "outputs/r/fig_1/alpha-obs-chem-long.RData")
+     file = "outputs/r/fig_1/alpha-obs-dom-long.RData") #change
 save(wt_sh_long,
-     file = "outputs/r/fig_1/alpha-sh-chem-long.RData")
+     file = "outputs/r/fig_1/alpha-sh-dom-long.RData") #change
 ```
 
 ##### Heatmaps
@@ -173,7 +166,6 @@ sig_sh <- plotPvalues(wt_sh_long,
                       colours =  c("#ce232a","#ff6682","#918bc0"),
                       ggplotFuncs = NULL, 
                       printPlot = T)
-
 ```
 
 ###### Merge
@@ -183,14 +175,7 @@ M <- cowplot::plot_grid(sig_obs,
                         sig_sh, 
                         labels = c("A", "B"),
                         align = "h",
-                        nrow = 1); M
-
-ggsave("outputs/visual/fig_1/sig-wt-gen.png",
-       bg = "white",
-       width = 45, # 45
-       height = 31, #31
-       units = "cm",
-       dpi = 600)
+                        nrow = 1)
 ```
 
 # Plot
@@ -198,7 +183,7 @@ ggsave("outputs/visual/fig_1/sig-wt-gen.png",
 ## Genotype Observed
 
 ```{r, echo = FALSE}
-load("outputs/r/supplementary/bh-raref.RData")
+load("outputs/r/setup/bh-raref.RData")
 
 palette <- c("#6159a4","#feae01","#0ea5e9","#ff6682")
 breaks <- c(0, 15, 30, 45, 60, 75, 90, 105, 120, 180)
@@ -254,7 +239,7 @@ p_alpha_gen_obs
 ## Domestication Observed
 
 ```{r}
-load("outputs/r/supplementary/bh-raref.RData")
+load("outputs/r/setup/bh-raref.RData")
 
 palette <- c("#feae01","#6159a4","#0ea5e9","#ff6682")
 breaks <- c(0, 15, 30, 45, 60, 75, 90, 105, 120, 180)
@@ -319,7 +304,7 @@ obs <- cowplot::plot_grid(p_alpha_gen_obs, p_alpha_dom_obs,
 ## Domestication Shannon
 
 ```{r}
-load("outputs/r/supplementary/bh-raref.RData")
+load("outputs/r/setup/bh-raref.RData")
 
 palette <- c("#feae01","#6159a4","#0ea5e9","#ff6682")
 breaks <- c(0, 0.5, 1, 1.5, 2, 2.5, 3)
@@ -375,7 +360,7 @@ p_alpha_dom_sha
 ## Genotype Shannon
 
 ```{r, echo = FALSE}
-load("outputs/r/supplementary/bh-raref.RData")
+load("outputs/r/setup/bh-raref.RData")
 
 palette <- c("#6159a4","#feae01","#0ea5e9","#ff6682")
 breaks <- c(0, 0.5, 1, 1.5, 2, 2.5, 3)
@@ -462,54 +447,4 @@ A2 <- A +
                 label = "Shannon H' index"),
             size = 5,
             fontface = "bold"); A2
-
-ggsave("outputs/visual/fig_1/p-alpha2.png",
-       bg = "white",
-       width = 45,
-       height = 31,
-       units = "cm",
-       dpi = 600)
-```
-
-```{r}
-B2 <- grid::rasterGrob(png::readPNG("outputs/visual/fig_1/sig-wt-gen-mod.png"), 
-                       interpolate = TRUE)
-
-C2 <- grid::rasterGrob(png::readPNG("outputs/visual/fig_1/sig-wt-dom-mod.png"), 
-                       interpolate = TRUE)
-
-BC2 <- cowplot::plot_grid(B2, C2, 
-                          labels = "",
-                          label_size = 12,
-                          nrow = 1,
-                          rel_heights = c(2, 1)); BC2
-
-cowplot::plot_grid(A, BC2, 
-                   labels = c("A", "B"),
-                   label_size = 12,
-                   nrow = 2,
-                   rel_heights = c(1, 1))
-
-# ggsave("outputs/visual/fig_1/p-alpha-ABC.png", 
-#        bg = "white",
-#        width = 40,
-#        height = 18,
-#        units = "cm",
-#        dpi = 600)
-```
-
-------------------------------------------------------------------------
-
-# Domestication low cannabinoid
-
-## Subset
-
-```{r}
-load("outputs/r/supplementary/bh-raref.RData")
-
-bh_raref_dom <- subset_samples(bh_raref, !is.na(domestication) & chemotype2 == "Low")
-bh_raref_dom <- prune_taxa(taxa_sums(bh_raref_dom) > 0, bh_raref_dom)
-
-save(bh_raref_dom, 
-     file = "outputs/r/supplementary/bh-raref-dom.RData")
 ```

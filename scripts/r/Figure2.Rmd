@@ -27,34 +27,37 @@ library(RColorBrewer)
 ## Distances
 
 ```{r, echo = FALSE}
-load("outputs/r/supplementary/bh.RData")
+load("outputs/r/setup/bh.RData")
 x <- meta(bh)
 
-bh_new <- subset_samples(bh, chemotype2 != ""); bh_new
+bh_new <- subset_samples(bh_raref, domestication != ""); bh_new #chemotype2 
 bh_new <- prune_taxa(taxa_sums(bh_new) > 0, bh_new); bh_new
-# bh_new <- subset_samples(bh_new, provider == "IPK");bh_new
 check <- unique(bh_new@sam_data[["replicates"]]);check
 
-# correct uneven sequencing depth using cumulative sum scaling (CSS)
+bh_prov <- subset_samples(bh_raref, provider == "Sensi Seeds"); bh_prov
+bh_prov <- prune_taxa(taxa_sums(bh_prov) > 0, bh_prov); bh_prov
+check <- unique(bh_prov@sam_data[["replicates"]]);check
+
+# Correct uneven sequencing depth using cumulative sum scaling (CSS)
 bh_css <- metagMisc::phyloseq_transform_css(bh_new, #bh 
                                             norm = T, 
                                             log = T); bh_css
 
-# get data
+# Get data
 df_css <- data.frame(sample_data(bh_css))
 
-# transpose the css ASV table as a matrix
+# Transpose the css ASV table as a matrix
 dist_matrix_t <- t(data.frame(otu_table(bh_css)))
 
-# generate a bray distance object
+# Generate a bray distance object
 bh_css_bray <- vegan::vegdist(dist_matrix_t,
                               method = "bray")
 
-# test significance
+# Test significance
 vegan::adonis2(bh_css_bray ~ chemotype2,
                data = df_css)
 
-# transpose if necessary to test pairwise significance
+# Transpose if necessary to test pairwise significance
 if (taxa_are_rows(bh_css)) {
     bh_css <- t(bh_css)
 }
@@ -72,7 +75,7 @@ df <-
   inner_join(metadata, by = "replicates") %>%
   select(chemotype2, starts_with("ASV"))
   
-# pairwise comparisons
+# Pairwise comparisons
 pwadonis <-
   pairwiseAdonis::pairwise.adonis(
   df[, 2:3696],
@@ -81,12 +84,11 @@ pwadonis <-
   sim.method = "bray",
   p.adjust.m = "fdr")
 
-# save(pwadonis, file = "outputs/r/fig_2/pw-adonis.RData")
-
-# coerce to data.frame and save
+# Coerce to data.frame and save
 pwadonis_df = as.data.frame(pwadonis)
-# write.csv(pwadonis_df,
-#           file = "outputs/r/fig_2/pw-adonis.csv")
+write.csv(pwadonis_df,
+          file = "outputs/r/fig_2/pw-adonis.csv")
+save(pwadonis, file = "outputs/r/fig_2/pw-adonis.RData")
 ```
 
 ## Significance
@@ -98,7 +100,7 @@ load("outputs/r/fig_2/pw-adonis.RData") #pwadonis
 load("outputs/r/fig_2/pw-adonis-dom.RData") #pwadonis
 load("outputs/r/fig_2/pw-adonis-chem.RData") #pwadonis
 
-# pairwise adonis
+# Pairwise adonis
 pwadonis_wide <- pwadonis_df %>%  select(c(1, 7)) %>%
   separate_wider_delim(cols = pairs,
                        delim = " vs ",
@@ -118,11 +120,11 @@ pwadonis_wide_df <- as.data.frame(t(apply(pwadonis_wide,
                                            swap_columns)))
 pwadonis_wide_df$p.adjusted <- as.numeric(pwadonis_wide_df$p.adjusted)
 
-# save
-# write.csv(pwadonis_wide_df,
-#           file = "outputs/r/fig_2/pw-adonis-wide.csv")
-# save(pwadonis_wide_df,
-#      file = "outputs/r/fig_2/pw-adonis-wide.RData")
+# Save
+write.csv(pwadonis_wide_df,
+          file = "outputs/r/fig_2/pw-adonis-wide.csv")
+save(pwadonis_wide_df,
+     file = "outputs/r/fig_2/pw-adonis-wide.RData")
 ```
 
 #### Heatmaps
@@ -150,69 +152,6 @@ sig.pwa <- asremlPlus::plotPvalues(pwadonis_wide_df,
             ggplotFuncs = NULL,
             sortFactor = "p.adjusted",
             printPlot = T)
-
-ggsave("outputs/visual/fig_2/sig-pwa-chem.png",
-       width = 23,
-       height = 16,
-       units = "cm",
-       dpi = 600)
-```
-
-## NMDS
-
-```{r, echo = FALSE}
-# Non-metric MultiDimenstional Scaling
-# Stress indicates the "goodness of fit” of your NMDS ordination. 
-# For a good representation of your data, the stress value should be less than 0.2. 
-# If the stress value is 0, it might mean you have an outlier sample.
-# Lower stress values indicate greater conformity and therefore are desirable.
-# bh_NMDS <- ordinate(bh_css, "NMDS", "bray", trymax = 1000); bh_NMDS
-# save(bh_NMDS, file = "outputs/r/fig_2/bh-nmds.RData")
-# Stress:     0.188289 
-# Stress type 1, weak ties
-load("outputs/r/fig_2/bh-nmds.RData") # bh_NMDS
-
-mycolors <- c("#6159a4","#feae01","#0ea5e9","#ff6682") 
-column1 <- sample_data(bh_css)$domestication
-# column2 <- sample_data(bh_css)$chemotype
-# column3 <- sample_data(bh_css)$genotype
-
-nmds <- plot_ordination(bh_css, bh_NMDS) +
-  geom_point(
-    aes(col = as.factor(column1)), 
-#        shape = as.factor(column2)),
-size = 5,
-show.legend = T) +
-  # geom_text(aes(label = as.factor(column3)), 
-  #           size = 2) +
-#  scale_shape_manual(values = c(19, 18, 15, 17)) +
-#  stat_ellipse(type = "norm", linetype = 1, level = 0.95) + 
-  scale_color_manual(values = mycolors,
-                     breaks = c("Landrace",
-                                "Selection",
-                                "Cross hybrid",
-                                "Inbred line",
-                                NA)) + 
-  theme_classic() +
-  theme(axis.text.x = element_text(size = 10),
-        axis.text.y = element_text(size = 10),
-        axis.title = element_text(size = 10),
-        legend.position = "right",
-        legend.box = "vertical",
-        legend.direction = "vertical",
-        legend.key.size = unit(0.8, 'cm'),
-        legend.text = element_text(size = 10)) +
-  labs(color = "", 
-       shape = "")
-nmds
-
-# ggsave(
-#   "outputs/visual/fig_2/nmds-bray-dom.png",
-#   width = 20,
-#   height = 18,
-#   units = "cm",
-#   scale = 1,
-#   dpi = 600)
 ```
 
 ## UMAP
@@ -220,7 +159,7 @@ nmds
 ## Cluster analysis
 
 ```{r}
-source("scripts/r/umap/cluster-analysis.R")
+source("scripts/utils/umap/cluster-analysis.R")
 load("outputs/r/fig_2/UMAP.RData") #df_postproc
 
 df_postproc2 <- df_postproc %>% 
@@ -232,13 +171,6 @@ ca <- silhouette_plot(embeds, labels)
 print(ca)
 
 p3 <- ca$p; p3
-
-# ggsave("outputs/visual/fig_2/silhouette.png",
-#         width = 40,
-#         height = 20,
-#         units = "cm",
-#         scale = 1,
-#         dpi = 600)
 ```
 
 ## Plot
@@ -257,7 +189,7 @@ p1 <-
            shape = Chemotype)) +
   geom_point(size = 5) +
   scale_color_discrete(type = palette_domestication) +
-  scale_shape_manual(values = c(1, 19, 4)) + # 13
+  scale_shape_manual(values = c(1, 19, 4)) +
   guides(color = guide_legend(order = 1), 
          shape = guide_legend(order = 2)) +
   theme_classic() +
@@ -275,33 +207,25 @@ p1 <-
                                  size = 12)),
     legend.text = (element_text(size = 12)),
     legend.position = c(0.18, 0.9),
-    legend.background = element_rect(fill = "transparent", color = "transparent"),
+    legend.background = element_rect(fill = "transparent", 
+                                     color = "transparent"),
     legend.box = "horizontal") +
   annotation_custom(ggplotGrob(p3),
                     xmin = 11, xmax = 14,
                     ymin = -3, ymax = 0)
 p1
 
-# palette_genotype <- colorRampPalette(brewer.pal(46, "Paired"))(46)
-# p2 <- ggplot(df_postproc, aes(x = `UMAP 1`, y = `UMAP 2`, color = Genotype)) +
-#   geom_point() +
-#   scale_color_discrete(type = palette_genotype) +
-#   guides(color = guide_legend(order = 1, ncol = 2),
-#          shape = guide_legend(order = 2)) +
-#   theme_classic()
-# p2
-
-# plotly::ggplotly(p2)
-
-# ggsave("outputs/visual/fig_2/umap-dom.png",
-#         width = 45,
-#         height = 31,
-#         units = "cm",
-#         scale = 1,
-#         dpi = 600)
-
 save(p1,
      file = "outputs/r/fig_2/umap.RData")
+
+palette_genotype <- colorRampPalette(brewer.pal(46, "Paired"))(46)
+p2 <- ggplot(df_postproc, aes(x = `UMAP 1`, y = `UMAP 2`, color = Genotype)) +
+  geom_point() +
+  scale_color_discrete(type = palette_genotype) +
+  guides(color = guide_legend(order = 1, ncol = 2),
+         shape = guide_legend(order = 2)) +
+  theme_classic()
+plotly::ggplotly(p2)
 ```
 
 # Dominant taxa
@@ -421,7 +345,6 @@ ht <- heat_tree(to_plot,
                 node_color = as.integer(to_plot$data$read_abund[['A']]*100,
                                         length = 0),
                 node_color_range = mycolors,
-#               edge_label = n_obs
                 initial_layout = "davidson-harel",
                 layout = "kamada-kawai",
                 title = "",
@@ -429,23 +352,7 @@ ht <- heat_tree(to_plot,
                 node_color_axis_label = "", #Rel. abundance (%)
                 repel_labels = T,
                 margin_size = c(0, 0, 0, 0))
-ht
-
-# ggsave("outputs/visual/fig_2/heattree-relab-asv-DHKK.png",
-#        bg = "white",
-#        width = 30,
-#        height = 30,
-#        units = "cm",
-#        dpi = 600)
-```
-
-### Import
-
-```{r, out.width = "25%"}
-ht2 <- grid::rasterGrob(png::readPNG("outputs/visual/fig_2/heattree-relab-asv-DHKKmod.png"), 
-                       interpolate = T)
-
-save(ht2,
+save(ht,
      file = "outputs/r/fig_2/heat-tree.RData")
 ```
 
@@ -453,7 +360,7 @@ save(ht2,
 
 ```{r, echo = FALSE}
 # source("scripts/utils/plot_composition_v2.R")
-load("outputs/r/supplementary/bh.RData")
+load("outputs/r/setup/bh.RData")
 
 bh_rel <- microbiome::transform(bh, "compositional")
 bh_agr <- microbiome::aggregate_rare(
@@ -551,24 +458,18 @@ bp_g1 <- plot_composition(bh_agr,
              space = "free")
 bp_g1
 
-# ggsave("outputs/visual/fig_2/dom-genus-class-0.05.png",
-#        width = 80,
-#        height = 40,
-#        units = "cm",
-#        dpi = 600)
-
-# save(bp_g1,
-#      file = "outputs/r/fig_2/barplot.RData")
+save(bp_g1,
+     file = "outputs/r/fig_2/barplot.RData")
 ```
 
 # Merge
 
 ```{r}
-load("outputs/r/fig_2/heat-tree.RData") # ht2
+load("outputs/r/fig_2/heat-tree.RData") # ht
 load("outputs/r/fig_2/umap.RData") # p1
 load("outputs/r/fig_2/barplot.RData") # bp_g1
 
-fig2 <- cowplot::plot_grid(ht2,
+fig2 <- cowplot::plot_grid(ht,
                            p1, 
                            labels = c("a", "b"),
                            nrow = 1,
@@ -588,13 +489,6 @@ fig2_final <- cowplot::plot_grid(fig2,
                 label = "*"),
             size = 5,
             fontface = "bold")
-
-# ggsave("outputs/visual/fig_2/p2-final.png",
-# bg = "white",
-# width = 45,
-# height = 31,
-# units = "cm",
-# dpi = 600)
 ```
 
 # Replicates
@@ -644,10 +538,4 @@ plot_bar(bh_agr,
        y = "", 
        fill = "") +
   guides(fill = guide_legend(nrow = 3))
-
-# ggsave("outputs/visual/fig_2/genus-0.05-gen-grid.png",
-#        width = 45,
-#        height = 31,
-#        units = "cm",
-#        dpi = 600)
 ```

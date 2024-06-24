@@ -1,0 +1,7 @@
+chemotype2;Observed_median;Observed_quantile;Shannon_median;Shannon_quantile;q
+High;45;29,5;1,21;0,83;q1
+High;45;62;1,21;1,55;q3
+Low;28;18;1,05;0,48;q1
+Low;28;54;1,05;1,66;q3
+NA;45;30,5;1,68;1,42;q1
+NA;45;57;1,68;2,05;q3
