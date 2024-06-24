@@ -1,0 +1,429 @@
+---
+title: "network-dom"
+author: "Carolina Lobato"
+date: "2023-12-12"
+output: html_document
+---
+
+# Load libraries
+
+```{r}
+library(SpiecEasi)
+library(igraph)
+library(GGally)
+library(phyloseq)
+```
+
+# Landraces
+
+## Subset data
+
+```{r}
+load("outputs/r/204_setup/bh.RData")
+
+bac_land <- subset_samples(bh, domestication == "Landrace")
+bac_land <- prune_taxa(taxa_sums(bac_land) > 0, bac_land); bac_land # 2190 taxa and 127 samples
+gen_land <- merge_samples(bac_land, "cultivar")
+sample_names(gen_land) # 13 landraces
+
+land_core <- microbiome::core(bac_land,
+                            detection = 0.1,
+                            prevalence = 0.1,
+                            include.lowest = TRUE); land_core
+
+core_taxa <- taxa_names(land_core); core_taxa # 116 ASVs
+
+save(land_core, 
+     file = "outputs/r/312_dom_networks/landrace/land-core10.RData")
+
+tax_land_core <- as.data.frame(tax_table(land_core))
+write.csv(tax_land_core,
+          file = "outputs/r/312_dom_networks/landrace/land-core-tax.csv",
+          quote = F)
+
+# Or Remove taxa not seen more than 5 times in at least 1% of the samples (1,27 samples): 
+land_pru <- filter_taxa(bac_land, function(x) sum(x > 5) > (0.01*length(x)), TRUE); land_pru # 353 taxa
+
+tax_land <- as.data.frame(tax_table(land_pru))
+write.csv(tax_land,
+          file = "outputs/r/312_dom_networks/landrace/land-pru-tax.csv",
+          quote = F)
+
+save(land_pru, 
+     file = "outputs/r/312_dom_networks/landrace/land-pru5-1.RData")
+```
+
+## Create Network
+
+```{r}
+load("outputs/r/312_dom_networks/landrace/land-core10.RData") # land_core
+load("outputs/r/312_dom_networks/landrace/land-pru5-1.RData") # land_pru
+
+# Warning: Optimal lambda may be outside the supplied values
+se.mb.land_01_100_100 <- spiec.easi(
+  land_core,
+  method = "mb",
+  sel.criterion = "bstars",
+  lambda.min.ratio = 0.1, # 0.5, smaller -> more edges
+  nlambda = 100, # 10
+  pulsar.params = list(rep.num = 100, # 20, increase for real data -> 99
+#                       ncores = 4, 
+                       seed = 12345),
+  verbose = T)
+
+# adjacency matrix with a number between 0-1, corresponding to the fraction of networks, constructed with 80% subsamples. Each entry corresponds to the stability of an edge (the non-zero entries in the inverse covariance matrix)
+getOptMerge(se.mb.land_01_100_100)
+# the maximum value of the StARS summary statistic should overcome the default threshold (0.05).
+se.mb.land_01_100_100$select$stars$summary # 0.1803598201 & 0.08075264
+# check how far from the target stability threshold (0.05). To get closer to the mark, bump up nlambda.
+getStability(se.mb.land_01_100_100) # 0.04928498 & 0.04850548
+sum(getRefit(se.mb.land_01_100_100)) / 2 # 230 & 1600
+
+
+save(se.mb.land_01_100_100, 
+     file = "outputs/r/312_dom_networks/landrace/se-land-core-01-100-100.RData")
+```
+
+```{r}
+load("outputs/r/312_dom_networks/landrace/se-land-core-01-100-100.RData")
+load("outputs/r/312_dom_networks/landrace/se-land-pru-01-100-100.RData")
+
+bm <- symBeta(getOptBeta(se.mb.land_01_100_100), mode = "maxabs")
+
+bm.m <- as.matrix(bm)
+positive <- length(bm.m[bm.m >= 0.1])/2; positive # 76 & 536
+negative <-length(bm.m[bm.m <= -0.1])/2; negative # 6 & 9
+
+betas <- Matrix::summary(t(bm))[, 3]
+weights <- ( 1 - Matrix::summary(t(bm))[, 3] ) / 2
+edges.attr <- list(beta = betas, weight = weights)
+
+ig.mb.land <- SpiecEasi::adj2igraph(
+  Matrix::drop0(getRefit(se.mb.land_01_100_100)),
+  rmEmptyNodes = TRUE,
+  edge.attr = edges.attr,
+  vertex.attr = list(name = taxa_names(land_pru)))
+
+write_graph(ig.mb.land, 
+            "outputs/r/312_dom_networks/landrace/cyt-land-pru-01-100-100.gml", 
+            format = "gml")
+```
+
+```{r}
+# bm <- symBeta(getOptBeta(se.mb.land_01_100_100), mode = "maxabs")
+
+otu.ids <- taxa_names(land_core)
+edges <- E(ig.mb.land) # spiec.graph
+
+edge.colors <- c()
+for (e.index in 1:length(edges)) {
+  adj.nodes = ends(ig.mb.land, edges[e.index])
+  xindex = which(otu.ids == adj.nodes[1])
+  yindex = which(otu.ids == adj.nodes[2])
+  beta = bm[xindex, yindex]
+  if (beta > 0) {
+    edge.colors = append(edge.colors, "forestgreen")
+  } else if (beta < 0) {
+    edge.colors = append(edge.colors, "red")
+  }
+}
+```
+
+```{r}
+E(ig.mb.land)$color <- edge.colors
+
+spiec.graph.b <- ig.mb.land
+nodenames <- V(spiec.graph.b)$name
+# V(spiec.graph.b)$name <-
+#   getTaxonomy(nodenames, land_core, useRownames = T)
+E(spiec.graph.b)$arrow.size = 5
+V(spiec.graph.b)$color = "white"
+V(spiec.graph.b)$frame.color = "black"
+tkplot(spiec.graph.b)
+```
+
+```{r}
+as.data.frame(degree(ig.mb.land))
+```
+
+# Selections
+
+## Subset data
+
+```{r}
+load("outputs/r/204_setup/bh.RData")
+
+bac_sel <- subset_samples(bh, domestication == "Selection")
+bac_sel <- prune_taxa(taxa_sums(bac_sel) > 0, bac_sel); bac_sel # 1011 taxa and 40 samples
+gen_sel <- merge_samples(bac_sel, "cultivar")
+sample_names(gen_sel) # 4 selections
+
+sel_core <- microbiome::core(bac_sel,
+                            detection = 0.1,
+                            prevalence = 0.1,
+                            include.lowest = TRUE); sel_core
+
+core_taxa <- taxa_names(sel_core); core_taxa # 166 ASVs
+
+save(sel_core, 
+     file = "outputs/r/312_dom_networks/selection/sel-core10.RData")
+
+tax_sel_core <- as.data.frame(tax_table(sel_core))
+write.csv(tax_sel_core,
+          file = "outputs/r/312_dom_networks/selection/sel-core-tax.csv",
+          quote = F)
+
+# Or Remove taxa not seen more than 5 times in at least 1% of the samples (1,27 samples): 
+sel_pru <- filter_taxa(bac_sel, function(x) sum(x > 5) > (0.01*length(x)), TRUE); sel_pru # 629 taxa
+
+tax_sel <- as.data.frame(tax_table(sel_pru))
+write.csv(tax_sel,
+          file = "outputs/r/312_dom_networks/selection/sel-pru-tax.csv",
+          quote = F)
+
+save(sel_pru, 
+     file = "outputs/r/312_dom_networks/selection/sel-pru5-1.RData")
+```
+
+## Create Network
+
+```{r}
+load("outputs/r/312_dom_networks/selection/sel-core10.RData") # sel_core
+load("outputs/r/312_dom_networks/selection/sel-pru5-1.RData") # sel_pru
+
+# Warning: Optimal lambda may be outside the supplied values
+se.mb.sel_01_100_100 <- spiec.easi(
+  sel_pru,
+  method = "mb",
+  sel.criterion = "bstars",
+  lambda.min.ratio = 0.1, # 0.5, smaller -> more edges
+  nlambda = 100, # 10
+  pulsar.params = list(rep.num = 100, # 20, increase for real data -> 99
+#                       ncores = 4, 
+                       seed = 12345),
+  verbose = T)
+
+# adjacency matrix with a number between 0-1, corresponding to the fraction of networks, constructed with 80% subsamples. Each entry corresponds to the stability of an edge (the non-zero entries in the inverse covariance matrix)
+getOptMerge(se.mb.sel_01_100_100)
+# the maximum value of the StARS summary statistic should overcome the default threshold (0.05).
+se.mb.sel_01_100_100$select$stars$summary # 0.1437751004
+# check how far from the target stability threshold (0.05). To get closer to the mark, bump up nlambda.
+getStability(se.mb.sel_01_100_100) # 0.04999667
+sum(getRefit(se.mb.sel_01_100_100)) / 2 # 323
+
+save(se.mb.sel_01_100_100, 
+     file = "outputs/r/312_dom_networks/selection/se-sel-pru-01-100-100.RData")
+```
+
+```{r}
+load("outputs/r/312_dom_networks/selection/se-sel-core-01-100-100.RData")
+load("outputs/r/312_dom_networks/selection/se-sel-pru-01-100-100.RData")
+
+bm <- symBeta(getOptBeta(se.mb.sel_01_100_100), mode = "maxabs")
+
+bm.m <- as.matrix(bm)
+positive <- length(bm.m[bm.m >= 0.1])/2; positive # 107
+negative <-length(bm.m[bm.m <= -0.1])/2; negative # 14
+
+betas <- Matrix::summary(t(bm))[, 3]
+weights <- ( 1 - Matrix::summary(t(bm))[, 3] ) / 2
+edges.attr <- list(beta = betas, weight = weights)
+
+ig.mb.sel <- SpiecEasi::adj2igraph(
+  Matrix::drop0(getRefit(se.mb.sel_01_100_100)),
+  rmEmptyNodes = TRUE,
+  edge.attr = edges.attr,
+  vertex.attr = list(name = taxa_names(sel_core)))
+
+write_graph(ig.mb.sel, 
+            "outputs/r/312_dom_networks/selection/cyt-sel-pru-01-100-100.gml", 
+            format = "gml")
+```
+
+# Cross Hybrids
+
+## Subset data
+
+```{r}
+load("outputs/r/204_setup/bh.RData")
+
+bac_cx <- subset_samples(bh, domestication == "Cross hybrid")
+bac_cx <- prune_taxa(taxa_sums(bac_cx) > 0, bac_cx); bac_cx # 1286 taxa and 109 samples
+gen_cx <- merge_samples(bac_cx, "cultivar")
+sample_names(gen_cx) # 11 cross hybrids
+
+cx_core <- microbiome::core(bac_cx,
+                            detection = 0.1,
+                            prevalence = 0.1,
+                            include.lowest = TRUE); cx_core
+
+core_taxa <- taxa_names(cx_core); core_taxa # 94 ASVs
+
+save(cx_core, 
+     file = "outputs/r/312_dom_networks/cross/cx-core10.RData")
+
+tax_cx_core <- as.data.frame(tax_table(cx_core))
+write.csv(tax_cx_core,
+          file = "outputs/r/312_dom_networks/cross/cx-core-tax.csv",
+          quote = F)
+
+# Or Remove taxa not seen more than 5 times in at least 1% of the samples (1,27 samples): 
+cx_pru <- filter_taxa(bac_cx, function(x) sum(x > 5) > (0.01*length(x)), TRUE); cx_pru # 200 taxa
+
+tax_cx <- as.data.frame(tax_table(cx_pru))
+write.csv(tax_cx,
+          file = "outputs/r/312_dom_networks/cross/cx-pru-tax.csv",
+          quote = F)
+
+save(cx_pru, 
+     file = "outputs/r/312_dom_networks/cross/cx-pru5-1.RData")
+```
+
+## Create Network
+
+```{r}
+load("outputs/r/312_dom_networks/cross/cx-core10.RData") # cx_core
+load("outputs/r/312_dom_networks/cross/cx-pru5-1.RData") # cx_pru
+
+# Warning: Optimal lambda may be outside the supplied values
+se.mb.cx_01_100_100 <- spiec.easi(
+  cx_pru,
+  method = "mb",
+  sel.criterion = "bstars",
+  lambda.min.ratio = 0.1, # 0.5, smaller -> more edges
+  nlambda = 100, # 10
+  pulsar.params = list(rep.num = 100, # 20, increase for real data -> 99
+#                       ncores = 4, 
+                       seed = 12345),
+  verbose = T)
+
+# adjacency matrix with a number between 0-1, corresponding to the fraction of networks, constructed with 80% subsamples. Each entry corresponds to the stability of an edge (the non-zero entries in the inverse covariance matrix)
+getOptMerge(se.mb.cx_01_100_100)
+# the maximum value of the StARS summary statistic should overcome the default threshold (0.05).
+se.mb.cx_01_100_100$select$stars$summary # 0.1599176390 & 0.1078894472
+# check how far from the target stability threshold (0.05). To get closer to the mark, bump up nlambda.
+getStability(se.mb.cx_01_100_100) # 0.04971283 & 0.04898004
+sum(getRefit(se.mb.cx_01_100_100)) / 2 # 171 & 537
+
+save(se.mb.cx_01_100_100, 
+     file = "outputs/r/312_dom_networks/cross/se-cx-pru-01-100-100.RData")
+```
+
+```{r}
+load("outputs/r/312_dom_networks/cross/se-cx-core-01-100-100.RData")
+load("outputs/r/312_dom_networks/cross/se-cx-pru-01-100-100.RData")
+
+bm <- symBeta(getOptBeta(se.mb.cx_01_100_100), mode = "maxabs")
+
+bm.m <- as.matrix(bm)
+positive <- length(bm.m[bm.m >= 0.1])/2; positive # 59 & 196
+negative <-length(bm.m[bm.m <= -0.1])/2; negative # 5 & 8
+
+betas <- Matrix::summary(t(bm))[, 3]
+weights <- ( 1 - Matrix::summary(t(bm))[, 3] ) / 2
+edges.attr <- list(beta = betas, weight = weights)
+
+ig.mb.cx <- SpiecEasi::adj2igraph(
+  Matrix::drop0(getRefit(se.mb.cx_01_100_100)),
+  rmEmptyNodes = TRUE,
+  edge.attr = edges.attr,
+  vertex.attr = list(name = taxa_names(cx_core)))
+
+write_graph(ig.mb.cx, 
+            "outputs/r/312_dom_networks/cross/cyt-cx-core-01-100-100.gml", 
+            format = "gml")
+```
+
+# Inbred lines
+
+## Subset data
+
+```{r}
+load("outputs/r/204_setup/bh.RData")
+
+bac_inb <- subset_samples(bh, domestication == "Inbred line")
+bac_inb <- prune_taxa(taxa_sums(bac_inb) > 0, bac_inb); bac_inb # 403 taxa and 49 samples
+gen_inb <- merge_samples(bac_inb, "cultivar")
+sample_names(gen_inb) # 5 inbred lines
+
+inb_core <- microbiome::core(bac_inb,
+                            detection = 0.1,
+                            prevalence = 0.1,
+                            include.lowest = TRUE); inb_core
+
+core_taxa <- taxa_names(inb_core); core_taxa # 48 ASVs
+
+save(inb_core, 
+     file = "outputs/r/312_dom_networks/inbred/inb-core10.RData")
+
+tax_inb_core <- as.data.frame(tax_table(inb_core))
+write.csv(tax_inb_core,
+          file = "outputs/r/312_dom_networks/inbred/inb-core-tax.csv",
+          quote = F)
+
+# Or Remove taxa not seen more than 5 times in at least 1% of the samples (1,27 samples): 
+inb_pru <- filter_taxa(bac_inb, function(x) sum(x > 5) > (0.01*length(x)), TRUE); inb_pru # 152 taxa
+
+tax_inb <- as.data.frame(tax_table(inb_pru))
+write.csv(tax_inb,
+          file = "outputs/r/312_dom_networks/inbred/inb-pru-tax.csv",
+          quote = F)
+
+save(inb_pru, 
+     file = "outputs/r/312_dom_networks/inbred/inb-pru5-1.RData")
+```
+
+## Create Network
+
+```{r}
+load("outputs/r/312_dom_networks/inbred/inb-core10.RData") # inb_core
+load("outputs/r/312_dom_networks/inbred/inb-pru5-1.RData") # inb_pru
+
+# Warning: Optimal lambda may be outside the supplied values
+se.mb.inb_01_100_100 <- spiec.easi(
+  inb_pru,
+  method = "mb",
+  sel.criterion = "bstars",
+  lambda.min.ratio = 0.1, # 0.5, smaller -> more edges
+  nlambda = 100, # 10
+  pulsar.params = list(rep.num = 100, # 20, increase for real data -> 99
+#                       ncores = 4, 
+                       seed = 12345),
+  verbose = T)
+
+# adjacency matrix with a number between 0-1, corresponding to the fraction of networks, constructed with 80% subsamples. Each entry corresponds to the stability of an edge (the non-zero entries in the inverse covariance matrix)
+getOptMerge(se.mb.inb_01_100_100)
+# the maximum value of the StARS summary statistic should overcome the default threshold (0.05).
+se.mb.inb_01_100_100$select$stars$summary # 0.2242907801 & 0.104740328
+# check how far from the target stability threshold (0.05). To get closer to the mark, bump up nlambda.
+getStability(se.mb.inb_01_100_100) # 0.04916702 & 0.04842649
+sum(getRefit(se.mb.inb_01_100_100)) / 2 # 38 & 127
+
+save(se.mb.inb_01_100_100, 
+     file = "outputs/r/312_dom_networks/inbred/se-inb-pru-01-100-100.RData")
+```
+
+```{r}
+load("outputs/r/312_dom_networks/inbred/se-inb-core-01-100-100.RData")
+load("outputs/r/312_dom_networks/inbred/se-inb-pru-01-100-100.RData")
+
+bm <- symBeta(getOptBeta(se.mb.inb_01_100_100), mode = "maxabs")
+
+bm.m <- as.matrix(bm)
+positive <- length(bm.m[bm.m >= 0.1])/2; positive # 14 & 74
+negative <-length(bm.m[bm.m <= -0.1])/2; negative # 2 & 0
+
+betas <- Matrix::summary(t(bm))[, 3]
+weights <- ( 1 - Matrix::summary(t(bm))[, 3] ) / 2
+edges.attr <- list(beta = betas, weight = weights)
+
+ig.mb.inb <- SpiecEasi::adj2igraph(
+  Matrix::drop0(getRefit(se.mb.inb_01_100_100)),
+  rmEmptyNodes = TRUE,
+  edge.attr = edges.attr,
+  vertex.attr = list(name = taxa_names(inb_core)))
+
+write_graph(ig.mb.inb, 
+            "outputs/r/312_dom_networks/inbred/cyt-inb-core-01-100-100.gml", 
+            format = "gml")
+```

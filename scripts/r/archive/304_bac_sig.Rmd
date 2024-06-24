@@ -1,0 +1,256 @@
+---
+title: "Chapter 3.4: Signatures"
+author: "Carolina Lobato"
+date: "21/02/2023"
+output: html_document
+---
+
+# Load Libraries
+
+```{r, include = F}
+library(phyloseq)
+library(tidyverse)
+library(ggplot2)
+library(vegan)
+library(pheatmap)
+library(ComplexUpset)
+library(microbiome)
+```
+
+# List core ASVs among replicates of a variety
+
+```{r}
+load("outputs/r/204_setup/bh.RData")
+
+core.list <- c()
+metadata <- sample_data(bh)
+categories <- unique(na.omit(metadata[["domestication"]]))
+
+for (item in categories)
+{
+  print(paste0("Identifying core taxa for ", item))
+  bh.subset <- subset_samples(bh, domestication == item)
+  subset.core <- core_members(bh.subset, detection = 0.01 , prevalence = 0.75) 
+  print(paste0("No. of core taxa in ", item, ": ", length(subset.core)))
+  core.list[[item]] <- subset.core
+}
+
+print(core.list)
+# save(core.list, file = "outputs/r/304_bac_sig/cultivar-core-list.RData")
+
+common.asv <- Reduce(intersect, core.list); common.asv # 2
+all.asv <- Reduce(union, core.list); all.asv # 93
+```
+
+# Adjacency Matrix
+
+```{r}
+load("outputs/r/304_bac_sig/cultivar-core-list.RData") #core.list
+
+create_membership_table <- function(asvList) {
+  allElements <- unique(unlist(asvList))
+  countsMatrix <- sapply(asvList, function(x) table(factor(x, levels = allElements)))
+  membershipDF <- as.data.frame(countsMatrix)
+  colnames(membershipDF) <- names(asvList)
+  row.names(membershipDF) <- allElements
+  return(membershipDF)
+}
+data <- create_membership_table(core.list) 
+
+# save(data, file = "outputs/r/304_bac_sig/cultivar-core-adj-matrix.RData")
+```
+
+## Plot UpSet
+
+```{r}
+load("outputs/r/304_bac_sig/cultivar-core-adj-matrix.RData") #data
+cultivars <- names(data)
+
+u <- upset(
+  data,
+  cultivars,
+  mode = "distinct",
+  name = "",
+  sort_intersections_by = "degree",
+  sort_intersections = "ascending",
+  width_ratio = 0.1,
+  height_ratio = 4)
+u
+
+# ggsave("outputs/visual/r/304_bac_sig/upset.png",
+#         width = 40,
+#         height = 38,
+#         units = "cm",
+#         scale = 1,
+#         dpi = 600)
+```
+
+## Find intersecting ASVs
+
+```{r}
+load("outputs/r/304_bac_sig/cultivar-core-list.RData") #core.list
+
+cultivars <- c("Master Kush")
+other_cultivars <- setdiff(names(core.list), cultivars)
+set1 <- Reduce(intersect, core.list[cultivars])
+set2 <- unique(unlist(core.list[other_cultivars]))
+setdiff(set1, set2)
+```
+
+## Replicates' Core taxa across varieties
+
+### Networks Prep
+
+```{r}
+load("outputs/r/204_setup/bh.RData")
+load("outputs/r/304_bac_sig/cultivar-core-list.RData") # core.list
+
+## Merge samples
+counts.merged <- merge_samples(bh, group = "cultivar", fun = sum) %>%
+  otu_table() %>% 
+  t() %>%
+  as.data.frame()
+
+## Relative abundance
+rel.abundance <- vegan::decostand(counts.merged, method = "total", MARGIN = 2)
+rel.abundance <- rel.abundance*100
+colSums(rel.abundance) 
+
+## Filter out non-core ASVs and (rare (<0.1%))
+s.core <- unique(unlist(core.list)); s.core
+s.core.rel <- rel.abundance %>%
+  filter(row.names(.) %in% s.core) #%>%
+#  filter(if_any(everything(), ~ .x > 0.1))
+
+## Reshape   
+s.core.rel.long <- rownames_to_column(s.core.rel, var = "ASV") %>% 
+  pivot_longer(-ASV, names_to = c("cultivar"), values_to = "rel_abundance")
+
+## Save
+# save(s.core, 
+#      file = "outputs/r/304_bac_sig/s-core-cultivar.RData")
+# save(s.core.rel, 
+#      file = "outputs/r/304_bac_sig/s-core-cultivar-rel.RData")
+# save(s.core.rel.long, 
+#      file = "outputs/r/304_bac_sig/s-core-cultivar-rel-long.RData")
+```
+
+### Networks
+
+```{r}
+load("outputs/r/204_setup/bh.RData")
+load("outputs/r/304_bac_sig/cultivar-core-adj-matrix.RData") # data
+load("outputs/r/304_bac_sig/s-core-cultivar-rel-long.RData") # s.core.rel.long
+
+# Histogram
+ra <- s.core.rel.long$rel_abundance
+# hist((as.vector(ra)))
+# hist((as.vector(log((1-ra)/(ra+0.000001))))) # looks good
+# hist((as.vector(exp(ra)/(1+exp(ra)))))
+
+taxo <- as.data.frame(tax_table(bh))
+taxo$ASV <- rownames(taxo)
+
+data.long <- rownames_to_column(data, var = "ASV") %>% 
+  pivot_longer(-ASV, names_to = c("cultivar"), values_to = "degree") %>%
+  filter(degree > 0)
+
+# Merging long format table with metadata
+score_taxo <- merge(s.core.rel.long, taxo, by = "ASV") %>%
+  right_join(data.long, by = c("ASV", "cultivar")) 
+summary(score_taxo) # to decide breaks
+
+score_taxo <-
+  score_taxo %>%
+  group_by(ASV) %>%
+  mutate(membership = paste0(sort(cultivar), collapse = ";"))
+
+# use values for size based on mean relative abundance 
+mean_rel_ab <- score_taxo %>% group_by(ASV) %>%
+  summarise(across(rel_abundance, mean)) # divides by the nº of cultivars where it is present
+
+# save(data.long,
+#      file = "outputs/r/304_bac_sig/cultivar-core-adj-matrix-long.RData")
+
+# Import into Cytoscape
+# write.table(
+#   score_taxo,
+#   "outputs/r/304_bac_sig/s-core-cultivar-rel-taxo.csv",
+#   sep = ",",
+#   row.names = F,
+#   quote = F)
+
+# write.table(
+#   mean_rel_ab,
+#   "outputs/r/304_bac_sig/relative-ab.csv",
+#   sep = ",",
+#   row.names = T,
+#   quote = F)
+```
+
+# Heatmap Prep
+
+```{r}
+load("outputs/r/204_setup/bh.RData")
+load("outputs/r/304_bac_sig/s-core-cultivar-rel-long.RData") #s.core.rel.long
+load("outputs/r/304_bac_sig/cultivar-core-list.RData") #core.list
+
+data.long <- 
+  rownames_to_column(data, var = "ASV") %>%
+  pivot_longer(-ASV, names_to = c("cultivar"), values_to = "degree") %>%
+  filter(degree > 0)
+
+taxo <- as.data.frame(tax_table(bh))
+taxo$ASV <- rownames(taxo)
+
+score_taxo <- merge(s.core.rel.long, taxo, by = "ASV") %>%
+  right_join(data.long, by = c("ASV", "cultivar")) 
+
+score_taxo <-
+  score_taxo %>%
+  group_by(ASV) %>%
+  mutate(membership = paste0(sort(cultivar), collapse = ";"))
+
+score_taxo_dec <- mutate(score_taxo, rel_dec = rel_abundance/100)
+
+values_fill <- 0
+score_taxo_wide <- pivot_wider(
+  score_taxo_dec,
+  id_cols = ASV,
+  names_from = "cultivar",
+  values_from = "rel_dec",
+  values_fill = values_fill)
+```
+
+## Heatmap
+
+```{r}
+score_taxo_wide <- column_to_rownames(score_taxo_wide, "ASV")
+score_taxo_wide <- as.matrix(score_taxo_wide)
+
+drows <- as.dist(vegdist(score_taxo_wide, metric = "bray", na.rm = TRUE))
+dcols <-  as.dist(vegdist(t(score_taxo_wide), metric = "bray", na.rm = TRUE))
+
+color <- colorRampPalette(c("#E2E6BD", "#EEAB65", "#8E063B"))(153)
+score_taxo_wide[score_taxo_wide == values_fill] <- NA
+
+core_map <- pheatmap(
+  log10(score_taxo_wide),
+  # log1p(),
+  # exp(s.core.rel)/(1+exp(s.core.rel)),
+  # log((score_taxo_wide + 1e-6)/(1-score_taxo_wide)),
+  color = color,
+  clustering_method = "ward.D2",
+  clustering_distance_rows = drows,
+  clustering_distance_cols = dcols,
+  scale = "none",
+  treeheight_row = 50,
+  fontsize_col = 12,
+  fontsize_row = 7,
+  angle_col = "45",
+  filename = paste0("outputs/visual/r/304_bac_sig/heatmap-log-core-s.png"),
+  height = 15,
+  width = 30,
+  na_col = "#D3D3D3")
+core_map
+```

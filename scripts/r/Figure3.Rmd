@@ -1,0 +1,1501 @@
+---
+title: "Figure 3"
+author: "Carolina Lobato"
+date: "2024-01-30"
+output: html_document
+---
+
+# Load Libraries
+
+```{r, include = F}
+library(phyloseq)
+library(microbiome)
+library(tidyverse)
+library(ggplot2)
+library(ggrepel)
+library(colorspace)
+library(tidytext)
+# library(packcircles)
+# library(hpackedbubble)
+```
+
+# Prep Phy-obj
+
+```{r, echo = FALSE}
+load("outputs/r/supplementary/bh.RData")
+
+bac_core <- microbiome::core(bh,
+                             detection = 0.1,
+                             prevalence = 0.75,
+                             include.lowest = F); bac_core 
+
+bac_core_df <- as.data.frame(tax_table(bac_core))
+bac_ctaxa <- taxa_names(bac_core); bac_ctaxa
+
+sample_sums(bh) # sum of all reads observed in each sample
+sample_sums(bac_core) # sum of all core reads observed in each sample
+taxa_sums(bh) # sum of all reads observed in each taxa
+taxa_sums(bac_core) # sum of all reads observed in each core taxa
+
+# write.csv(bac_core_df,
+#           file = "outputs/r/fig_3/bac-core-list.csv")
+# save(bac_ctaxa,
+#      file = "outputs/r/fig_3/bac-core-list.RData")
+
+x_bac <- subset_samples(bh, domestication == "Inbred line") # change
+x_bac <- prune_taxa(taxa_sums(x_bac) > 0, x_bac); x_bac 
+x_gen <- merge_samples(x_bac, "genotype")
+sample_names(x_gen) 
+
+# save(x_bac,
+#      file = "outputs/r/fig_3/landraces/land-bac.RData")
+# save(x_bac,
+#      file = "outputs/r/fig_3/selections/sel-bac.RData")
+# save(x_bac,
+#      file = "outputs/r/fig_3/cross_hybrids/cxh-bac.RData")
+# save(x_bac,
+#      file = "outputs/r/fig_3/inbred_lines/ib-bac.RData")
+```
+
+# Prep Core-list
+
+```{r}
+load("outputs/r/supplementary/bh.RData")
+
+core.list <- c()
+metadata <- sample_data(bh)
+categories <- unique(na.omit(metadata[["domestication"]]))
+
+for (item in categories)
+{
+  print(paste0("Identifying core taxa for ", item))
+  bh.subset <- subset_samples(bh, domestication == item)
+  subset.core <- core_members(bh.subset, 
+                              detection = 0.1 , 
+                              prevalence = 0.75, 
+                              include.lowest = T) 
+  print(paste0("No. of core taxa in ", item, ": ", length(subset.core)))
+  core.list[[item]] <- subset.core
+}
+print(core.list)
+
+common.asv <- Reduce(intersect, core.list); common.asv # 8
+all.asv <- Reduce(union, core.list); all.asv # 17
+
+core.75.land <- unlist(core.list[["Landrace"]], recursive = F); core.75.land # 11
+core.75.sel <- unlist(core.list[["Selection"]], recursive = F); core.75.sel #12
+core.75.cxh <- unlist(core.list[["Cross hybrid"]], recursive = F); core.75.cxh # 9
+core.75.ib <- unlist(core.list[["Inbred line"]], recursive = F); core.75.ib # 11
+
+# save(core.75.land,
+#      file = "outputs/r/fig_3/landraces/land-c75.RData")
+# save(core.75.sel,
+#      file = "outputs/r/fig_3/selections/sel-c75.RData")
+# save(core.75.cxh,
+#      file = "outputs/r/fig_3/cross_hybrids/cxh-c75.RData")
+# save(core.75.ib,
+#      file = "outputs/r/fig_3/inbred_lines/ib-c75.RData")
+```
+
+# Prep Biomarker list
+
+```{r}
+pos.bmk.land <- c("ASV 3151: Pseudomonas_putida", 
+                  "ASV 3399: Yersiniaceae",
+                  "ASV 2716: Oenococcus_oeni",
+                  "ASV 3007: Bacillus",
+                  "ASV 4650: Brevibacillus",
+                  "ASV 3140: Pseudomonas",
+                  "ASV 1161: Sphingomonas",
+                  "ASV 2973: Bacillus",
+                  "ASV 3511: Acinetobacter",
+                  "ASV 1229: Sphingomonas"); pos.bmk.land # 10
+
+pos.bmk.sel <- c("ASV 3872: Simkaniaceae",
+                 "ASV 2331: Cupriavidus",
+                 "ASV 2704: Bacillus",
+                 "ASV 3078: Staphylococcus",
+                 "ASV 4090: Rathayibacter",
+                 "ASV 3820: BD7-11",
+                 "ASV 2062: Pelomonas",
+                 "ASV 2505: Dyella",
+                 "ASV 3055: Bacillus_sp.",
+                 "ASV 2328: Ralstonia"); pos.bmk.sel #10
+
+pos.bmk.cxh <- c("ASV 2704: Bacillus",
+                 "ASV 2970: Bacillus_sp.",
+                 "ASV 4599: Paenibacillus_sp.",
+                 "ASV 4674: Paenibacillus",
+                 "ASV 3198: Pseudomonas_sp.",
+                 "ASV 3369: Kosakonia",
+                 "ASV 3464: Enhydrobacter",
+                 "ASV 4544: Rhodococcus_erythropolis",
+                 "ASV 3872: Simkaniaceae",
+                 "ASV 4601: Paenibacillus_sp."); pos.bmk.cxh # 10
+
+pos.bmk.ib <- c("ASV 3353: Pantoea_agglomerans") # 1
+
+# save(pos.bmk.land,
+#      file = "outputs/r/fig_3/landraces/land-pos-biomk.RData")
+# save(pos.bmk.sel,
+#      file = "outputs/r/fig_3/selections/sel-pos-biomk.RData")
+# save(pos.bmk.cxh,
+#      file = "outputs/r/fig_3/cross_hybrids/cxh-pos-biomk.RData")
+# save(pos.bmk.ib,
+#      file = "outputs/r/fig_3/inbred_lines/ib-pos-biomk.RData")
+```
+
+# Prep Prevalence and %RA Core
+
+```{r, echo = FALSE}
+# Select one
+
+# load("outputs/r/fig_3/landraces/land-bac.RData") # x_bac
+# load("outputs/r/fig_3/selections/sel-bac.RData") # x_bac
+# load("outputs/r/fig_3/cross_hybrids/cxh-bac.RData") # x_bac
+# load("outputs/r/fig_3/inbred_lines/ib-bac.RData") # x_bac
+# load("outputs/r/supplementary/bh.RData")
+
+meta <- microbiome::meta(bh) # x_bac
+asv <- otu_table(bh) # x_bac
+taxo <- rownames_to_column(as.data.frame(tax_table(bh)),
+                                        "ASV") # x_bac
+sample_names(bh)
+# presence-absence data
+asv_PA <- 1 * ((asv > 0) == 1)
+
+# occupancy calculation
+asv_prev <- rowSums(asv_PA) / ncol(asv_PA)
+
+# relative abundance
+asv_rel <- apply(vegan::decostand(asv, 
+                                  method = "total", 
+                                  MARGIN = 2), 1, mean)
+
+# combine occupancy and RA of each ASV in a table
+asv_prev_rel <- rownames_to_column(as.data.frame(cbind(asv_prev, 
+                                                       asv_rel)),
+                                   "ASV")
+
+asv_prev_rel_taxo <- merge(taxo, 
+                           asv_prev_rel, 
+                           by = "ASV")
+
+# merge with metadata
+asv_tdf <- rownames_to_column(as.data.frame(t(asv)),
+                           "replicates")
+asv_tdf_meta <- merge(meta,
+                      asv_tdf, 
+                      by = "replicates")
+
+# keep only the one feature column for collapsing table
+asv_tdf_meta <- asv_tdf_meta[-c(1:4, 6:19)]
+
+asv_gen <- asv_tdf_meta %>% 
+  group_by(code) %>%
+  summarise_each(list(sum))
+
+# small paper data
+# asv_gen_sel1 <- asv_gen[-c(2:327, 329:369, 371:2118, 2121:5300)]
+# asv_gen_sel2 <- asv_gen[-c(2:2138, 2140:2239, 2242:5300)]
+
+# make a ASV P/A table
+asv_gen_PA <- 1 * ((asv_gen > 0) == 1)
+
+# merge prevalence, RA and taxa with the nr of obs per genotype
+asv_gen_obs <- data.frame(colSums(asv_gen_PA)) %>%
+  na.omit() %>% 
+  rownames_to_column("ASV")
+names(asv_gen_obs)[names(asv_gen_obs) == "colSums.asv_gen_PA."] <- 'Obs'
+
+asv_prev_rel_taxo_gen_obs <- merge(asv_prev_rel_taxo, 
+                                   asv_gen_obs, 
+                                   by = "ASV")
+
+# save(asv_prev_rel_taxo_gen_obs,
+#      file = "outputs/r/fig_3/landraces/land-prev-rel-taxo-gen-obs.RData")
+# save(asv_prev_rel_taxo_gen_obs,
+#      file = "outputs/r/fig_3/selections/sel-prev-rel-taxo-gen-obs.RData")
+# save(asv_prev_rel_taxo_gen_obs,
+#      file = "outputs/r/fig_3/cross_hybrids/cxh-prev-rel-taxo-gen-obs.RData")
+# save(asv_prev_rel_taxo_gen_obs,
+#      file = "outputs/r/fig_3/inbred_lines/ib-prev-rel-taxo-gen-obs.RData")
+# save(asv_prev_rel_taxo_gen_obs,
+#      file = "outputs/r/fig_3/all-prev-rel-taxo-gen-obs.RData")
+
+```
+
+## Prep Scatter Plot
+
+```{r}
+# Select one
+load("outputs/r/fig_3/landraces/land-c75.RData") # core.75.land
+load("outputs/r/fig_3/landraces/land-prev-rel-taxo-gen-obs.RData") # asv_prev_rel_taxo_gen_obs
+load("outputs/r/fig_3/landraces/land-pos-biomk.RData") # pos.bmk.land
+
+load("outputs/r/fig_3/selections/sel-c75.RData") # core.75.sel
+load("outputs/r/fig_3/selections/sel-prev-rel-taxo-gen-obs.RData") # asv_prev_rel_taxo_gen_obs
+load("outputs/r/fig_3/selections/sel-pos-biomk.RData") # pos.bmk.sel
+
+load("outputs/r/fig_3/cross_hybrids/cxh-c75.RData") # core.75.cxh
+load("outputs/r/fig_3/cross_hybrids/cxh-prev-rel-taxo-gen-obs.RData") # asv_prev_rel_taxo_gen_obs
+load("outputs/r/fig_3/cross_hybrids/cxh-pos-biomk.RData") # pos.bmk.cxh
+
+load("outputs/r/fig_3/inbred_lines/ib-c75.RData") # core.75.ib
+load("outputs/r/fig_3/inbred_lines/ib-prev-rel-taxo-gen-obs.RData") # asv_prev_rel_taxo_gen_obs
+load("outputs/r/fig_3/inbred_lines/ib-pos-biomk.RData") # pos.bmk.ib
+
+load("outputs/r/fig_3/bac-core-list.RData") # bac_ctaxa
+load("outputs/r/fig_3/all-prev-rel-taxo-gen-obs.RData") # asv_prev_rel_taxo_gen_obs
+
+asv_prev_rel_taxo_gen_obs_core_bmk <-
+  asv_prev_rel_taxo_gen_obs %>%
+  mutate(biomarkers = ASV %in% pos.bmk.ib) %>% # change
+  mutate(core_asv = ASV %in% core.75.ib) %>% # change
+  mutate(bmk_core_asv = if_else(.$biomarkers == TRUE,
+                            "Biomarker",
+                            if_else(.$core_asv == TRUE,
+                            "Core",
+                            "Flexible"))) %>%
+  mutate(asv_rel_p = asv_rel * 100, asv_prev_p = asv_prev * 100)
+
+asv_prev_rel_taxo_gen_obs_core_bmk$core_asv <-
+  ordered(asv_prev_rel_taxo_gen_obs_core_bmk$bmk_core_asv, 
+          levels = c("Biomarker", "Core", "Flexible"))
+
+# for all
+asv_prev_rel_taxo_gen_obs_core_all <-
+  asv_prev_rel_taxo_gen_obs %>%
+  mutate(core_asv = ASV %in% bac_ctaxa) %>%
+  mutate(core_asv = if_else(.$ASV == "ASV 3007: Bacillus",
+                            "Flexible",
+                            if_else(.$core_asv == TRUE,
+                            "Core",
+                            "Flexible"))) %>%
+  mutate(asv_rel_p = asv_rel * 100, asv_prev_p = asv_prev * 100)
+
+asv_prev_rel_taxo_gen_obs_core_all$core_asv <-
+  ordered(asv_prev_rel_taxo_gen_obs_core_all$core_asv, 
+          levels = c("Core", "Flexible"))
+
+## Save
+# save(asv_prev_rel_taxo_gen_obs_core_bmk,
+#      file = "outputs/r/fig_3/landraces/land-asv-rel-taxo-bmk.RData")
+# save(asv_prev_rel_taxo_gen_obs_core_bmk,
+#      file = "outputs/r/fig_3/selections/sel-asv-rel-taxo-bmk.RData")
+# save(asv_prev_rel_taxo_gen_obs_core_bmk,
+#      file = "outputs/r/fig_3/cross_hybrids/cxh-asv-rel-taxo-bmk.RData")
+# save(asv_prev_rel_taxo_gen_obs_core_bmk,
+#      file = "outputs/r/fig_3/inbred_lines/ib-asv-rel-taxo-bmk.RData")
+# save(asv_prev_rel_taxo_gen_obs_core_all,
+#      file = "outputs/r/fig_3/all-asv-rel-taxo.RData")
+```
+
+### LAND: Scatter Plot
+
+```{r}
+load("outputs/r/fig_3/landraces/land-asv-rel-taxo-bmk.RData") #asv_prev_rel_taxo_gen_obs_core_bmk
+
+color_core = c(Biomarker = "#ff6682",
+               Core = "#ce232a", 
+               Flexible = "#918bc0")
+
+counts <- asv_prev_rel_taxo_gen_obs_core_bmk %>% dplyr::count(Domain = "Bacteria")
+bmks <- subset(asv_prev_rel_taxo_gen_obs_core_bmk, bmk_core_asv == "Biomarker") %>%
+   mutate(ASV = recode(ASV,
+                      "ASV 2716: Oenococcus_oeni" = "ASV 2716: O. oeni",
+                      "ASV 3151: Pseudomonas_putida" = "ASV 3151: P. putida")) 
+
+p_core_flex1_land <-
+  ggplot(asv_prev_rel_taxo_gen_obs_core_bmk, aes(x = asv_rel_p, y = asv_prev_p)) +
+  geom_point(aes(color = bmk_core_asv), size = 3, alpha = 0.7) + 
+  ggrepel::geom_text_repel(data = bmks, max.overlaps = 20,
+                           aes(asv_rel_p,
+                               asv_prev_p,
+                               color = bmk_core_asv,
+                               label = ASV),
+                           size = 3.5, show.legend = F) +
+  geom_label(data = counts, aes(x = 10, y = 5, label = n, fontface = "bold"), size = 5) +
+  geom_hline(yintercept = 75, linetype = "dashed", color = "black") +
+  geom_vline(xintercept = 0.1, linetype = "dotted", color = "black", show.legend = T) +
+  theme_classic() +
+  theme(
+    plot.margin = margin(t = 0, r = 0, b = 0, l = 0, unit = "cm"),
+    axis.title.x = element_text(size = 12),
+    axis.title.y = element_text(size = 12), 
+    axis.text = element_text(size = 12),
+    legend.text = element_text(size = 12),
+    legend.position = c(0.2, 0.95), 
+    legend.direction = "vertical",
+    legend.background = element_rect(fill = "transparent", color = "transparent"),
+    legend.margin = margin(0, 0, 0, 0),
+    panel.spacing = unit(0.1, "lines")) +
+  scale_x_log10(breaks = c(10, 1, 0.1, 0.01, 0.001), labels = c(10, 1, 0.1, 0.01, 0.001)) +
+  scale_y_continuous(expand = expand_scale(mult = c(0, 0.05)), limits = c(0, 101)) +
+  scale_color_manual(values = color_core)	+
+  labs(x = "Relative abundance [%]", y = "Prevalence [%]", color = "")
+p_core_flex1_land
+```
+
+### SEL: Scatter Plot
+
+```{r}
+load("outputs/r/fig_3/selections/sel-asv-rel-taxo-bmk.RData") #asv_prev_rel_taxo_gen_obs_core_bmk
+
+color_core = c(Biomarker = "#ff6682",
+               Core = "#ce232a", 
+               Flexible = "#918bc0")
+
+counts <- asv_prev_rel_taxo_gen_obs_core_bmk %>% dplyr::count(Domain = "Bacteria")
+bmks <- subset(asv_prev_rel_taxo_gen_obs_core_bmk, bmk_core_asv == "Biomarker") %>%
+   mutate(ASV = recode(ASV,
+                      "ASV 3055: Bacillus_sp." = "ASV 3055: Bacillus")) 
+
+p_core_flex1_sel <-
+  ggplot(asv_prev_rel_taxo_gen_obs_core_bmk, aes(x = asv_rel_p, y = asv_prev_p)) +
+  geom_point(aes(color = bmk_core_asv), size = 3, alpha = 0.7) + 
+  ggrepel::geom_text_repel(data = bmks, max.overlaps = 20,
+                           aes(asv_rel_p,
+                               asv_prev_p,
+                               color = bmk_core_asv,
+                               label = ASV),
+                           size = 3.5, show.legend = F) +
+  geom_label(data = counts, aes(x = 10, y = 5, label = n, fontface = "bold"), size = 5) +
+  geom_hline(yintercept = 75, linetype = "dashed", color = "black") +
+  geom_vline(xintercept = 0.1, linetype = "dotted", color = "black", show.legend = T) +
+  theme_classic() +
+  theme(
+    plot.margin = margin(t = 0, r = 0, b = 0, l = 0, unit = "cm"),
+    axis.title.x = element_text(size = 12),
+    axis.title.y = element_blank(),
+    axis.text = element_text(size = 12),
+    legend.text = element_text(size = 12),
+    legend.position = "none",
+    legend.direction = "vertical",
+    legend.background = element_rect(fill = "transparent", color = "transparent"),
+    legend.margin = margin(0, 0, 0, 0),
+    panel.spacing = unit(0.1, "lines")) +
+  scale_x_log10(breaks = c(10, 1, 0.1, 0.01, 0.001), labels = c(10, 1, 0.1, 0.01, 0.001)) +
+  scale_y_continuous(expand = expand_scale(mult = c(0, 0.05)), limits = c(0, 101)) +
+  scale_color_manual(values = color_core)	+
+  labs(x = "Relative abundance [%]", y = "Prevalence [%]", color = "")
+p_core_flex1_sel
+```
+
+### CXH: Scatter Plot
+
+```{r}
+load("outputs/r/fig_3/cross_hybrids/cxh-asv-rel-taxo-bmk.RData") #asv_prev_rel_taxo_gen_obs_core_bmk
+
+color_core = c(Biomarker = "#ff6682",
+               Core = "#ce232a", 
+               Flexible = "#918bc0")
+
+counts <- asv_prev_rel_taxo_gen_obs_core_bmk %>% dplyr::count(Domain = "Bacteria")
+bmks <- subset(asv_prev_rel_taxo_gen_obs_core_bmk, bmk_core_asv == "Biomarker") %>%
+   mutate(ASV = recode(ASV,
+                      "ASV 2970: Bacillus_sp." = "ASV 2970: Bacillus",
+                      "ASV 3198: Pseudomonas_sp." = "ASV 3198: Pseudomonas",
+                      "ASV 4544: Rhodococcus_erythropolis" = "ASV 4544: R. erythropolis",
+                      "ASV 4599: Paenibacillus_sp." = "ASV 4599: Paenibacillus",
+                      "ASV 4601: Paenibacillus_sp." = "ASV 4601: Paenibacillus")) 
+
+p_core_flex1_cxh <-
+  ggplot(asv_prev_rel_taxo_gen_obs_core_bmk, aes(x = asv_rel_p, y = asv_prev_p)) +
+  geom_point(aes(color = bmk_core_asv), size = 3, alpha = 0.7) + 
+  ggrepel::geom_text_repel(data = bmks, max.overlaps = 20,
+                           aes(asv_rel_p,
+                               asv_prev_p,
+                               color = bmk_core_asv,
+                               label = ASV),
+                           size = 3.5, show.legend = F) +
+  geom_label(data = counts, aes(x = 10, y = 5, label = n, fontface = "bold"), size = 5) +
+  geom_hline(yintercept = 75, linetype = "dashed", color = "black") +
+  geom_vline(xintercept = 0.1, linetype = "dotted", color = "black", show.legend = T) +
+  theme_classic() +
+  theme(
+    plot.margin = margin(t = 0, r = 0, b = 0, l = 0, unit = "cm"),
+    axis.title.x = element_text(size = 12),
+    axis.title.y = element_blank(),
+    axis.text = element_text(size = 12),
+    legend.text = element_text(size = 12),
+    legend.position = "none",
+    legend.direction = "vertical",
+    legend.background = element_rect(fill = "transparent", color = "transparent"),
+    legend.margin = margin(0, 0, 0, 0),
+    panel.spacing = unit(0.1, "lines")) +
+  scale_x_log10(breaks = c(10, 1, 0.1, 0.01, 0.001), labels = c(10, 1, 0.1, 0.01, 0.001)) +
+  scale_y_continuous(expand = expand_scale(mult = c(0, 0.05)), limits = c(0, 101)) +
+  scale_color_manual(values = color_core)	+
+  labs(x = "Relative abundance [%]", y = "Prevalence [%]", color = "")
+p_core_flex1_cxh
+```
+
+### IBL: Scatter Plot
+
+```{r}
+load("outputs/r/fig_3/inbred_lines/ib-asv-rel-taxo-bmk.RData") #asv_prev_rel_taxo_gen_obs_core_bmk
+
+color_core = c(Biomarker = "#ff6682",
+               Core = "#ce232a", 
+               Flexible = "#918bc0")
+
+counts <- asv_prev_rel_taxo_gen_obs_core_bmk %>% dplyr::count(Domain = "Bacteria")
+bmks <- subset(asv_prev_rel_taxo_gen_obs_core_bmk, bmk_core_asv == "Biomarker") %>%
+   mutate(ASV = recode(ASV,
+                      "ASV 3353: Pantoea_agglomerans" = "ASV 3353: P. agglomerans")) 
+
+p_core_flex1_ib <-
+  ggplot(asv_prev_rel_taxo_gen_obs_core_bmk, aes(x = asv_rel_p, y = asv_prev_p)) +
+  geom_point(aes(color = bmk_core_asv), size = 3, alpha = 0.7) + 
+  ggrepel::geom_text_repel(data = bmks, max.overlaps = 20,
+                           aes(asv_rel_p,
+                               asv_prev_p,
+                               color = bmk_core_asv,
+                               label = ASV),
+                           size = 3.5, show.legend = F) +
+  geom_label(data = counts, aes(x = 10, y = 5, label = n, fontface = "bold"), size = 5) +
+  geom_hline(yintercept = 75, linetype = "dashed", color = "black") +
+  geom_vline(xintercept = 0.1, linetype = "dotted", color = "black", show.legend = T) +
+  theme_classic() +
+  theme(
+    plot.margin = margin(t = 0, r = 0, b = 0, l = 0, unit = "cm"),
+    axis.title.x = element_text(size = 12),
+    axis.title.y = element_blank(),
+    axis.text = element_text(size = 12),
+    legend.text = element_text(size = 12),
+    legend.position = "none",
+    legend.direction = "vertical",
+    legend.background = element_rect(fill = "transparent", color = "transparent"),
+    legend.margin = margin(0, 0, 0, 0),
+    panel.spacing = unit(0.1, "lines")) +
+  scale_x_log10(breaks = c(10, 1, 0.1, 0.01, 0.001), labels = c(10, 1, 0.1, 0.01, 0.001)) +
+  scale_y_continuous(expand = expand_scale(mult = c(0, 0.05)), limits = c(0, 101)) +
+  scale_color_manual(values = color_core)	+
+  labs(x = "Relative abundance [%]", y = "Prevalence [%]", color = "")
+p_core_flex1_ib
+```
+
+### ALL: Scatter Plot
+
+```{r}
+load("outputs/r/fig_3/all-asv-rel-taxo.RData") #asv_prev_rel_taxo_gen_obs_core_all
+
+color_core = c(Core = "#ce232a", 
+               Flexible = "#918bc0")
+
+counts <- asv_prev_rel_taxo_gen_obs_core_all %>% dplyr::count(Domain = "Bacteria")
+
+p_core_flex1_all <- 
+  ggplot(asv_prev_rel_taxo_gen_obs_core_all, aes(x = asv_rel_p, y = asv_prev_p)) +
+  geom_point(aes(color = core_asv), size = 3, alpha = 0.7) + 
+  ggrepel::geom_text_repel(data = subset(asv_prev_rel_taxo_gen_obs_core_all, core_asv == "Core"),
+                           max.overlaps = 20,
+                           aes(asv_rel_p,
+                               asv_prev_p,
+                               color = core_asv,
+                               label = ASV),
+                           size = 3,
+                           show.legend = F) +
+  geom_label(data = counts, aes(x = 10, y = 5, label = n,  fontface = "bold"), size = 5) +
+  geom_hline(yintercept = 75, linetype = "dashed", color = "black") +
+  geom_vline(xintercept = 0.1, linetype = "dotted", color = "black", show.legend = T) +
+  theme_classic() +
+  theme(
+    plot.margin = margin(t = 0.5, r = 0.5, b = 0.5, l = 0.5, unit = "cm"),
+    axis.title.x = element_text(size = 12),
+    axis.title.y = element_text(size = 12),
+    axis.text = element_text(size = 12),
+    legend.text = element_text(size = 12),
+    legend.position = c(0.16, 0.6),
+    legend.direction = "vertical",
+    legend.background = element_rect(fill = "transparent", color = "transparent"),
+    legend.margin = margin(0, 0, 0, 0),
+    panel.spacing = unit(0.1, "lines")) +
+  scale_x_log10(breaks = c(10, 1, 0.1, 0.01, 0.001), labels = c(10, 1, 0.1, 0.01, 0.001)) +
+  scale_y_continuous(expand = c(0, 0), limits = c(0, 101)) +
+  scale_color_manual(values = color_core)	+
+  labs(x = "Relative abundance [%]", y = "Prevalence [%]", color = "")
+p_core_flex1_all
+```
+
+# Merge Scatters
+
+```{r}
+p_core_flex1_lsci <- cowplot::plot_grid(p_core_flex1_land,
+                                        p_core_flex1_sel, 
+                                        p_core_flex1_cxh,
+                                        p_core_flex1_ib,
+                                        labels = c("", "", "", ""),
+                                        nrow = 1,
+                                        rel_widths = c(0.3, 0.3, 0.3, 0.3),
+                                        greedy = T); p_core_flex1_lsci
+
+# png("outputs/visual/fig_3/core_flex1-final.png",
+#     bg = "white",
+#     width = 45,
+#     height = 31,
+#     units = "cm",
+#     res = 600); print(p_core_flex1_lsci); dev.off()
+
+# save(p_core_flex1_lsci,
+#      file = "outputs/r/fig_3/core_flex1-final.RData")
+```
+
+## Prep Barplot Core
+
+```{r}
+# Select one
+load("outputs/r/fig_3/landraces/land-c75.RData") # core.75.land
+load("outputs/r/fig_3/landraces/land-prev-rel-taxo-gen-obs.RData") # asv_prev_rel_taxo_gen_obs
+
+load("outputs/r/fig_3/selections/sel-c75.RData") # core.75.sel
+load("outputs/r/fig_3/selections/sel-prev-rel-taxo-gen-obs.RData") # asv_prev_rel_taxo_gen_obs
+
+load("outputs/r/fig_3/cross_hybrids/cxh-c75.RData") # core.75.cxh
+load("outputs/r/fig_3/cross_hybrids/cxh-prev-rel-taxo-gen-obs.RData") # asv_prev_rel_taxo_gen_obs
+
+load("outputs/r/fig_3/inbred_lines/ib-c75.RData") # core.75.ib
+load("outputs/r/fig_3/inbred_lines/ib-prev-rel-taxo-gen-obs.RData") # asv_prev_rel_taxo_gen_obs
+
+load("outputs/r/fig_3/bac-core-list.RData") # bac_ctaxa
+load("outputs/r/fig_3/all-prev-rel-taxo-gen-obs.RData") # asv_prev_rel_taxo_gen_obs
+
+asv_prev_rel_taxo_gen_obs_core <-
+  asv_prev_rel_taxo_gen_obs %>% 
+  mutate(core_asv = ASV %in% bac_ctaxa) %>% #change
+  mutate(core_asv = if_else(.$core_asv == TRUE, 
+                            "Core", 
+                            "Flexible")) %>% 
+  mutate(asv_rel_p = asv_rel * 100, asv_prev_p = asv_prev * 100)
+
+asv_prev_rel_taxo_gen_obs_core$core_asv <-
+  ordered(asv_prev_rel_taxo_gen_obs_core$core_asv, 
+          levels = c("Flexible", "Core"))
+
+df <- asv_prev_rel_taxo_gen_obs_core %>%
+  group_by(core_asv) %>%
+  summarise(n_taxa = n(), 
+            rel_ab = sum(asv_rel_p))
+
+# for all
+asv_prev_rel_taxo_gen_obs_core_all <-
+  asv_prev_rel_taxo_gen_obs %>%
+  mutate(core_asv = ASV %in% bac_ctaxa) %>%
+  mutate(core_asv = if_else(.$ASV == "ASV 3007: Bacillus",
+                            "Flexible",
+                            if_else(.$core_asv == TRUE,
+                            "Core",
+                            "Flexible"))) %>%
+  mutate(asv_rel_p = asv_rel * 100, asv_prev_p = asv_prev * 100)
+
+asv_prev_rel_taxo_gen_obs_core_all$core_asv <-
+  ordered(asv_prev_rel_taxo_gen_obs_core_all$core_asv, 
+          levels = c("Flexible", "Core"))
+
+df <- asv_prev_rel_taxo_gen_obs_core_all %>%
+  group_by(core_asv) %>%
+  summarise(n_taxa = n(), 
+            rel_ab = sum(asv_rel_p))
+
+## Save
+# save(df, file = "outputs/r/fig_3/landraces/land-c75-rel.RData")
+# save(df, file = "outputs/r/fig_3/selections/sel-c75-rel.RData")
+# save(df, file = "outputs/r/fig_3/cross_hybrids/cxh-c75-rel.RData")
+# save(df, file = "outputs/r/fig_3/inbred_lines/ib-c75-rel.RData")
+# save(df, file = "outputs/r/fig_3/all-c75-rel.RData")
+```
+
+### LAND: Barplot Core
+
+```{r}
+load("outputs/r/fig_3/landraces/land-c75-rel.RData") #df
+
+color_core = c(Core = "#ce232a", Flexible = "#918bc0")
+color_num = c(Core = "white", Flexible = "white")
+
+p_core_flex2_land <-
+  ggplot(df, 
+         aes(x = "", 
+             y = rel_ab, 
+             fill = core_asv)) +
+  geom_bar(stat = "identity", 
+           position = "stack") + 
+  geom_text(aes(label = n_taxa,
+                fontface = "bold",
+                colour = core_asv, 
+                size = 12),
+            position = position_stack(vjust = 0.5)) +
+  theme_classic() +
+  theme(axis.title.x = element_text(size = 12),
+        axis.title.y = element_text(size = 12),
+        axis.ticks.x = element_blank(),
+        axis.text = element_text(size = 12),
+        legend.position = "none",
+        plot.margin = margin(t = 0.2, r = 0, b = 0, l = 0, unit = "cm")) +
+  scale_y_continuous(expand = c(0, 0)) +
+  scale_x_discrete(expand = c(0, 0)) +
+  scale_fill_manual(values = color_core) +
+  scale_color_manual(values = color_num) +
+  labs(x = "", 
+       y = "Relative abundance [%]", 
+       fill = "")
+p_core_flex2_land
+```
+
+### SEL: Barplot Core
+
+```{r}
+load("outputs/r/fig_3/selections/sel-c75-rel.RData") #df
+
+color_core = c(Core = "#ce232a", Flexible = "#918bc0")
+color_num = c(Core = "white", Flexible = "white")
+
+p_core_flex2_sel <-
+  ggplot(df, 
+         aes(x = "", 
+             y = rel_ab, 
+             fill = core_asv)) +
+  geom_bar(stat = "identity", 
+           position = "stack") + 
+  geom_text(aes(label = n_taxa,
+                fontface = "bold",
+                colour = core_asv, 
+                size = 12),
+            position = position_stack(vjust = 0.5)) +
+  theme_classic() +
+  theme(axis.title.x = element_text(size = 12),
+        axis.title.y = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.text = element_text(size = 12),
+        legend.position = "none",
+        plot.margin = margin(t = 0.2, r = 0.5, b = 0, l = 0, unit = "cm")) +
+  scale_y_continuous(expand = c(0, 0)) +
+  scale_x_discrete(expand = c(0, 0)) +
+  scale_fill_manual(values = color_core) +
+  scale_color_manual(values = color_num) +
+  labs(x = "", 
+       y = "Relative abundance [%]", 
+       fill = "")
+p_core_flex2_sel
+```
+
+### CXH: Barplot Core
+
+```{r}
+load("outputs/r/fig_3/cross_hybrids/cxh-c75-rel.RData") #df
+
+color_core = c(Core = "#ce232a", Flexible = "#918bc0")
+color_num = c(Core = "white", Flexible = "white")
+
+p_core_flex2_cxh <-
+  ggplot(df, 
+         aes(x = "", 
+             y = rel_ab, 
+             fill = core_asv)) +
+  geom_bar(stat = "identity", 
+           position = "stack") + 
+  geom_text(aes(label = n_taxa,
+                fontface = "bold",
+                colour = core_asv, 
+                size = 12),
+            position = position_stack(vjust = 0.5)) +
+  theme_classic() +
+  theme(axis.title.x = element_text(size = 12),
+        axis.title.y = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.text = element_text(size = 12),
+        legend.position = "none",
+        plot.margin = margin(t = 0.2, r = 0.5, b = 0, l = 0, unit = "cm")) +
+  scale_y_continuous(expand = c(0, 0)) +
+  scale_x_discrete(expand = c(0, 0)) +
+  scale_fill_manual(values = color_core) +
+  scale_color_manual(values = color_num) +
+  labs(x = "", 
+       y = "Relative abundance [%]", 
+       fill = "")
+p_core_flex2_cxh
+```
+
+### IBL: Barplot Core
+
+```{r}
+load("outputs/r/fig_3/inbred_lines/ib-c75-rel.RData") #df
+
+color_core = c(Core = "#ce232a", Flexible = "#918bc0")
+color_num = c(Core = "white", Flexible = "white")
+
+p_core_flex2_ib <-
+  ggplot(df, 
+         aes(x = "", 
+             y = rel_ab, 
+             fill = core_asv)) +
+  geom_bar(stat = "identity", 
+           position = "stack") + 
+  geom_text(aes(label = n_taxa,
+                fontface = "bold",
+                colour = core_asv, 
+                size = 12),
+            position = position_stack(vjust = 0.5)) +
+  theme_classic() +
+  theme(axis.title.x = element_text(size = 12),
+        axis.title.y = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.text = element_text(size = 12),
+        legend.position = "none",
+        plot.margin = margin(t = 0.2, r = 0.5, b = 0, l = 0, unit = "cm")) + 
+  scale_y_continuous(expand = c(0, 0)) +
+  scale_x_discrete(expand = c(0, 0)) +
+  scale_fill_manual(values = color_core) +
+  scale_color_manual(values = color_num) +
+  labs(x = "", 
+       y = "Relative abundance [%]", 
+       fill = "")
+p_core_flex2_ib
+```
+
+### ALL: Barplot Core
+
+```{r}
+load("outputs/r/fig_3/all-c75-rel.RData") #df
+
+color_core = c(Core = "#ce232a", Flexible = "#918bc0")
+color_num = c(Core = "white", Flexible = "white")
+
+p_core_flex2_all <-
+  ggplot(df, 
+         aes(x = "", 
+             y = rel_ab, 
+             fill = core_asv)) +
+  geom_bar(stat = "identity", 
+           position = "stack") + 
+  geom_text(aes(label = n_taxa,
+                fontface = "bold",
+                colour = core_asv, 
+                size = 12),
+            position = position_stack(vjust = 0.5)) +
+  theme_classic() +
+  theme(axis.title.x = element_text(size = 12),
+        axis.title.y = element_text(size = 12),
+        axis.ticks.x = element_blank(),
+        axis.text = element_text(size = 12),
+        legend.position = "none",
+        plot.margin = margin(t = 0.2, r = 0.5, b = 0, l = 0, unit = "cm")) +
+  scale_y_continuous(expand = c(0, 0)) +
+  scale_x_discrete(expand = c(0, 0)) +
+  scale_fill_manual(values = color_core) +
+  scale_color_manual(values = color_num) +
+  labs(x = "", 
+       y = "Relative abundance [%]", 
+       fill = "")
+p_core_flex2_all
+```
+
+## Prep Barplot Taxa Core
+
+```{r}
+# Select one
+load("outputs/r/fig_3/landraces/land-bac.RData") # x_bac
+load("outputs/r/fig_3/landraces/land-c75.RData") # core.75.land
+
+load("outputs/r/fig_3/selections/sel-bac.RData") # x_bac
+load("outputs/r/fig_3/selections/sel-c75.RData") # core.75.sel
+
+load("outputs/r/fig_3/cross_hybrids/cxh-bac.RData") # x_bac
+load("outputs/r/fig_3/cross_hybrids/cxh-c75.RData") # core.75.cxh
+
+load("outputs/r/fig_3/inbred_lines/ib-bac.RData") # x_bac
+load("outputs/r/fig_3/inbred_lines/ib-c75.RData") # core.75.ib
+
+load("outputs/r/supplementary/bh.RData") # bh
+load("outputs/r/fig_3/bac-core-list.RData") # bac_ctaxa
+
+## Merge samples
+counts <- 
+  bh %>%
+  otu_table() %>% 
+  as.data.frame()
+
+## Relative abundance
+rel.abundance <- vegan::decostand(counts, 
+                                  method = "total", 
+                                  MARGIN = 2)
+rel.abundance <- rel.abundance * 100
+colSums(rel.abundance) 
+
+## Filter out non-core ASVs
+core.rel <- rel.abundance %>%
+  filter(row.names(.) %in% bac_ctaxa) # change
+
+## Reshape   
+core.rel.long <- rownames_to_column(core.rel, 
+                                    var = "ASV") %>%
+  pivot_longer(-ASV, 
+               names_to = c("genotype"), 
+               values_to = "rel_ab") %>% 
+  group_by(ASV) %>%
+  dplyr::summarise_at(vars(rel_ab),
+                      list(mean = mean))
+  
+## Save from counts (not merged)
+# save(core.rel.long,
+#      file = "outputs/r/fig_3/landraces/land-c75-rel-long-s.RData")
+# save(core.rel.long,
+#      file = "outputs/r/fig_3/selections/sel-c75-rel-long-s.RData")
+# save(core.rel.long,
+#      file = "outputs/r/fig_3/cross_hybrids/cxh-c75-rel-long-s.RData")
+# save(core.rel.long,
+#      file = "outputs/r/fig_3/inbred_lines/ib-c75-rel-long-s.RData")
+# save(core.rel.long,
+#      file = "outputs/r/fig_3/all-c75-rel-long-s.RData")
+```
+
+### LAND: Barplot Taxa Core
+
+```{r}
+load("outputs/r/fig_3/landraces/land-c75-rel-long-s.RData") # core.rel.long, 127 samples
+
+core.rel.long.mod <- core.rel.long %>% 
+    mutate(ASV = recode(ASV,
+                      "ASV 2389: Burkholderia_sp." = "ASV 2389: Burkholderia",
+                      "ASV 3198: Pseudomonas_sp." = "ASV 3198: Pseudomonas",
+                      "ASV 3353: Pantoea_agglomerans" = "ASV 3353: P. agglomerans",
+                      "ASV 4544: Rhodococcus_erythropolis" = "ASV 4544: R. erythropolis")) 
+
+mycolors_land <- c("#fec74f", # Shingomonas
+                   "#2cb5f2", # Pelomonas_c
+                   "#76cff7", # Ralstonia_c
+                   "#9bdcf9", # Ralstonia_c
+                   "#053c55", # Burkholderia_c
+                   "#db3f29", # Bacillus
+                   "#ecb18e", # Staphylococcus
+                   "#51c2f5", # Pseudomonas_c
+                   "#0ea5e9", # Pantoea_c
+                   "#07567a", # Enhydro_c
+                   "#9a93d9") # Rhodococcus_c
+
+
+p_core_flex3_land <-
+  ggplot(data = core.rel.long.mod, 
+         aes(x = "", 
+             y = mean,
+             fill = ASV)) +
+  geom_bar(aes(), 
+           stat = "identity", 
+           position = "stack") +
+  theme_classic() +
+  theme(axis.title.x = element_text(size = 12),
+        axis.title.y = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.text = element_text(size = 12),
+        legend.text = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        legend.key.size = unit(0.3, "cm"), 
+        legend.position = "right",
+        legend.direction = "vertical",
+        plot.margin = margin(t = 0.2, r = 0, b = 0, l = 0, unit = "cm")) +
+  labs(y = "Relative abundance [%]", 
+       x = "", 
+       fill = "") + 
+  scale_y_continuous(expand = c(0, 0), limits = c(0, 100)) +
+  scale_x_discrete(expand = c(0, 0)) +
+  scale_fill_manual(values = mycolors_land) +
+  guides(fill = guide_legend(ncol = 1))
+p_core_flex3_land
+```
+
+### SEL: Barplot Taxa Core
+
+```{r}
+load("outputs/r/fig_3/selections/sel-c75-rel-long-s.RData") # core.rel.long, 40 samples
+
+core.rel.long.mod <- core.rel.long %>% 
+    mutate(ASV = recode(ASV,
+                      "ASV 2389: Burkholderia_sp." = "ASV 2389: Burkholderia",
+                      "ASV 2970: Bacillus_sp." = "ASV 2970: Bacillus",
+                      "ASV 3198: Pseudomonas_sp." = "ASV 3198: Pseudomonas",
+                      "ASV 3353: Pantoea_agglomerans" = "ASV 3353: P. agglomerans",
+                      "ASV 4544: Rhodococcus_erythropolis" = "ASV 4544: R. erythropolis")) 
+
+mycolors_sel <- c("#2cb5f2", # Pelomonas_c
+                  "#76cff7", # Ralstonia_c
+                  "#9bdcf9", # Ralstonia_c
+                  "#053c55", # Burkholderia_c
+                  "#69d1a2", # Dyella
+                  "#db3f29", # Bacillus
+                  "#ecb18e", # Staphylococcus
+                  "#51c2f5", # Pseudomonas_c
+                  "#0ea5e9", # Pantoea_c
+                  "#07567a", # Enhydro_c
+                  "#a6a6a6", # BD7-11
+                  "#9a93d9") # Rhodococcus_c
+
+
+p_core_flex3_sel <-
+  ggplot(data = core.rel.long.mod, 
+         aes(x = "", 
+             y = mean,
+             fill = ASV)) +
+  geom_bar(aes(), 
+           stat = "identity", 
+           position = "stack") +
+  theme_classic() +
+  theme(axis.title.x = element_text(size = 12),
+        axis.title.y = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.text = element_text(size = 12),
+        legend.text = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        legend.key.size = unit(0.3, "cm"), 
+        legend.position = "right",
+        legend.direction = "vertical",
+        plot.margin = margin(t = 0.2, r = 0, b = 0, l = 0, unit = "cm")) +
+  labs(y = "Relative abundance [%]", 
+       x = "", 
+       fill = "") + 
+  scale_y_continuous(expand = c(0, 0), limits = c(0, 100)) +
+  scale_x_discrete(expand = c(0, 0)) +
+  scale_fill_manual(values = mycolors_sel) +
+  guides(fill = guide_legend(ncol = 1))
+p_core_flex3_sel
+```
+
+### CXH: Barplot Taxa Core
+
+```{r}
+load("outputs/r/fig_3/cross_hybrids/cxh-c75-rel-long-s.RData") # core.rel.long, 109 samples
+
+core.rel.long.mod <- core.rel.long %>% 
+    mutate(ASV = recode(ASV,
+                      "ASV 2389: Burkholderia_sp." = "ASV 2389: Burkholderia",
+                      "ASV 3198: Pseudomonas_sp." = "ASV 3198: Pseudomonas",
+                      "ASV 3353: Pantoea_agglomerans" = "ASV 3353: P. agglomerans",
+                      "ASV 4544: Rhodococcus_erythropolis" = "ASV 4544: R. erythropolis")) 
+
+mycolors_cxh <- c("#2cb5f2", # Pelomonas_c
+                  "#76cff7", # Ralstonia_c
+                  "#9bdcf9", # Ralstonia_c
+                  "#053c55", # Burkholderia_c
+                  "#db3f29", # Bacillus
+                  "#51c2f5", # Pseudomonas_c
+                  "#0ea5e9", # Pantoea_c
+                  "#07567a", # Enhydro_c
+                  "#9a93d9") # Rhodococcus_c
+
+p_core_flex3_cxh <-
+  ggplot(data = core.rel.long.mod, 
+         aes(x = "", 
+             y = mean,
+             fill = ASV)) +
+  geom_bar(aes(), 
+           stat = "identity", 
+           position = "stack") +
+  theme_classic() +
+  theme(axis.title.x = element_text(size = 12),
+        axis.title.y = element_blank(), 
+        axis.text = element_text(size = 12),
+        axis.ticks.x = element_blank(),
+        legend.text = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        legend.key.size = unit(0.3, "cm"), 
+        legend.position = "right",
+        legend.direction = "vertical",
+        plot.margin = margin(t = 0.2, r = 0, b = 0, l = 0, unit = "cm")) +
+  labs(y = "Relative abundance [%]", 
+       x = "", 
+       fill = "") + 
+  scale_y_continuous(expand = c(0, 0), limits = c(0, 100)) +
+  scale_x_discrete(expand = c(0, 0)) +
+  scale_fill_manual(values = mycolors_cxh) +
+  guides(fill = guide_legend(ncol = 1))
+p_core_flex3_cxh
+```
+
+### IBL: Barplot Taxa Core
+
+```{r}
+load("outputs/r/fig_3/inbred_lines/ib-c75-rel-long-s.RData") # core.rel.long, 49 samples
+
+core.rel.long.mod <- core.rel.long %>% 
+    mutate(ASV = recode(ASV,
+                      "ASV 2389: Burkholderia_sp." = "ASV 2389: Burkholderia",
+                      "ASV 3198: Pseudomonas_sp." = "ASV 3198: Pseudomonas",
+                      "ASV 3353: Pantoea_agglomerans" = "ASV 3353: P. agglomerans",
+                      "ASV 4544: Rhodococcus_erythropolis" = "ASV 4544: R. erythropolis")) 
+
+mycolors_ib <- c("#2cb5f2", # Pelomonas_c
+                 "#76cff7", # Ralstonia_c
+                 "#9bdcf9", # Ralstonia_c
+                 "#053c55", # Burkholderia_c
+                 "#aadb84", # Pseudomonas
+                 "#51c2f5", # Pseudomonas_c
+                 "#0ea5e9", # Pantoea_c
+                 "#0c8bc4", # Kosakonia
+                 "#0a719f", # Enterobacter
+                 "#07567a", # Enhydro_c
+                 "#9a93d9") # Rhodococcus_c
+
+p_core_flex3_ib <- 
+  ggplot(data = core.rel.long.mod, 
+         aes(x = "", 
+             y = mean, 
+             fill = ASV)) +
+  geom_bar(aes(), 
+           stat = "identity", 
+           position = "stack") +
+  theme_classic() +
+  theme(axis.title.x = element_text(size = 12),
+        axis.title.y = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.text = element_text(size = 12),
+        legend.text = element_text(size = 12),
+        legend.title = element_text(size = 12),
+        legend.key.size = unit(0.3, "cm"), 
+        legend.position = "right",
+        legend.direction = "vertical",
+        plot.margin = margin(t = 0.2, r = 0, b = 0, l = 0, unit = "cm")) +
+  labs(y = "Relative abundance [%]", 
+       x = "", 
+       fill = "") + 
+  scale_y_continuous(expand = c(0, 0), limits = c(0, 100)) +
+  scale_x_discrete(expand = c(0, 0)) +
+  scale_fill_manual(values = mycolors_ib) +
+  guides(fill = guide_legend(ncol = 1))
+p_core_flex3_ib
+```
+
+### ALL: Barplot Taxa Core
+
+```{r}
+load("outputs/r/fig_3/all-c75-rel-long-s.RData") # core.rel.long, 451 samples
+
+core.rel.long.mod <- core.rel.long %>% 
+    mutate(ASV = recode(ASV,
+                      "ASV 2389: Burkholderia_sp." = "ASV 2389: Burkholderia",
+                      "ASV 3198: Pseudomonas_sp." = "ASV 3198: Pseudomonas",
+                      "ASV 3353: Pantoea_agglomerans" = "ASV 3353: P. agglomerans",
+                      "ASV 4544: Rhodococcus_erythropolis" = "ASV 4544: R. erythropolis")) %>%
+  filter(ASV != "ASV 3007: Bacillus")
+
+mycolors_all <- c("#2cb5f2", # Pelomonas_c
+                  "#76cff7", # Ralstonia_c
+                  "#9bdcf9", # Ralstonia_c
+                  "#053c55", # Burkholderia_c
+                  # "#db3f29", # Bacillus
+                  "#51c2f5", # Pseudomonas_c
+                  "#0ea5e9", # Pantoea_c
+                  "#07567a", # Enhydro_c
+                  "#9a93d9") # Rhodococcus_c
+
+p_core_flex3_all <-
+  ggplot(data = core.rel.long.mod, 
+         aes(x = "", 
+             y = mean,
+             fill = ASV)) +
+  geom_bar(aes(), 
+           stat = "identity", 
+           position = "stack") +
+  theme_classic() +
+  theme(axis.title.x = element_text(size = 12),
+        axis.title.y = element_blank(), 
+        axis.text = element_text(size = 12),
+        legend.text = element_text(size = 12),
+        axis.ticks.x = element_blank(),
+        legend.title = element_text(size = 12),
+        legend.key.size = unit(0.3, "cm"), 
+        legend.position = "right",
+        legend.direction = "vertical",
+        plot.margin = margin(t = 0.2, r = 0, b = 0, l = 0, unit = "cm")) +
+  labs(y = "Relative abundance [%]", 
+       x = "", 
+       fill = "") + 
+  scale_y_continuous(expand = c(0, 0), limits = c(0, 100)) +
+  scale_x_discrete(expand = c(0, 0)) +
+  scale_fill_manual(values = mycolors_all) +
+  guides(fill = guide_legend(ncol = 1))
+p_core_flex3_all
+```
+
+# Merge Barplots
+
+```{r}
+p_core_flex2_lsci <- cowplot::plot_grid(p_core_flex2_land,
+                                        p_core_flex3_land,
+                                        p_core_flex2_sel,
+                                        p_core_flex3_sel,
+                                        p_core_flex2_cxh,
+                                        p_core_flex3_cxh,
+                                        p_core_flex2_ib,
+                                        p_core_flex3_ib,
+                                        labels = c("", "", "", "",
+                                                   "", "", "", ""),
+                                        nrow = 1,
+                                        rel_widths = c(0.25, 0.75, 0.25, 0.75,
+                                                       0.25, 0.75, 0.25, 0.75),
+                                        greedy = T); p_core_flex2_lsci
+
+# png("outputs/visual/fig_3/core_flex2-final.png",
+#     bg = "white",
+#     width = 45,
+#     height = 31,
+#     units = "cm",
+#     res = 600); print(p_core_flex2_lsci); dev.off()
+# 
+# save(p_core_flex2_lsci,
+#      file = "outputs/r/fig_3/core_flex2-final.RData")
+```
+
+# Merge core whole dataset
+
+```{r}
+p_core_flex_all <- cowplot::plot_grid(p_core_flex1_all,
+                                      p_core_flex2_all,
+                                      p_core_flex3_all,
+                                      labels = c("a", "b", "c"),
+                                      label_size = 12,
+                                      ncol = 3,
+                                      rel_widths = c(1, 0.5, 0.75),
+                                      rel_heights = c(1, 0.5, 0.75),
+                                      align = "b",
+                                      scale = c(1, 0.95, 0.95)); p_core_flex_all
+
+# png("outputs/visual/supplementary/core_flex-final-all.png",
+#     bg = "white",
+#     width = 34,
+#     height = 24,
+#     units = "cm",
+#     res = 600); print(p_core_flex_all); dev.off()
+# 
+# save(p_core_flex_all,
+#      file = "outputs/r/supplementary/core_flex-final-all.RData")
+```
+
+# Biomarkers
+
+## Lollypop
+
+```{r}
+load("outputs/r/fig_3/biomarkers.RData") #df_plot
+
+# mycolors <- c("#feae01","#0ea5e9","#ff6682")
+mycolors <- c("#ff6682")
+
+df_plot2 <- df_plot %>%
+  pivot_wider(names_from = Kind, 
+              values_from = Importance) %>%
+  filter(Score > 0.01) %>%
+  pivot_longer(cols = (4:6),
+               names_to = "Method",
+               values_to = "Importance") %>%
+  separate_wider_delim(ASV, ":", names = c("ASV1", "ASV2")) %>%
+  mutate_at(vars(ASV2), ~ paste0(":", .)) %>%
+  mutate(ASV_ordered = str_remove(ASV_ordered, ASV2)) %>%
+  filter(Method == "Score")
+
+p_core_flex3_lsci <-
+  ggplot(df_plot2,
+         aes(x = Importance,
+             y = reorder(ASV_ordered, -Importance),
+             color = Method,
+             fill = Method)) +
+  geom_point(position = position_dodge(width = 1),
+             size = 6,
+             alpha = 0.7) +
+  geom_linerange(aes(xmin = 0,
+                     xmax = Importance,
+                     color = Method),
+                 alpha = 0.35,
+                 position = position_dodge(width = 1)) +
+  facet_wrap(~Domestication,
+             scales = "free", 
+             nrow = 1) +
+  scale_y_reordered() +
+  scale_x_continuous(expand = expand_scale(mult = c(0, 0.06))) +
+  scale_color_manual(values = mycolors) +
+  scale_fill_manual(values = mycolors) +
+  theme_classic() +
+  theme(axis.text.y = element_text(size = 12),
+        axis.text.x = element_text(size = 10, 
+                                   angle = 45,
+                                   hjust = 1),
+        strip.background = element_blank(),
+        strip.text = element_blank(),
+        legend.position = "none", #c(0.95, 0.85)
+        plot.margin = margin(0, 0, 0, 0, unit = "cm")) +
+  guides(fill = guide_legend(ncol = 1)) + 
+  labs(x = "", 
+       y = "") +
+  coord_flip()
+p_core_flex3_lsci
+
+# ggsave("outputs/visual/fig_3/biomarkers-lolly-flip.png",
+#         width = 45,
+#         height = 31,
+#         units = "cm",
+#         scale = 1,
+#         dpi = 600)
+# 
+# save(p_core_flex3_lsci,
+#      file = "outputs/r/fig_3/core_flex3-final.RData")
+```
+
+## Circular packing
+
+```{r}
+load("outputs/r/fig_3/biomarkers.RData") #df_plot
+
+df_plot3 <- df_plot %>%
+  pivot_wider(names_from = Kind, 
+              values_from = Importance) %>%
+  filter(Score > 0.01) %>%
+  pivot_longer(cols = (4:6),
+               names_to = "Method",
+               values_to = "Importance") %>%
+  separate_wider_delim(ASV, ":", names = c("ASV1", "ASV2")) %>%
+  mutate_at(vars(ASV2), ~ paste0(":", .)) %>%
+  mutate(ASV_ordered = str_remove(ASV_ordered, ASV2))
+```
+
+### LAND: Plot
+
+```{r}
+lda <- c("ASV 2973", "ASV 3007", "ASV 3151", "ASV 3399", "ASV 3511")
+
+df_plot3_land <- df_plot3 %>% 
+  filter(Method == "Score") %>%
+  filter(Domestication == "Landrace") %>%
+  mutate(lda = ifelse(ASV1 %in% lda, "lda", "score"))
+
+mycolors <- c("#aadb84","#053c55") 
+
+mycolors <- c("#feae01","#ff6682","#0ea5e9")
+
+"#2cb5f2","#76cff7","#9bdcf9","#51c2f5","#0c8bc4","#0a719f","#07567a"
+
+# Generate the layout
+packing <- circleProgressiveLayout(df_plot3_land$Importance, sizetype = "area")
+packing$radius <- 0.95*packing$radius
+data <- cbind(df_plot3_land, packing) %>% 
+  rownames_to_column("id")
+dat.gg <- circleLayoutVertices(packing, npoints = 50)
+
+datapoly <- merge(data, dat.gg, by = c("id"))
+
+# Plot 
+cp_land <- ggplot() + 
+  geom_polygon(data = datapoly, 
+               aes(x.y, y.y, group = id, fill = lda, colour = lda),
+               alpha = 1) +
+  scale_fill_manual(values = mycolors) +
+  scale_color_manual(values = mycolors) +
+  geom_text(data = datapoly, 
+            aes(x.x, y.x, 
+                size = Importance, 
+                label = ASV1), 
+            color = "white") +
+  theme_void() + 
+  theme(legend.position = "none") +
+#  labs(fill = "", size = "") +
+  coord_equal(); cp_land
+```
+
+### SEL: Plot
+
+```{r}
+lda <- c("ASV 2328", "ASV 3055", "ASV 4090", "ASV 2062")
+
+df_plot3_sel <- df_plot3 %>% 
+  filter(Method == "Score") %>%
+  filter(Domestication == "Selection") %>%
+  mutate(lda = ifelse(ASV1 %in% lda, "lda", "score"))
+
+mycolors <- c("#aadb84","#053c55") 
+
+mycolors <- c("#feae01","#ff6682","#0ea5e9")
+
+"#2cb5f2","#76cff7","#9bdcf9","#51c2f5","#0c8bc4","#0a719f","#07567a"
+
+# Generate the layout
+packing <- circleProgressiveLayout(df_plot3_sel$Importance, sizetype = "area")
+packing$radius <- 0.95*packing$radius
+data <- cbind(df_plot3_sel, packing) %>% 
+  rownames_to_column("id")
+dat.gg <- circleLayoutVertices(packing, npoints = 50)
+
+datapoly <- merge(data, dat.gg, by = c("id"))
+
+# Plot 
+cp_sel <- ggplot() + 
+  geom_polygon(data = datapoly, 
+               aes(x.y, y.y, group = id, fill = lda, colour = lda),
+               alpha = 1) +
+  scale_fill_manual(values = mycolors) +
+  scale_color_manual(values = mycolors) +
+  geom_text(data = datapoly, 
+            aes(x.x, y.x, 
+                size = Importance, 
+                label = ASV1), 
+            color = "white") +
+  theme_void() + 
+  theme(legend.position = "none") +
+#  labs(fill = "", size = "") +
+  coord_equal(); cp_sel
+```
+
+### CXH: Plot
+
+```{r}
+lda <- c("ASV 2970", "ASV 4674")
+
+df_plot3_cxh <- df_plot3 %>% 
+  filter(Method == "Score") %>%
+  filter(Domestication == "Cross hybrid") %>%
+  mutate(lda = ifelse(ASV1 %in% lda, "lda", "score"))
+
+mycolors <- c("#aadb84","#053c55") 
+
+mycolors <- c("#feae01","#ff6682","#0ea5e9")
+
+"#2cb5f2","#76cff7","#9bdcf9","#51c2f5","#0c8bc4","#0a719f","#07567a"
+
+# Generate the layout
+packing <- circleProgressiveLayout(df_plot3_cxh$Importance, sizetype = "area")
+packing$radius <- 0.95*packing$radius
+data <- cbind(df_plot3_cxh, packing) %>% 
+  rownames_to_column("id")
+dat.gg <- circleLayoutVertices(packing, npoints = 50)
+
+datapoly <- merge(data, dat.gg, by = c("id"))
+
+# Plot 
+cp_cxh <- ggplot() + 
+  geom_polygon(data = datapoly, 
+               aes(x.y, y.y, group = id, fill = lda, colour = lda),
+               alpha = 1) +
+  scale_fill_manual(values = mycolors) +
+  scale_color_manual(values = mycolors) +
+  geom_text(data = datapoly, 
+            aes(x.x, y.x, 
+                size = Importance, 
+                label = ASV1), 
+            color = "white") +
+  theme_void() + 
+  theme(legend.position = "none") +
+#  labs(fill = "", size = "") +
+  coord_equal(); cp_cxh
+```
+
+### IBL: Plot
+
+```{r}
+lda <- c("ASV 3353")
+
+df_plot3_ib <- df_plot3 %>% 
+  filter(Method == "Score") %>%
+  filter(Domestication == "Inbred line") %>%
+  mutate(lda = ifelse(ASV1 %in% lda, "lda", "score"))
+
+mycolors <- c("#aadb84","#053c55") 
+
+mycolors <- c("#feae01","#ff6682","#0ea5e9")
+
+"#2cb5f2","#76cff7","#9bdcf9","#51c2f5","#0c8bc4","#0a719f","#07567a"
+
+# Generate the layout
+packing <- circleProgressiveLayout(df_plot3_ib$Importance, sizetype = "area")
+packing$radius <- 0.95*packing$radius
+data <- cbind(df_plot3_ib, packing) %>% 
+  rownames_to_column("id")
+dat.gg <- circleLayoutVertices(packing, npoints = 50)
+
+datapoly <- merge(data, dat.gg, by = c("id"))
+
+# Plot 
+cp_ib <- ggplot() + 
+  geom_polygon(data = datapoly, 
+               aes(x.y, y.y, group = id, fill = lda, colour = lda),
+               alpha = 1) +
+  scale_fill_manual(values = mycolors) +
+  scale_color_manual(values = mycolors) +
+  geom_text(data = datapoly, 
+            aes(x.x, y.x, 
+                size = Importance, 
+                label = ASV1), 
+            color = "white") +
+  theme_void() + 
+  theme(legend.position = "none") +
+#  labs(fill = "", size = "") +
+  coord_equal(); cp_ib
+```
+
+# Merge Circles
+
+```{r}
+p_core_flex4_lsci <- cowplot::plot_grid(cp_land,
+                                        cp_sel,
+                                        cp_cxh,
+                                        cp_ib,
+                                        labels = c("", "", "", ""),
+                                        nrow = 1,
+                                        greedy = T); p_core_flex4_lsci
+
+# png("outputs/visual/fig_3/core_flex4-final.png",
+#     bg = "white",
+#     width = 45,
+#     height = 31,
+#     units = "cm",
+#     res = 600); print(p_core_flex3_lsci); dev.off()
+
+# save(p_core_flex4_lsci,
+#      file = "outputs/r/fig_3/core_flex4-final.RData")
+```
+
+# Merge all
+
+```{r}
+load("outputs/r/fig_3/core_flex1-final.RData")
+load("outputs/r/fig_3/core_flex2-final.RData")
+load("outputs/r/fig_3/core_flex3-final.RData")
+
+p_core_flex_lsci_f123 <- cowplot::plot_grid(p_core_flex2_lsci,
+                                            p_core_flex3_lsci,
+                                            p_core_flex1_lsci,
+                                            labels = c("a", "b", "C"),
+                                            label_size = 12,
+                                            ncol = 1,
+                                            rel_widths = c(1, 1, 1),
+                                            rel_heights = c(0.75, 0.5, 1)); p_core_flex_lsci_f123
+
+p_core_flex_lsci_f123_final <- p_core_flex_lsci_f123 +
+  theme(plot.margin = margin(1.2,0,0,0, "cm")) +
+  geom_text(aes(x = 0.15,
+                y = 1.03,
+                label = "Landrace"),
+            size = 5,
+            fontface = "bold") +
+  geom_text(aes(x = 0.41,
+                y = 1.03,
+                label = "Selected line"),
+            size = 5,
+            fontface = "bold") +
+  geom_text(aes(x = 0.65,
+                y = 1.03,
+                label = "Cross hybrid"),
+            size = 5,
+            fontface = "bold") +
+  geom_text(aes(x = 0.89,
+                y = 1.03,
+                label = "Inbred line"),
+            size = 5,
+            fontface = "bold"); p_core_flex_lsci_f123_final
+
+png("outputs/visual/fig_3/core_flex-final-1-2-3-flip.png",
+    bg = "white",
+    width = 45,
+    height = 31,
+    units = "cm",
+    res = 600); print(p_core_flex_lsci_f123_final); dev.off()
+
+save(p_core_flex_lsci_f123_final,
+     file = "outputs/r/fig_3/core_flex-final-1-2-3.RData")
+```

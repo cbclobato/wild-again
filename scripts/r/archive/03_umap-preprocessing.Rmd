@@ -1,0 +1,61 @@
+---
+title: "Prepare data for UMap"
+author: "João Machado de Freitas"
+date: "21/02/2023"
+output: html_document
+---
+
+# Setup
+
+```{r, setup, include=FALSE}
+knitr::opts_knit$set(root.dir = normalizePath("../../.."))
+getwd()
+```
+
+Save feature importance datasets
+
+```{r}
+source("scripts/r/archive/03_data-preprocessing-utils.R")
+
+## Test
+load("outputs/r/supplementary/bh.RData")
+d <- get_dataset(bh, "domestication") # 36 cultivars
+unique(sample_data(d$ps)[[d$label_name]])
+length(unique(sample_data(d$ps)[["genotype"]]))
+```
+
+# UMAP
+
+Save UMAP's datasets
+
+> abundances: `[full-]{DATASET}[-css].csv` metadata: `[full-]{DATASET}-metadata.csv`
+
+## Run All
+
+```{r}
+library(foreach)
+library(doParallel)
+
+registerDoParallel(2)
+
+dir.create("data/umap", FALSE, TRUE)
+
+true_false <- c(TRUE, FALSE)
+dataset <- "domestication"
+foreach(normalize=true_false) %dopar% {
+    load("outputs/r/supplementary/bh.RData")  
+    preprocess_umap_asv(
+      bh,
+      dataset = dataset,
+      normalize = normalize,
+    )
+  
+    # load("outputs/r/supplementary/bh.RData")  
+    # preprocess_umap_samples(
+    #   bh,
+    #   dataset = dataset,
+    #   normalize = normalize,
+    # )
+    # 
+}
+```

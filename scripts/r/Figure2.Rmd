@@ -1,0 +1,653 @@
+---
+title: "Figure 2"
+author: "Carolina Lobato"
+date: "2024-01-29"
+output: html_document
+---
+
+# Load Libraries
+
+```{r include = FALSE}
+library(phyloseq)
+library(tidyverse)
+library(microbiome)
+library(microbiomeutilities)
+library(microViz)
+library(metagMisc)
+library(vegan)
+library(ggrepel)
+library(metacoder)
+library(png)
+library(asremlPlus)
+library(RColorBrewer)
+```
+
+# Beta-diversity
+
+## Distances
+
+```{r, echo = FALSE}
+load("outputs/r/supplementary/bh.RData")
+x <- meta(bh)
+
+bh_new <- subset_samples(bh, chemotype2 != ""); bh_new
+bh_new <- prune_taxa(taxa_sums(bh_new) > 0, bh_new); bh_new
+# bh_new <- subset_samples(bh_new, provider == "IPK");bh_new
+check <- unique(bh_new@sam_data[["replicates"]]);check
+
+# correct uneven sequencing depth using cumulative sum scaling (CSS)
+bh_css <- metagMisc::phyloseq_transform_css(bh_new, #bh 
+                                            norm = T, 
+                                            log = T); bh_css
+
+# get data
+df_css <- data.frame(sample_data(bh_css))
+
+# transpose the css ASV table as a matrix
+dist_matrix_t <- t(data.frame(otu_table(bh_css)))
+
+# generate a bray distance object
+bh_css_bray <- vegan::vegdist(dist_matrix_t,
+                              method = "bray")
+
+# test significance
+vegan::adonis2(bh_css_bray ~ chemotype2,
+               data = df_css)
+
+# transpose if necessary to test pairwise significance
+if (taxa_are_rows(bh_css)) {
+    bh_css <- t(bh_css)
+}
+
+metadata <-
+  as(sample_data(bh_css), "data.frame") %>%
+  select(replicates, chemotype2)
+
+css_table <-
+  as.data.frame(otu_table(bh_css)) %>%
+  rownames_to_column("replicates")
+
+df <-
+  css_table %>%
+  inner_join(metadata, by = "replicates") %>%
+  select(chemotype2, starts_with("ASV"))
+  
+# pairwise comparisons
+pwadonis <-
+  pairwiseAdonis::pairwise.adonis(
+  df[, 2:3696],
+  as.factor(df$chemotype2),
+  sim.function = "vegdist",
+  sim.method = "bray",
+  p.adjust.m = "fdr")
+
+# save(pwadonis, file = "outputs/r/fig_2/pw-adonis.RData")
+
+# coerce to data.frame and save
+pwadonis_df = as.data.frame(pwadonis)
+# write.csv(pwadonis_df,
+#           file = "outputs/r/fig_2/pw-adonis.csv")
+```
+
+## Significance
+
+### Heatmaps Prep
+
+```{r}
+load("outputs/r/fig_2/pw-adonis.RData") #pwadonis
+load("outputs/r/fig_2/pw-adonis-dom.RData") #pwadonis
+load("outputs/r/fig_2/pw-adonis-chem.RData") #pwadonis
+
+# pairwise adonis
+pwadonis_wide <- pwadonis_df %>%  select(c(1, 7)) %>%
+  separate_wider_delim(cols = pairs,
+                       delim = " vs ",
+                       names = c("G1", "G2"))
+
+swap_columns <- function(row) {
+  if (row['G1'] < row['G2']) {
+    tmp <- row['G1']
+    row['G1'] <- row['G2']
+    row['G2'] <- tmp
+  }
+  return(row)
+}
+
+pwadonis_wide_df <- as.data.frame(t(apply(pwadonis_wide, 
+                                           1, 
+                                           swap_columns)))
+pwadonis_wide_df$p.adjusted <- as.numeric(pwadonis_wide_df$p.adjusted)
+
+# save
+# write.csv(pwadonis_wide_df,
+#           file = "outputs/r/fig_2/pw-adonis-wide.csv")
+# save(pwadonis_wide_df,
+#      file = "outputs/r/fig_2/pw-adonis-wide.RData")
+```
+
+#### Heatmaps
+
+```{r}
+load("outputs/r/fig_2/pw-adonis-wide.RData") #pwadonis_wide_df
+load("outputs/r/fig_2/pw-adonis-dom-wide.RData") #pwadonis_wide_df
+load("outputs/r/fig_2/pw-adonis-chem-wide.RData") #pwadonis_wide_df
+
+sig.pwa <- asremlPlus::plotPvalues(pwadonis_wide_df, 
+            p = "p.adjusted",
+            x = "G1",
+            y = "G2", 
+            gridspacing = 0, 
+            show.sig = T,
+            alpha = 0.05, 
+            sig.size = 3,
+            sig.colour = "black", 
+            sig.face = "plain", 
+            triangles = "lower", 
+            title = "", 
+            axis.labels = NULL, 
+            axis.text.size = 8, 
+            colours = c("#ce232a","#ff6682","#918bc0"),
+            ggplotFuncs = NULL,
+            sortFactor = "p.adjusted",
+            printPlot = T)
+
+ggsave("outputs/visual/fig_2/sig-pwa-chem.png",
+       width = 23,
+       height = 16,
+       units = "cm",
+       dpi = 600)
+```
+
+## NMDS
+
+```{r, echo = FALSE}
+# Non-metric MultiDimenstional Scaling
+# Stress indicates the "goodness of fit” of your NMDS ordination. 
+# For a good representation of your data, the stress value should be less than 0.2. 
+# If the stress value is 0, it might mean you have an outlier sample.
+# Lower stress values indicate greater conformity and therefore are desirable.
+# bh_NMDS <- ordinate(bh_css, "NMDS", "bray", trymax = 1000); bh_NMDS
+# save(bh_NMDS, file = "outputs/r/fig_2/bh-nmds.RData")
+# Stress:     0.188289 
+# Stress type 1, weak ties
+load("outputs/r/fig_2/bh-nmds.RData") # bh_NMDS
+
+mycolors <- c("#6159a4","#feae01","#0ea5e9","#ff6682") 
+column1 <- sample_data(bh_css)$domestication
+# column2 <- sample_data(bh_css)$chemotype
+# column3 <- sample_data(bh_css)$genotype
+
+nmds <- plot_ordination(bh_css, bh_NMDS) +
+  geom_point(
+    aes(col = as.factor(column1)), 
+#        shape = as.factor(column2)),
+size = 5,
+show.legend = T) +
+  # geom_text(aes(label = as.factor(column3)), 
+  #           size = 2) +
+#  scale_shape_manual(values = c(19, 18, 15, 17)) +
+#  stat_ellipse(type = "norm", linetype = 1, level = 0.95) + 
+  scale_color_manual(values = mycolors,
+                     breaks = c("Landrace",
+                                "Selection",
+                                "Cross hybrid",
+                                "Inbred line",
+                                NA)) + 
+  theme_classic() +
+  theme(axis.text.x = element_text(size = 10),
+        axis.text.y = element_text(size = 10),
+        axis.title = element_text(size = 10),
+        legend.position = "right",
+        legend.box = "vertical",
+        legend.direction = "vertical",
+        legend.key.size = unit(0.8, 'cm'),
+        legend.text = element_text(size = 10)) +
+  labs(color = "", 
+       shape = "")
+nmds
+
+# ggsave(
+#   "outputs/visual/fig_2/nmds-bray-dom.png",
+#   width = 20,
+#   height = 18,
+#   units = "cm",
+#   scale = 1,
+#   dpi = 600)
+```
+
+## UMAP
+
+## Cluster analysis
+
+```{r}
+source("scripts/r/umap/cluster-analysis.R")
+load("outputs/r/fig_2/UMAP.RData") #df_postproc
+
+df_postproc2 <- df_postproc %>% 
+  filter(Domestication != "NA")
+
+embeds <- df_postproc2[,c("UMAP 1", "UMAP 2")]
+labels <- df_postproc2[,"Domestication"] 
+ca <- silhouette_plot(embeds, labels)
+print(ca)
+
+p3 <- ca$p; p3
+
+# ggsave("outputs/visual/fig_2/silhouette.png",
+#         width = 40,
+#         height = 20,
+#         units = "cm",
+#         scale = 1,
+#         dpi = 600)
+```
+
+## Plot
+
+```{r}
+load("outputs/r/fig_2/UMAP.RData") #df_postproc
+
+palette_domestication <-
+  c("#0EA5E9", "#ff6682", "#6159a4", "#feae01", "#a6a6a6")
+p1 <-
+  ggplot(df_postproc,
+         aes(
+           x = `UMAP 1`,
+           y = `UMAP 2`,
+           color = Domestication,
+           shape = Chemotype)) +
+  geom_point(size = 5) +
+  scale_color_discrete(type = palette_domestication) +
+  scale_shape_manual(values = c(1, 19, 4)) + # 13
+  guides(color = guide_legend(order = 1), 
+         shape = guide_legend(order = 2)) +
+  theme_classic() +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    plot.margin = margin(0.025, 0.025, 0.025, 0.025, unit = "cm"),
+    axis.text.x = (element_text(angle = 0,
+                                hjust = 0.5,
+                                size = 12)),
+    axis.text.y = (element_text(angle = 0,
+                                hjust = 0.5,
+                                size = 12)),
+    legend.title = (element_text(face = "bold",
+                                 size = 12)),
+    legend.text = (element_text(size = 12)),
+    legend.position = c(0.18, 0.9),
+    legend.background = element_rect(fill = "transparent", color = "transparent"),
+    legend.box = "horizontal") +
+  annotation_custom(ggplotGrob(p3),
+                    xmin = 11, xmax = 14,
+                    ymin = -3, ymax = 0)
+p1
+
+# palette_genotype <- colorRampPalette(brewer.pal(46, "Paired"))(46)
+# p2 <- ggplot(df_postproc, aes(x = `UMAP 1`, y = `UMAP 2`, color = Genotype)) +
+#   geom_point() +
+#   scale_color_discrete(type = palette_genotype) +
+#   guides(color = guide_legend(order = 1, ncol = 2),
+#          shape = guide_legend(order = 2)) +
+#   theme_classic()
+# p2
+
+# plotly::ggplotly(p2)
+
+# ggsave("outputs/visual/fig_2/umap-dom.png",
+#         width = 45,
+#         height = 31,
+#         units = "cm",
+#         scale = 1,
+#         dpi = 600)
+
+save(p1,
+     file = "outputs/r/fig_2/umap.RData")
+```
+
+# Dominant taxa
+
+```{r, echo = FALSE}
+load("outputs/r/supplementary/bh.RData")
+
+# Relative abundances (per sample use group_by(Genus, Sample)) 
+ra_table <-
+  bh %>%
+  phyloseq::merge_samples(group = "genotype",
+                          fun = mean) %>%
+  phyloseq::transform_sample_counts(function(x) x / sum(x) * 100) %>%
+  microbiome::aggregate_rare(level = "Genus", # Class
+                             detection = 0, 
+                             prevalence = 0, 
+                             include.lowest = F) %>%
+  psmelt() %>%
+  select(Sample,
+         Abundance, 
+         Genus) %>% # Class
+  group_by(Genus) %>% # Class
+  summarise(Abundance = mean(Abundance))
+
+# ASV richness of the dominant classes, total = 65,57% (3343 ASV in 5297)
+bh # 5297 taxa and 451 samples
+cla_gmm <-  microViz::tax_select(bh, 
+                                 tax_list = "Gammaproteobacteria", 
+                                 ranks_searched = "Class", 
+                                 strict_matches = T); cla_gmm # 1367 taxa (25,8%) 
+cla_alp <-  microViz::tax_select(bh, 
+                                 tax_list = "Alphaproteobacteria", 
+                                 ranks_searched = "Class", 
+                                 strict_matches = T); cla_alp # 796 taxa (15,03%)  
+cla_bcl <-  microViz::tax_select(bh, 
+                                 tax_list = "Bacilli", 
+                                 ranks_searched = "Class",  
+                                 strict_matches = T); cla_bcl # 672 taxa (12,7%) 
+cla_act <-  microViz::tax_select(bh, 
+                                 tax_list = "Actinobacteria", 
+                                 ranks_searched = "Class", 
+                                 strict_matches = T); cla_act # 638 taxa  (12,04%) 
+
+cla_bac <-  microViz::tax_select(bh, 
+                                 tax_list = "Bacteroidia", 
+                                 ranks_searched = "Class", 
+                                 strict_matches = T); cla_bac # 468 taxa  (8,84%) 
+
+
+gen_bacillus <-  microViz::tax_select(bh, 
+                                 tax_list = "Bacillus", 
+                                 ranks_searched = "Genus", 
+                                 strict_matches = T); gen_bacillus # 256 taxa 
+
+gen_ralstonia <-  microViz::tax_select(bh, 
+                                 tax_list = "Ralstonia", 
+                                 ranks_searched = "Genus",  
+                                 strict_matches = T); gen_ralstonia # 137 taxa
+
+gen_pantoea <-  microViz::tax_select(bh, 
+                                 tax_list = "Pantoea", 
+                                 ranks_searched = "Genus", 
+                                 strict_matches = T); gen_pantoea # 54 taxa
+
+
+bh_mer <- phyloseq::merge_samples(bh, 
+                                  group = "genotype", 
+                                  fun = mean)
+
+# dominant taxonomic group, n and percent sample that are dominated by each taxon
+dom_sum <- microbiomeutilities::dominant_taxa(
+  bh_mer,
+  level = "Class") # Genus
+ds <- dom_sum$dominant_overview
+
+# retrieves the dominant taxonomic group of each sample
+sample_dom <- dominant(
+  bh_mer, 
+  level = "Genus"); sample_dom # Class
+```
+
+## Heat Tree
+
+```{r, echo = FALSE}
+load("outputs/r/supplementary/ps.RData")
+
+ps_fil <- metagMisc::phyloseq_filter_taxa_rel_abund(ps, 
+                                                    frac = 0.00001); ps_fil # 265 taxa with >1e-5 %RA
+
+sample_data(ps_fil)$A <- "A"
+p_mc <- metacoder::parse_phyloseq(ps_fil, 
+                                  class_regex = "(.*)", 
+                                  class_key = "taxon_name")
+n_replicates <- length(sample_data(ps_fil)$replicates)
+
+p_mc$data$read_props <- calc_obs_props(p_mc, 
+                                       "otu_table",  
+                                       groups = "A")
+p_mc$data$read_abund <- calc_taxon_abund(p_mc, 
+                                         data = "read_props")
+print(p_mc)
+
+to_plot <- p_mc %>%
+  metacoder::filter_taxa(taxon_ranks == "Genus", 
+                         supertaxa = TRUE, 
+                         reassign_obs = F) %>%
+  metacoder::filter_taxa(grepl(pattern = "^[a-zA-Z]+$", 
+                               taxon_names), 
+                         reassign_obs = F)
+
+mycolors <- c("#918bc0","#ff6682","#ce232a")
+set.seed(1112)
+ht <- heat_tree(to_plot,
+                node_label = taxon_names,
+                node_label_size_range = c(0.015, 0.03),
+                node_size = as.integer((n_obs/181)*100),
+                node_color = as.integer(to_plot$data$read_abund[['A']]*100,
+                                        length = 0),
+                node_color_range = mycolors,
+#               edge_label = n_obs
+                initial_layout = "davidson-harel",
+                layout = "kamada-kawai",
+                title = "",
+                node_size_axis_label = "", #ASV count
+                node_color_axis_label = "", #Rel. abundance (%)
+                repel_labels = T,
+                margin_size = c(0, 0, 0, 0))
+ht
+
+# ggsave("outputs/visual/fig_2/heattree-relab-asv-DHKK.png",
+#        bg = "white",
+#        width = 30,
+#        height = 30,
+#        units = "cm",
+#        dpi = 600)
+```
+
+### Import
+
+```{r, out.width = "25%"}
+ht2 <- grid::rasterGrob(png::readPNG("outputs/visual/fig_2/heattree-relab-asv-DHKKmod.png"), 
+                       interpolate = T)
+
+save(ht2,
+     file = "outputs/r/fig_2/heat-tree.RData")
+```
+
+## Plot most abundant Genus by genotype
+
+```{r, echo = FALSE}
+# source("scripts/utils/plot_composition_v2.R")
+load("outputs/r/supplementary/bh.RData")
+
+bh_rel <- microbiome::transform(bh, "compositional")
+bh_agr <- microbiome::aggregate_rare(
+  bh_rel,
+  level = "Genus", 
+  detection = 0.05,
+  prevalence = 0,
+  include.lowest = F); bh_agr # 26 taxa and 451 samples
+
+tax_table(bh_agr)
+
+sorting_asv <- ordered(
+  bh_agr@tax_table@.Data[,"Genus"],
+  levels = c("Acinetobacter", #Gamma 
+             "Burkholderia-Caballeronia-Paraburkholderia",
+             "Enhydrobacter",
+             "Enterobacter",
+             "Kosakonia",
+             "Pantoea",
+             "Pelomonas",
+             "Pseudomonas",
+             "Ralstonia",
+             "Yersiniaceae",
+             "Bacillus", #Bacilli
+             "Brevibacillus",
+             "Lysinibacillus",
+             "Oenococcus",
+             "Paenibacillus",
+             "Staphylococcus", 
+             "Curtobacterium", #Actino 
+             "Pseudarthrobacter",
+             "Rathayibacter",
+             "Rhodococcus",
+             "Streptomyces",
+             "Methylobacterium-Methylorubrum", #Alpha
+             "Sphingomonas",
+             "Bacteroides", #Bacteroidia
+             "Chitinophagaceae",  
+             "Other"))
+
+sorting_idx <- order(sorting_asv, decreasing = F, na.last = NA)
+otu_order <- bh_agr@tax_table@.Data[sorting_idx, "Genus"]
+color <- c("#032230","#053c55","#07567a","#0a719f","#0c8bc4",
+           "#0ea5e9","#2cb5f2","#51c2f5","#76cff7","#9bdcf9",
+           "#db3f29","#db4e29","#db5d29","#e1834b","#e69a6c","#ecb18e",
+           "#444d7e","#5964a4","#6159a4","#9a93d9","#b5b0e3",
+           "#feae01","#fec74f",
+           "#ff6682","#ff8da2",
+           "#a6a6a6")
+
+par(omi = c(12, 8, 8, 8) + 0.1)
+bp_g1 <- plot_composition(bh_agr,
+                          plot.type = "barplot",
+                          group_by = "domestication",
+                          average_by = "code",
+                          otu.sort = otu_order,
+                          sample.sort = "neatmap") +
+  geom_bar(stat = "identity",
+           position = "stack") +
+  scale_fill_manual(values = color) +
+  scale_y_continuous(expand = c(0, 0), 
+                     label = function(x) paste0(x*100)) +
+  scale_x_discrete(expand = c(0, 0)) +
+  theme_classic() +
+  theme(
+    panel.border = element_rect(color = "black",
+                                fill = NA, 
+                                size = 1),
+    strip.background = element_blank(),
+    strip.text = element_text(size = 12,
+                              face = "bold"),
+    axis.text.x = element_text(size = 12, 
+                               angle = 0, 
+                               hjust = 0.5),
+    axis.text.y = element_text(size = 12),
+    axis.title.y = element_text(size = 12),
+    legend.position = "bottom",
+    legend.key.size = unit(0.5, 'cm'),
+    legend.background = element_rect(fill = "transparent", color = "transparent"),
+    legend.text = element_text(size = 12),
+    legend.title = element_text(size = 12,
+                                face = "bold")) +
+  labs(x = "", 
+       y = "Relative abundance [%]", 
+       fill = "Genus") +
+  guides(fill = guide_legend(nrow = 4, 
+                             byrow = F)) +
+  facet_grid(~factor(Group, 
+                     levels = c("Landrace",
+                                "Selected line",
+                                "Cross hybrid",
+                                "Inbred line",
+                                NA)),
+             scales = "free_x",
+             space = "free")
+bp_g1
+
+# ggsave("outputs/visual/fig_2/dom-genus-class-0.05.png",
+#        width = 80,
+#        height = 40,
+#        units = "cm",
+#        dpi = 600)
+
+# save(bp_g1,
+#      file = "outputs/r/fig_2/barplot.RData")
+```
+
+# Merge
+
+```{r}
+load("outputs/r/fig_2/heat-tree.RData") # ht2
+load("outputs/r/fig_2/umap.RData") # p1
+load("outputs/r/fig_2/barplot.RData") # bp_g1
+
+fig2 <- cowplot::plot_grid(ht2,
+                           p1, 
+                           labels = c("a", "b"),
+                           nrow = 1,
+                           rel_widths = c(1.15, 1),
+                           label_size = 12,
+                           greedy = T)
+
+fig2_final <- cowplot::plot_grid(fig2,
+                                 bp_g1, 
+                   labels = c("", "c"),
+                   rel_heights = c(1.5, 1),
+                   label_size = 12, 
+                   ncol = 1,
+                   greedy = T) +
+   geom_text(aes(x = c(0.275, 0.295, 0.379, 0.569, 0.59, 0.608, 0.76, 0.947, 0.968),
+                 y = rep(0.1, 9),
+                label = "*"),
+            size = 5,
+            fontface = "bold")
+
+# ggsave("outputs/visual/fig_2/p2-final.png",
+# bg = "white",
+# width = 45,
+# height = 31,
+# units = "cm",
+# dpi = 600)
+```
+
+# Replicates
+
+## Setup
+
+```{r, echo = FALSE}
+load("outputs/r/supplementary/bh.RData")
+
+bh_rel <- microbiome::transform(bh, "compositional")
+bh_agr <- microbiome::aggregate_rare(
+  bh_rel,
+  level = "Genus",
+  detection = 0.05,
+  prevalence = 0,
+  include.lowest = F); bh_agr # 26 taxa and 451 samples
+```
+
+## Barplot
+
+```{r, echo = FALSE}
+palette <- colorRampPalette(brewer.pal(26, "Paired"))(26)
+
+plot_bar(bh_agr, 
+         x = "replicates", 
+         fill = "Genus") +
+    facet_wrap(~code, 
+               nrow = 4, 
+               ncol = 12, 
+               shrink = T, 
+               scales = "free_x") +
+    theme_classic() +
+  scale_fill_manual(values = palette) +
+  scale_y_continuous(expand = c(0, 0), 
+                     label = scales::percent) +
+  scale_x_discrete(expand = c(0, 0)) +
+  theme_classic() +
+  theme(
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank(),
+    axis.text.y = element_text(size = 12),
+    axis.title.y = element_blank(),
+    legend.position = "bottom",
+    legend.key.size = unit(0.3, 'cm'),
+    legend.text = element_text(size = 12)) +
+  labs(x = "", 
+       y = "", 
+       fill = "") +
+  guides(fill = guide_legend(nrow = 3))
+
+# ggsave("outputs/visual/fig_2/genus-0.05-gen-grid.png",
+#        width = 45,
+#        height = 31,
+#        units = "cm",
+#        dpi = 600)
+```

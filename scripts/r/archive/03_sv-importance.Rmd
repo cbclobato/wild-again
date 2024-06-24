@@ -1,0 +1,172 @@
+```{r, setup, include=FALSE}
+knitr::opts_knit$set(root.dir = normalizePath("../../.."))
+getwd()
+```
+
+```{r}
+library(xgboost)
+
+source("scripts/r/archive/03_sv-importance-patch.R")
+
+params <- list(objective = "multi:softprob", num_class = 3, nthread = 1)
+X_pred <- data.matrix(iris[, -5])
+dtrain <- xgb.DMatrix(X_pred, label = as.integer(iris[, 5]) - 1, nthread = 1)
+fit <- xgb.train(params = params, data = dtrain, nrounds = 50)
+
+# Create "mshapviz" object (logit scale)
+(x <- shapviz::shapviz(fit, X_pred = X_pred, X = iris))
+#> 'mshapviz' object representing 3 'shapviz' objects:
+#>    'Class_1': 150 x 4 SHAP matrix
+#>    'Class_2': 150 x 4 SHAP matrix
+#>    'Class_3': 150 x 4 SHAP matrix
+
+# Contains "shapviz" objects for all classes
+all.equal(x[[3]], shapviz::shapviz(fit, X_pred = X_pred, X = iris, which_class = 3))
+#> [1] TRUE
+
+# Better names
+names(x) <- levels(iris$Species)
+x
+#> 'mshapviz' object representing 3 'shapviz' objects:
+#>    'setosa': 150 x 4 SHAP matrix
+#>    'versicolor': 150 x 4 SHAP matrix
+#>    'virginica': 150 x 4 SHAP matrix
+
+# SHAP plots
+
+# sv_importance(x, kind="beeswarm")
+sv_importance(x, kind="both")
+# class(p)
+```
+
+```{r}
+obj
+
+.get_imp <- function(x, w) {
+  # TODO: Modify for ranking and barplot
+  
+  # Weighted average
+  colWMean <- function (x, w) {
+    col_names <- colnames(x)
+    weighted_averages <- c()
+    for (i in 1:ncol(x)) {
+      xc <- x
+      x[xc[,i] < 0, i] <- NA
+      w[xc[,i] < 0, i] <- NA
+      ws <- .min_max_scale(w[,i]) 
+      weighted_average <-
+        sum(x[,i] * ws, na.rm=TRUE) / sum(ws, na.rm=TRUE)
+      
+      weighted_averages <- c(weighted_averages, weighted_average)
+    }
+    names(weighted_averages) <- col_names
+    weighted_averages
+  }
+  
+  if (is.matrix(x)) {
+    return(sort(colWMean(x, w), decreasing = TRUE))
+  }
+  
+  # list/mshapviz and if bar
+  imp <- mapply(function(x, w) colWMean(x, w), x, w )
+  imp[order(-rowSums(imp)),]
+}
+
+x <- shapviz::get_shap_values(obj[[4]])
+w <- shapviz::get_feature_values(obj[[4]])
+imp <- .get_imp(x, w)
+imp
+```
+
+```{r}
+w <- shapviz::get_feature_values(obj[[4]])
+xc <- as.data.frame(x)$`ASV 3353: Pantoea_agglomerans`
+wc <- as.data.frame(w)$`ASV 3353: Pantoea_agglomerans`
+
+xcs <- .min_max_scale(xc)
+wcs <- .min_max_scale(wc)
+```
+
+```{r}
+source("scripts/r/archive/03_sv-importance-patch.R")
+# shapviz::sv_importance(obj, kind = "beeswarm", max_display=20)
+sv_importance_v2(obj, kind = "beeswarm", max_display=20)
+```
+
+```{r}
+f <- shapviz::get_feature_values(obj)[[2]]$`ASV 4237: Micrococcus`
+sd(f)
+```
+
+```{r}
+library(tidyverse)
+source("scripts/r/archive/03_sv-importance-patch.R")
+# shapviz::sv_importance(obj, kind = "beeswarm", max_display=20)
+
+imp <- sv_importance_v2(obj, kind = "no")
+df <- as.data.frame(imp) %>%
+  rownames_to_column("ASV")
+
+imp_abs <- shapviz::sv_importance(obj, kind = "no")
+df_abs <- as.data.frame(imp_abs) %>%
+  rownames_to_column("ASV")
+
+df_plot <- 
+  inner_join(df, df_abs, by="ASV") %>%
+  pivot_longer(cols = starts_with("Class"),
+               names_to = c("Class", ".value"),
+               names_sep = "\\.",
+               # names_pattern = "^(Class_\\d+)\\.(\\w+)$",
+               values_to = "Importance") %>%
+  rename(Score=x, `Mean(|SHAP|)`=y) %>%
+  group_by(Class) %>%
+  slice_max(order_by = Score, n = 15, with_ties=FALSE) %>%
+  mutate(ASV_ordered=reorder_within(ASV, Score, Class)) %>%
+  pivot_longer(cols = c("Score", "Mean(|SHAP|)"),
+               names_to = "Kind",
+               values_to = "Importance")
+  
+df <- df_abs %>%
+  rownames_to_column("ASV") 
+
+df_longer <- df %>%
+  rownames_to_column("ASV") %>%
+  pivot_longer(cols = starts_with("Class_"),
+               names_to = "Class",
+               values_to = "Importance") %>%
+  mutate(kind="Score") %>%
+  group_by(Class) %>%
+  slice_max(order_by = Importance, n = 15, with_ties=FALSE) %>%
+  mutate(ASV_ordered=reorder_within(ASV, Importance, Class))
+  
+top_asv <- pull(df_longer, ASV)
+
+imp_abs <- shapviz::sv_importance(obj, kind = "no")
+df_abs <- as.data.frame(imp_abs)
+df_longer_abs <- df_abs %>%
+  rownames_to_column("ASV") %>%
+  pivot_longer(cols = starts_with("Class"),
+               names_to = c("Class", "kind"),
+               names_sep=".",
+               values_to = "Importance") %>%
+  mutate(kind="Mean(|SHAP|)") %>%
+  group_by(Class) %>%
+  filter(ASV %in% top_asv)
+
+df_final <- rbind(df_longer, df_longer_abs) %>%
+    mutate(ASV_ordered=reorder_within(ASV, Importance, Class))
+
+```
+
+```{r}
+df_final
+```
+
+```{r}
+ggplot(df_plot, aes(x=Importance, y=ASV_ordered, color=Kind, fill=Kind)) +
+  # geom_bar(stat="identity", position="dodge") +
+  geom_point(position=position_dodge(width=0.8)) +
+  facet_wrap(~Class, scales="free") +
+  scale_y_reordered() +
+  theme_bw()
+```

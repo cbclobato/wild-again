@@ -1,0 +1,1216 @@
+---
+title: "Figure 4"
+author: "Carolina Lobato"
+date: "2024-03-22"
+output: html_document
+---
+
+# Load Libraries
+
+```{r, include = F}
+library(tidyverse)
+library(ggrepel)
+library(tidytext)
+library(stats)
+library(corrplot)
+```
+
+# Import tables
+
+```{r, echo = FALSE}
+pouches1 <- read.table(
+  "data/metadata/pouches1-ext.tsv",
+  sep = "\t",
+  header = TRUE,
+  fill = TRUE,
+  row.names = "ID")
+
+pouches2 <- read.table(
+  "data/metadata/pouches2-ext.tsv",
+  sep = "\t",
+  header = TRUE,
+  fill = TRUE,
+  row.names = "ID")
+
+assays <- read.table(
+  "data/metadata/phy-assays.tsv",
+  sep = "\t",
+  header = TRUE,
+  fill = TRUE,
+  row.names = "ID")
+
+field23 <- read.table(
+  "data/metadata/field23.tsv",
+  sep = "\t",
+  header = TRUE,
+  fill = TRUE,
+  row.names = "ID") %>%
+  filter(hydrodots == "No")
+```
+
+# Lab
+
+## Test normality
+
+```{r}
+x <- "root_length" # shoot_length, total_length
+hist(pouches1[pouches1$treatment == "Control", x], 10)
+hist(pouches1[pouches1$treatment == "C28_M1_B3", x], 10)
+hist(pouches1[pouches1$treatment == "C65_M3_B2", x], 10)
+hist(pouches1[pouches1$treatment == "C17A_M7_B1", x], 10)
+hist(pouches1[pouches1$treatment == "C37B_M1_R1", x], 10)
+hist(pouches1[pouches1$treatment == "C11_M4_B1", x], 10)
+
+# Normality test: p < 0.05 implies sign. differences from the normal dist.
+shapiro.test(pouches1[pouches1$germination == TRUE, x]) 
+# shoot_length: W = 0.99276, p-value = 0.01031 -> KW
+# root_length: W = 0.9866, p-value = 7.274e-05 -> KW
+# total_length: W = 0.98272, p-value = 5.105e-06 -> KW
+
+summary(pouches1) # 540 samples, 180 NAs
+```
+
+## Length
+
+### Boxplot
+
+```{r}
+dflab1 <- pouches1 %>%
+  select(ASV,
+         shoot_length,
+         root_length, 
+         total_length) %>%
+  drop_na() %>%
+  pivot_longer(-ASV,
+               names_to = "type", 
+               values_to = "value") %>%
+  mutate(ASV = fct_relevel(ASV,
+                           "Control",
+                           "ASV 3007",
+                           "ASV 3055",
+                           "ASV 3140",
+                           "ASV 3151",
+                           "ASV 4090"))
+
+my_colors <- c("#564787", "#9a93d9", "#BEBAEC")
+
+plab1 <- ggplot(data = dflab1, 
+            aes(x = ASV, 
+                y = value,
+                fill = type)) +
+  geom_boxplot(position = "dodge") +
+  theme_classic() +
+  scale_fill_manual(values = my_colors)
+plab1
+```
+
+### Barplot
+
+```{r}
+dflab2a <- pouches1 %>%
+  group_by(ASV) %>%
+  drop_na() %>%
+  dplyr::summarise_at(vars(shoot_length,
+                           root_length, 
+                           total_length),
+                      list(mean = mean)) %>%   
+  pivot_longer(-ASV,
+               names_to = "parameter",
+               values_to = "mean") %>% 
+  mutate(parameter = recode(parameter, 
+                            "shoot_length_mean" = "Shoot", 
+                            "root_length_mean" = "Root",
+                            "total_length_mean" = "Total"))
+               
+se <- function(x) {
+  n <- length(x)
+  sd(x)/sqrt(n)
+}
+
+dflab2b <- pouches1 %>%
+  group_by(ASV) %>%
+  drop_na() %>%
+  dplyr::summarise_at(vars(shoot_length,
+                           root_length, 
+                           total_length),
+                      list(se = se)) %>%   
+  pivot_longer(-ASV,
+               names_to =  "parameter",
+               values_to = "se") %>% 
+  mutate(parameter = recode(parameter, 
+                            "shoot_length_se" = "Shoot", 
+                            "root_length_se" = "Root",
+                            "total_length_se" = "Total"))
+
+
+dflab2 <- merge(dflab2a, 
+                dflab2b,
+                by = c("ASV", "parameter")) %>% 
+  mutate(ASV = fct_relevel(ASV,
+                           "Control",
+                           "ASV 3007",
+                           "ASV 3055",
+                           "ASV 3140",
+                           "ASV 3151",
+                           "ASV 4090"))
+
+my_colors <- c("#564787", "#9a93d9", "#BEBAEC")
+
+plab2 <- ggplot(data = dflab2, 
+            aes(x = ASV, 
+                y = mean,
+                fill = parameter)) +
+  geom_bar(stat = "identity", 
+           position = "dodge") +
+  geom_errorbar(aes(ymin = mean - se * 1.96,
+                    ymax = mean + se * 1.96), 
+                width = .2,
+                position = position_dodge(.9)) +
+  theme_classic() +
+  theme(
+    plot.margin = margin(0.5, 0.5, 0.5, 0.5, unit = "cm"),
+    panel.grid.major.y = element_line(),
+    panel.grid.minor.y = element_line(),
+    axis.title.x = element_text(size = 12),
+    axis.title.y = element_text(size = 12),
+    axis.text.x = element_text(size = 12,
+                               angle = 45,
+                               hjust = 1),
+    axis.text.y = element_text(size = 12),
+    legend.title = element_text(size = 12),
+    legend.text = element_text(size = 12)) +
+  scale_fill_manual(values = my_colors) +
+  scale_y_continuous(expand = c(0, 0)) +
+  labs(x = "", y = "Length [cm]", fill = "") # Add pairwise comparisons p-value
+plab2
+
+# ggsave("outputs/visual/fig_4/length-ext.png",
+#         width = 20,
+#         height = 18,
+#         units = "cm",
+#         scale = 1,
+#         dpi = 600)
+```
+
+### Significance
+
+```{r}
+kt_SL <- kruskal.test(shoot_length ~ ASV, pouches1); kt_SL # p = 0.003018 SIG
+kt_RL <- kruskal.test(root_length ~ ASV, pouches1); kt_RL # p = 0.0005625 SIG
+kt_TL <- kruskal.test(total_length ~ ASV, pouches1); kt_TL # p = 3.07e-05 SIG
+
+# Pairwise shoot_length
+wt_SL_ref <- ggpubr::compare_means(shoot_length ~ ASV,                          
+                                   ref.group = "Control",
+                                   method = "wilcox.test",
+                                   p.adjust.method = "bonferroni",
+                                   data = pouches1); wt_SL_ref
+
+# Pairwise root_length
+wt_RL_ref <- ggpubr::compare_means(root_length ~ ASV, 
+                                   ref.group = "Control",
+                                   method = "wilcox.test",
+                                   p.adjust.method = "bonferroni",
+                                   data = pouches1); wt_RL_ref
+
+# Pairwise total_length
+wt_TL_ref <- ggpubr::compare_means(total_length ~ ASV,  
+                                ref.group = "Control",
+                                p.adjust.method = "bonferroni",
+                                data = pouches1); wt_TL_ref
+```
+
+## Biomass
+
+```{r}
+dflab3a <- pouches2 %>%
+  group_by(ASV) %>%
+  drop_na() %>%
+  dplyr::summarise_at(vars(fresh_weight_seed_mg,
+                           biomass_seed_mg, 
+                           water_content_seed),
+                      list(mean = mean)) %>%   
+  pivot_longer(-ASV,
+               names_to =  "parameter",
+               values_to = "mean") %>% 
+  mutate(parameter = recode(parameter, 
+                            "fresh_weight_seed_mg_mean" = "Fresh weight [mg]", 
+                            "biomass_seed_mg_mean" = "Biomass [mg]",
+                            "water_content_seed_mean" = "Water content [%]"))
+               
+se <- function(x) {
+  n <- length(x)
+  sd(x)/sqrt(n)
+}
+
+dflab3b <- pouches2 %>%
+  group_by(ASV) %>%
+  drop_na() %>%
+  dplyr::summarise_at(vars(fresh_weight_seed_mg,
+                           biomass_seed_mg, 
+                           water_content_seed),
+                      list(se = se)) %>%   
+  pivot_longer(-ASV,
+               names_to =  "parameter",
+               values_to = "se") %>% 
+  mutate(parameter = recode(parameter, 
+                            "fresh_weight_seed_mg_se" = "Fresh weight [mg]", 
+                            "biomass_seed_mg_se" = "Biomass [mg]",
+                            "water_content_seed_se" = "Water content [%]"))
+
+
+dflab3 <- merge(dflab3a,
+                dflab3b, 
+                by = c("ASV", "parameter")) %>% 
+  mutate(ASV = fct_relevel(ASV,
+                           "Control",
+                           "ASV 3007",
+                           "ASV 3055",
+                           "ASV 3140",
+                           "ASV 3151",
+                           "ASV 4090"))
+
+my_colors <- c("#564787", "#9a93d9", "#BEBAEC")
+plab3 <- ggplot(data = dflab3, 
+            aes(x = ASV, 
+                y = mean,
+                fill = parameter)) +
+  geom_bar(stat = "identity", 
+           position = "dodge") +
+  geom_errorbar(aes(ymin = mean - se * 1.96,
+                    ymax = mean + se * 1.96), 
+                width = .2,
+                position = position_dodge(.9)) +
+  theme_classic() +
+  theme(
+    panel.grid.major.y = element_line(),
+    panel.grid.minor.y = element_line(),
+    axis.title.x = element_text(size = 12),
+    axis.title.y = element_text(size = 12),
+    axis.text.x = element_text(size = 12,
+                               angle = 45,
+                               hjust = 1),
+    legend.title = element_text(size = 12),
+    legend.text = element_text(size = 12)) +
+  scale_fill_manual(values = my_colors) +
+  scale_y_continuous(expand = c(0, 0)) +
+  labs(x = "", y = "", fill = "")
+plab3
+
+# ggsave("outputs/visual/fig_4/biomass-ext.png",
+#         width = 20,
+#         height = 18,
+#         units = "cm",
+#         scale = 1,
+#         dpi = 600)
+
+```
+
+### Significance
+
+```{r}
+kt_B <- kruskal.test(biomass_seed_mg ~ ASV, pouches2); kt_B # p = 0.1121 NS
+kt_FW <- kruskal.test(fresh_weight_seed_mg ~ ASV, pouches2); kt_FW # p = 0.3008 NS
+kt_WC <- kruskal.test(water_content_seed ~ ASV, pouches2); kt_WC # p = 0.1114 NS
+
+# Pairwise biomass
+wt_B_ref <- ggpubr::compare_means(biomass_seed_mg ~ ASV,                          
+                                  ref.group = "Control",
+                                  method = "wilcox.test",
+                                  p.adjust.method = "bonferroni",
+                                  data = pouches2); wt_B_ref
+
+# Pairwise fresh weight
+wt_FW_ref <- ggpubr::compare_means(fresh_weight_seed_mg ~ ASV, 
+                                   ref.group = "Control",
+                                   method = "wilcox.test",
+                                   p.adjust.method = "bonferroni",
+                                   data = pouches2); wt_FW_ref
+
+# Pairwise water content
+wt_WC_ref <- ggpubr::compare_means(water_content_seed ~ ASV,  
+                                   ref.group = "Control",
+                                   p.adjust.method = "bonferroni",
+                                   data = pouches2); wt_WC_ref
+```
+
+## Merge plots
+
+```{r}
+p_lab <- cowplot::plot_grid(plab2, plab3,
+                           labels = c("a", "b"),
+                           label_size = 12,
+                           ncol = 2,
+                           rel_widths = c(1, 1),
+                           rel_heights = c(1, 1),
+                           axis = "lb"); p_lab
+
+png("outputs/visual/fig_4/lab-bar.png",
+    bg = "white",
+    width = 23,
+    height = 16,
+    units = "cm",
+    res = 600); print(p_lab); dev.off()
+
+save(p_lab,
+     file = "outputs/r/fig_4/field-line_AB.RData")
+
+```
+
+## Categorical traits
+
+### Significance
+
+#### Chi-sqr: The proportion of "parameter x" differs between treatments.
+
+```{r}
+dflab4_stat <- pouches1 %>%
+  group_by(ASV) %>%
+  drop_na() %>%
+  dplyr::summarise_at(vars(germination,
+                           side_roots, 
+                           true_leaves, 
+                           dry_stem, 
+                           dry_root, 
+                           diseased_stem, 
+                           diseased_root),
+                      list(n = sum)) %>%
+  pivot_longer(-ASV,
+               names_to =  "parameter", 
+               values_to = "count") %>% 
+  select(ASV, parameter, count) %>% 
+  pivot_wider(names_from = "ASV", values_from = "count")
+
+names(dflab4_stat) <- sub(" ", ".", names(dflab4_stat))
+
+# Germination rate
+dflab4_stat_ger <- dflab4_stat %>%
+  filter(parameter == "germination_n") %>%
+  column_to_rownames("parameter") %>%
+  t() %>% as.data.frame() %>%
+  mutate(not = 120 - germination_n) %>%
+  t() %>% as.data.frame() %>%
+  # select(c("Control", "ASV.3007"))
+  # select(c("Control", "ASV.3055"))
+  # select(c("Control", "ASV.3140"))
+  # select(c("Control", "ASV.3151"))
+  # select(c("Control", "ASV.4090"))
+
+
+chisq <- chisq.test(as.matrix(dflab4_stat_ger)); chisq 
+# X-squared = 9.0667, df = 5, p-value = 0.1064 NS
+# ASV 3151, X-squared = 8.0222, df = 1, p-value = 0.004621*5 = 0.023105 SIG
+round(chisq$observed, 2)
+round(chisq$expected, 2)
+round(chisq$residuals, 3)
+
+corrplot(chisq$residuals, is.cor = F)
+contrib <- 100*chisq$residuals^2/chisq$statistic; round(contrib, 3)
+corrplot(contrib, is.cor = F)
+
+# ASV table
+dflab4_stat_3007 <- dflab4_stat %>%
+  filter(parameter != "germination_n") %>%
+  select(c("parameter", "ASV.3007")) %>%
+  mutate(not_.3007 = 89 - ASV.3007) %>%
+  pivot_longer(-parameter, names_to = "test", values_to = "ASV.3007") %>%
+  separate_wider_delim(test, ".", names = c("test", "ASV")) %>%
+  mutate_at(vars(parameter), ~ paste0(test, .)) %>%
+  select(c("parameter", "ASV.3007"))
+
+dflab4_stat_3055 <- dflab4_stat %>%
+  filter(parameter != "germination_n") %>%
+  select(c("parameter", "ASV.3055")) %>%
+  mutate(not_.3055 = 91 - ASV.3055) %>%
+  pivot_longer(-parameter, names_to = "test", values_to = "ASV.3055") %>%
+  separate_wider_delim(test, ".", names = c("test", "ASV")) %>%
+  mutate_at(vars(parameter), ~ paste0(test, .)) %>%
+  select(c("parameter", "ASV.3055"))
+
+dflab4_stat_3140 <- dflab4_stat %>%
+  filter(parameter != "germination_n") %>%
+  select(c("parameter", "ASV.3140")) %>%
+  mutate(not_.3140 = 89 - ASV.3140) %>%
+  pivot_longer(-parameter, names_to = "test", values_to = "ASV.3140") %>%
+  separate_wider_delim(test, ".", names = c("test", "ASV")) %>%
+  mutate_at(vars(parameter), ~ paste0(test, .)) %>%
+  select(c("parameter", "ASV.3140"))
+
+dflab4_stat_3151 <- dflab4_stat %>%
+  filter(parameter != "germination_n") %>%
+  select(c("parameter", "ASV.3151")) %>%
+  mutate(not_.3151 = 100 - ASV.3151) %>%
+  pivot_longer(-parameter, names_to = "test", values_to = "ASV.3151") %>%
+  separate_wider_delim(test, ".", names = c("test", "ASV")) %>%
+  mutate_at(vars(parameter), ~ paste0(test, .)) %>%
+  select(c("parameter", "ASV.3151"))
+
+dflab4_stat_4090 <- dflab4_stat %>%
+  filter(parameter != "germination_n") %>%
+  select(c("parameter", "ASV.4090")) %>%
+  mutate(not_.4090 = 91 - ASV.4090) %>%
+  pivot_longer(-parameter, names_to = "test", values_to = "ASV.4090") %>%
+  separate_wider_delim(test, ".", names = c("test", "ASV")) %>%
+  mutate_at(vars(parameter), ~ paste0(test, .)) %>%
+  select(c("parameter", "ASV.4090"))
+
+dflab4_stat_C <- dflab4_stat %>%
+  filter(parameter != "germination_n") %>%
+  select(c("parameter", "Control")) %>%
+  mutate(not_.C = 80 - Control) %>%
+  pivot_longer(-parameter, names_to = "test", values_to = "Control") %>%
+  mutate(test = recode(test, "Control" = "ASV.C")) %>%
+  separate_wider_delim(test, ".", names = c("test", "C")) %>%
+  mutate_at(vars(parameter), ~ paste0(test, .)) %>%
+  select(c("parameter", "Control"))
+
+all1 <- right_join(dflab4_stat_3007, dflab4_stat_3055)
+all2 <- right_join(all1, dflab4_stat_3140)
+all3 <- right_join(all2, dflab4_stat_3151)
+all4 <- right_join(all3, dflab4_stat_4090)
+all5 <- right_join(all4, dflab4_stat_C) %>% column_to_rownames("parameter")
+
+# Side roots
+sr <- all5 %>% slice(1:2) %>%
+  # select(c("Control", "ASV.3007"))
+  # select(c("Control", "ASV.3055"))
+  # select(c("Control", "ASV.3140"))
+  # select(c("Control", "ASV.3151"))
+  # select(c("Control", "ASV.4090"))
+chisq <- chisq.test(as.matrix(sr)); chisq 
+# X-squared = 11.767, df = 5, p-value = 0.03813 SIG
+# include ASV 3055, X-squared = 6.8184, df = 1, p-value = 0.009022*5 = 0.04511 SIG
+# include ASV 3151, X-squared = 6.5682, df = 1, p-value = 0.01038*5 = 0.0519 NS
+# include ASV 4090, X-squared = 4.72, df = 1, p-value = 0.02981*5 = 0.14905 NS
+
+round(chisq$observed, 2)
+round(chisq$expected, 2)
+round(chisq$residuals, 3)
+
+corrplot(chisq$residuals, is.cor = F)
+contrib <- 100*chisq$residuals^2/chisq$statistic; round(contrib, 3)
+corrplot(contrib, is.cor = F)
+
+# True Leaves
+tl <- all5 %>% slice(3:4) %>%
+  # select(c("Control", "ASV.3007"))
+  # select(c("Control", "ASV.3055"))
+  # select(c("Control", "ASV.3140"))
+  # select(c("Control", "ASV.3151"))
+  # select(c("Control", "ASV.4090"))
+chisq <- chisq.test(as.matrix(tl)); chisq 
+# X-squared = 12.953, df = 5, p-value = 0.02382 SIG
+
+round(chisq$observed, 2)
+round(chisq$expected, 2)
+round(chisq$residuals, 3)
+
+corrplot(chisq$residuals, is.cor = F)
+contrib <- 100*chisq$residuals^2/chisq$statistic; round(contrib, 3)
+corrplot(contrib, is.cor = F)
+
+# Dry Stem
+drys <- all5 %>% slice(5:6) %>%
+  # select(c("Control", "ASV.3007"))
+  # select(c("Control", "ASV.3055"))
+  # select(c("Control", "ASV.3140"))
+  # select(c("Control", "ASV.3151"))
+  # select(c("Control", "ASV.4090"))
+chisq <- chisq.test(as.matrix(drys)); chisq
+# X-squared = 10.346, df = 5, p-value = 0.066 NS
+# include ASV 3055, X-squared = 8.1041, df = 1, p-value = 0.004416*5 = 0.02208 SIG
+
+round(chisq$observed, 2)
+round(chisq$expected, 2)
+round(chisq$residuals, 3)
+
+corrplot(chisq$residuals, is.cor = F)
+contrib <- 100*chisq$residuals^2/chisq$statistic; round(contrib, 3)
+corrplot(contrib, is.cor = F)
+
+# Dry Root
+dryr <- all5 %>% slice(7:8) %>%
+  # select(c("Control", "ASV.3007"))
+  # select(c("Control", "ASV.3055"))
+  # select(c("Control", "ASV.3140"))
+  # select(c("Control", "ASV.3151"))
+  # select(c("Control", "ASV.4090"))
+chisq <- chisq.test(as.matrix(dryr)); chisq
+# X-squared = 7.6789, df = 5, p-value = 0.1748 NS
+
+round(chisq$observed, 2)
+round(chisq$expected, 2)
+round(chisq$residuals, 3)
+
+corrplot(chisq$residuals, is.cor = F)
+contrib <- 100*chisq$residuals^2/chisq$statistic; round(contrib, 3)
+corrplot(contrib, is.cor = F)
+
+# Diseased Stem
+diss <- all5 %>% slice(9:10) %>%
+  # select(c("Control", "ASV.3007"))
+  # select(c("Control", "ASV.3055"))
+  # select(c("Control", "ASV.3140"))
+  # select(c("Control", "ASV.3151"))
+  # select(c("Control", "ASV.4090"))
+chisq <- chisq.test(as.matrix(diss)); chisq
+# X-squared = 9.5782, df = 5, p-value = 0.08811 NS
+
+round(chisq$observed, 2)
+round(chisq$expected, 2)
+round(chisq$residuals, 3)
+
+corrplot(chisq$residuals, is.cor = F)
+contrib <- 100*chisq$residuals^2/chisq$statistic; round(contrib, 3)
+corrplot(contrib, is.cor = F)
+
+# Diseased Root
+disr <- all5 %>% slice(11:12) %>%
+  # select(c("Control", "ASV.3007"))
+  # select(c("Control", "ASV.3055"))
+  # select(c("Control", "ASV.3140"))
+  # select(c("Control", "ASV.3151"))
+  # select(c("Control", "ASV.4090"))
+chisq <- chisq.test(as.matrix(disr)); chisq
+# X-squared = 23.717, df = 5, p-value = 0.0002461
+# include ASV 3055, X-squared = 6.1411, df = 1, p-value = 0.01321*5 = 0.06605 NS
+
+round(chisq$observed, 2)
+round(chisq$expected, 2)
+round(chisq$residuals, 3)
+
+corrplot(chisq$residuals, is.cor = F)
+contrib <- 100*chisq$residuals^2/chisq$statistic; round(contrib, 3)
+corrplot(contrib, is.cor = F)
+```
+
+### Convert to percentage
+
+```{r}
+dflab4 <- pouches1 %>%
+  group_by(ASV) %>%
+  drop_na() %>%
+  dplyr::summarise_at(vars(germination,
+                           side_roots, 
+                           true_leaves, 
+                           dry_stem, 
+                           dry_root, 
+                           diseased_stem, 
+                           diseased_root),
+                      list(n = sum)) %>%
+  mutate(germination_p = round(germination_n*100/120, 2)) %>%
+  mutate(across(side_roots_n:diseased_root_n, ~ . / germination_n *100)) %>% # transform into %
+  select(-germination_n) %>%
+  pivot_longer(-ASV,
+               names_to =  "parameter", 
+               values_to = "per") %>%
+  mutate(per = round(per, 2)) %>%
+  mutate(type = ifelse(.$parameter %in% c("germination_p", 
+                                          "true_leaves_n", 
+                                          "side_roots_n"),
+                       "Positive features", 
+                       "Negative features")) %>% 
+  mutate(parameter = recode(parameter, 
+                            "germination_p" = "Germination rate", 
+                            "true_leaves_n" = "True leaves",
+                            "side_roots_n" = "Secondary roots",
+                            "diseased_root_n" = "Diseased roots",
+                            "diseased_stem_n" = "Diseased stems",
+                            "dry_root_n" = "Dry roots",
+                            "dry_stem_n" = "Dry stems")) %>% 
+  mutate(parameter = fct_relevel(parameter, 
+                                 "Germination rate",
+                                 "True leaves",
+                                 "Secondary roots",
+                                 "Diseased stems",
+                                 "Dry stems",
+                                 "Diseased roots",
+                                 "Dry roots")) %>%
+  mutate(ASV = fct_relevel(ASV,
+                           "Control",
+                           "ASV 3007",
+                           "ASV 3055",
+                           "ASV 3140",
+                           "ASV 3151",
+                           "ASV 4090"))
+  
+```
+
+### Plot
+
+```{r}
+dflab4$per[dflab4$type == "Negative features"] <- -dflab4$per[dflab4$type == "Negative features"]
+
+my_colors <- c("#564787","#1BB367","#0ea5e9",
+               "#ce232a","#E65E93",
+               "#FC8D62","#fed680")
+
+breaks = c(-50, -25, 0, 25, 50, 75, 100)
+
+sig <- data.frame(
+  label = c("*", "*", "*"),
+  ASV = c("ASV 3151", "ASV 3055", "ASV 3055"),
+  x = c(0.61, 1.115, 0.89),
+  y = c(88, -20.5, 71))
+
+
+plab4 <- ggplot(dflab4, aes(interaction(ASV), per)) +
+  geom_bar(aes(fill = parameter), 
+           stat = "identity",
+           position = "dodge2") + #stack
+  geom_hline(aes(yintercept = 0)) +
+  scale_x_discrete(position = "top") +
+  scale_y_continuous(breaks = breaks,
+                     labels = abs(breaks)) +
+  scale_fill_manual(values = my_colors) +
+  theme_classic() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.y = element_blank(),
+    strip.text = element_blank(),
+    axis.title.y = element_text(size = 12),
+    axis.title.x = element_text(size = 12),
+    axis.text.x = element_text(angle = 0, 
+                               hjust = 0.5,
+                               vjust = 1,
+                               size = 12),
+    axis.text.y = element_text(size = 12),
+    legend.position = "right",
+    legend.box = "vertical",
+    legend.direction = "vertical",
+    legend.text = element_text(size = 12),
+    legend.title = element_text(size = 12, face = "bold")) +
+    labs(x = "", y = "Individuals [%]", fill = "Traits") +
+  guides(fill = guide_legend(ncol = 1)) +
+  facet_wrap(~ interaction(ASV),
+             scales = "free_x",
+             ncol = 6) + 
+  geom_text(data = sig,
+  mapping = aes(x = x, y = y, label = label),
+  color = "black", size = 5); plab4
+
+ggsave("outputs/visual/fig_4/traits-ext-per.png", #stack
+        width = 20,
+        height = 18,
+        units = "cm",
+        scale = 1,
+        dpi = 600)
+
+```
+
+## Physiological assays: Add table on Supp
+
+## GC-MS
+
+```{r}
+
+```
+
+# Field
+
+## Test normality
+
+```{r}
+x <- "weight" # H1, H2, H3, H4, S1, S2, S3, S4, weight 
+hist(field23[field23$treatment2 == "Control", x], 10)
+hist(field23[field23$treatment2 == "RR2_5_10", x], 10)
+hist(field23[field23$treatment2 == "C11_M4_B1", x], 10)
+
+# Normality test: p < 0.05 implies sign. differences from the normal dist.
+shapiro.test(field23[field23$hydrodots == "No", x]) 
+# H1: W = 0.97737, p-value = 0.1221 N
+# H2: W = 0.98523, p-value = 0.4115 N
+# H3: W = 0.97956, p-value = 0.1847 N
+# H4: W = 0.98878, p-value = 0.6637 N
+
+# S1: W = 0.97835, p-value = 0.1431
+# S2: W = 0.93815, p-value = 0.0003619
+# S3: W = 0.94469, p-value = 0.001005
+# S4: W = 0.94378, p-value = 0.0008894
+
+# weight: W = 0.90368, p-value = 1.012e-05
+
+summary(field23) # 89
+
+```
+
+### Significance
+
+```{r}
+kt_H1 <- kruskal.test(H1 ~ treatment2, field23); kt_H1 # p = 0.2551 NS
+kt_H2 <- kruskal.test(H2 ~ treatment2, field23); kt_H2 # p = 1.168e-07 SIG
+kt_H3 <- kruskal.test(H3 ~ treatment2, field23); kt_H3 # p = 3.329e-09 SIG
+kt_H4 <- kruskal.test(H4 ~ treatment2, field23); kt_H4 # p = 7.208e-10 SIG
+
+kt_S1 <- kruskal.test(S1 ~ treatment2, field23); kt_S1 # p = 0.003982 SIG
+kt_S2 <- kruskal.test(S2 ~ treatment2, field23); kt_S2 # p = 8.982e-07 SIG
+kt_S3 <- kruskal.test(S3 ~ treatment2, field23); kt_S3 # p = 1.095e-08 SIG
+kt_S4 <- kruskal.test(S4 ~ treatment2, field23); kt_S4 # p = 3.593e-09 SIG
+
+kt_W <- kruskal.test(weight ~ treatment2, field23); kt_W # p = 1.065e-07 SIG
+
+# Pairwise heigth
+wt_H_ref <- ggpubr::compare_means(H4 ~ treatment2, # 1, 2, 3, 4              
+                                  ref.group = "Control",
+                                  method = "t.test",
+                                  p.adjust.method = "bonferroni",
+                                  data = field23); wt_H_ref
+
+# Pairwise stalk diameter
+wt_S_ref <- ggpubr::compare_means(S3 ~ treatment2, # 1, 2, 3, 4   
+                                  ref.group = "Control",
+                                  method = "wilcox.test",
+                                  p.adjust.method = "bonferroni",
+                                  data = field23); wt_S_ref
+
+# Pairwise weight
+wt_W_ref <- ggpubr::compare_means(weight ~ treatment2,  
+                                  ref.group = "Control",
+                                  p.adjust.method = "bonferroni",
+                                  data = field23); wt_W_ref
+```
+
+## Boxplot
+
+### Weight
+
+```{r}
+dfwies1 <- field23 %>%
+  select(name,
+         weight) %>%
+  drop_na() %>%
+  mutate(name = fct_relevel(name,
+                            "Control",
+                            "Serratia plymunthica RR2-5-10",
+                            "Bacillus frigotolerans C1141"))
+
+dfwies1x <- dfwies1 %>%
+  group_by(name) %>%
+  dplyr::summarise_at(vars(weight),
+                      list(mean = mean))
+
+my_colors <- c("#564787", "#9a93d9", "#BEBAEC")
+pwies1 <- ggplot(data = dfwies1, 
+            aes(x = name, 
+                y = weight,
+                color = name)) +
+   geom_boxplot(aes(fill = name, 
+                   color = name),
+               outlier.shape = NA,
+               alpha = 0.7,
+               lwd = 0.5,
+               show.legend = F) +
+  geom_jitter(aes(color = name),
+              size = 1.5,
+              width = 0.2) +
+  theme_classic() +
+  theme(
+    axis.title.x = element_text(size = 12),
+    axis.ticks.x = element_blank(),
+    axis.title.y = element_text(size = 12),
+    axis.text.x = element_text(size = 12),
+    axis.text.y = element_text(size = 12),
+    legend.title = element_text(size = 12, face = "bold"),
+    legend.text = element_text(size = 12),
+    legend.position = "right") +
+  scale_color_manual(values = my_colors) +
+  scale_fill_manual(values = my_colors) +
+  scale_x_discrete(labels = c("Control" = "",
+                              "Serratia plymunthica RR2-5-10" = "",
+                              "Bacillus frigotolerans C1141" = "")) +
+  labs(x = "", y = "Plant biomass at harvest [Kg]", color = "Treatment") +
+  geom_text(aes(x = 2,
+                y = 2,
+                label = "**"),
+            color = "black",
+            size = 5) +
+  geom_text(aes(x = 3,
+                y = 2,
+                label = "****"),
+            color = "black",
+            size = 5)
+# pwies1$layers[1] <- NULL # don't use with cowplot
+pwies1
+
+# ggsave("outputs/visual/fig_4/weight-boxplot.png",
+#         width = 20,
+#         height = 18,
+#         units = "cm",
+#         scale = 1,
+#         dpi = 600)
+```
+
+### Height
+
+```{r}
+dfwies2 <- field23 %>%
+  select(name,
+         H1,
+         H2, 
+         H3,
+         H4) %>%
+  drop_na() %>%
+  pivot_longer(-name,
+               names_to = "timepoint", 
+               values_to = "height") %>% 
+  mutate(timepoint = recode(timepoint, 
+                            "H1" = "1", 
+                            "H2" = "2",
+                            "H3" = "3",
+                            "H4" = "4")) %>%
+  mutate(name = fct_relevel(name,
+                            "Control",
+                            "Serratia plymunthica RR2-5-10",
+                            "Bacillus frigotolerans C1141"))
+
+my_colors <- c("#564787", "#9a93d9", "#BEBAEC")
+pwies2 <- ggplot(data = dfwies2, 
+            aes(x = timepoint, 
+                y = height,
+                color = name)) +
+  geom_point(aes(color = name),
+              size = 1.5,
+              width = 0.2,
+             position = position_jitterdodge()) +
+  geom_boxplot(position = "dodge",
+               alpha = 0) +
+  theme_classic() +
+  theme(
+    axis.title.x = element_text(size = 12),
+    axis.title.y = element_text(size = 12),
+    axis.text.x = element_text(size = 12,
+                               angle = 0,
+                               hjust = 1),
+    legend.position = "none",
+    legend.title = element_text(size = 12),
+    legend.text = element_text(size = 12)) +
+  scale_color_manual(values = my_colors) +
+  labs(x = "", y = "Height (cm)", color = "Treatment")
+pwies2
+pwies2$layers[1] <- NULL
+
+# ggsave("outputs/visual/fig_4/height-boxplot.png",
+#         width = 20,
+#         height = 18,
+#         units = "cm",
+#         scale = 1,
+#         dpi = 600)
+```
+
+### Stalk diameter
+
+```{r}
+dfwies3 <- field23 %>%
+  select(name,
+         S1,
+         S2, 
+         S3,
+         S4) %>%
+  drop_na() %>%
+  pivot_longer(-name,
+               names_to = "timepoint", 
+               values_to = "stalk") %>% 
+  mutate(timepoint = recode(timepoint, 
+                            "S1" = "1", 
+                            "S2" = "2",
+                            "S3" = "3",
+                            "S4" = "4")) %>%
+  mutate(name = fct_relevel(name,
+                            "Control",
+                            "Serratia plymunthica RR2-5-10",
+                            "Bacillus frigotolerans C1141"))
+
+my_colors <- c("#564787", "#9a93d9", "#BEBAEC")
+pwies3 <- ggplot(data = dfwies3, 
+            aes(x = timepoint, 
+                y = stalk,
+                color = name)) +
+  geom_point(aes(color = name),
+              size = 1.5,
+              width = 0.2,
+             position = position_jitterdodge()) +
+  geom_boxplot(position = "dodge",
+               alpha = 0) +
+  theme_classic() +
+  theme(
+    axis.title.x = element_text(size = 12),
+    axis.title.y = element_text(size = 12),
+    axis.text.x = element_text(size = 12,
+                               angle = 0,
+                               hjust = 1),
+    legend.position = "none",
+    legend.title = element_text(size = 12),
+    legend.text = element_text(size = 12)) +
+  scale_color_manual(values = my_colors) +
+  labs(x = "Timepoint", y = "Stalk diameter (cm)", color = "Treatment"); pwies3
+pwies3$layers[1] <- NULL
+
+# ggsave("outputs/visual/fig_4/stalk-boxplot.png",
+#         width = 20,
+#         height = 18,
+#         units = "cm",
+#         scale = 1,
+#         dpi = 600)
+
+```
+
+## Lineplot
+
+### Height
+
+```{r}
+dfwies4a <- field23 %>%
+  select(treatment,
+         H1, H2, H3, H4) %>%
+  group_by(treatment) %>%
+  drop_na() %>%
+  dplyr::summarise_at(vars(H1, H2, H3, H4),
+                      list(mean = mean)) %>%   
+  pivot_longer(-treatment,
+               names_to =  "timepoint",
+               values_to = "mean") %>% 
+  mutate(timepoint = recode(timepoint, 
+                            "H1_mean" = "1", 
+                            "H2_mean" = "2",
+                            "H3_mean" = "3",
+                            "H4_mean" = "4"))
+
+se <- function(x) {
+  n <- length(x)
+  sd(x)/sqrt(n)
+}
+
+dfwies4b <- field23 %>%
+  filter(hydrodots == "No") %>%
+  select(treatment,
+         H1, H2, H3, H4) %>%
+  group_by(treatment) %>%
+  drop_na() %>%
+  dplyr::summarise_at(vars(H1, H2, H3, H4),
+                      list(se = se)) %>%   
+  pivot_longer(-treatment,
+               names_to =  "timepoint",
+               values_to = "se") %>% 
+  mutate(timepoint = recode(timepoint, 
+                            "H1_se" = "1", 
+                            "H2_se" = "2",
+                            "H3_se" = "3",
+                            "H4_se" = "4"))
+
+
+dfwies4 <- merge(dfwies4a, dfwies4b, 
+                 by = c("treatment", "timepoint")) %>% 
+  mutate(treatment = fct_relevel(treatment, 
+                                 "Control",
+                                 "RR2_5_10",
+                                 "C11_M4_B1"))
+
+my_colors <- c("#564787", "#9a93d9", "#BEBAEC")
+pwies4 <- ggplot(data = dfwies4, 
+            aes(x = timepoint, 
+                y = mean,
+                group = treatment,
+                color = treatment)) +
+  geom_line(size = 2, alpha = 0.7) +
+  geom_point(size = 4, alpha = 0.7) +
+  geom_errorbar(aes(ymin = mean - se * 1.96,
+                    ymax = mean + se * 1.96),
+                width = 0.05,
+                size = 1,
+                alpha = 0.7) +
+  theme_classic() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.y = element_blank(),
+    axis.title.x = element_text(size = 12),
+    axis.title.y = element_text(size = 12),
+    axis.text.x = element_text(size = 12,
+                               angle = 0,
+                               hjust = 1),
+    axis.text.y = element_text(size = 12),
+    legend.position = "none",
+    legend.title = element_text(size = 12),
+    legend.text = element_text(size = 12)) +
+  scale_color_manual(values = my_colors) +
+  scale_y_continuous(expand = expand_scale(mult = c(0, 0.05))) +
+  scale_x_discrete(expand = expand_scale(mult = c(0.05, 0.05))) +
+  labs(x = "", y = "Height [cm]", color = "") +
+  geom_text(aes(x = 2, y = 130, label = "****"),
+            color = "black", size = 5) +
+  geom_text(aes(x = 3, y = 189, label = "****"),
+            color = "black", size = 5) +
+  geom_text(aes(x = 4, y = 200, label = "****"),
+            color = "black", size = 5) +
+  geom_text(aes(x = 4, y = 162, label = "*"),
+            color = "black", size = 5); pwies4
+
+# ggsave("outputs/visual/fig_4/height-lineplot.png",
+#         width = 20,
+#         height = 18,
+#         units = "cm",
+#         scale = 1,
+#         dpi = 600)
+```
+
+### Stalk Diameter
+
+```{r}
+dfwies5a <- field23 %>%
+  filter(hydrodots == "No") %>%
+  select(treatment,
+         S1, S2, S3, S4) %>%
+  group_by(treatment) %>%
+  drop_na() %>%
+  dplyr::summarise_at(vars(S1, S2, S3, S4),
+                      list(mean = mean)) %>%   
+  pivot_longer(-treatment,
+               names_to =  "timepoint",
+               values_to = "mean") %>% 
+  mutate(timepoint = recode(timepoint, 
+                            "S1_mean" = "1", 
+                            "S2_mean" = "2",
+                            "S3_mean" = "3",
+                            "S4_mean" = "4"))
+
+se <- function(x) {
+  n <- length(x)
+  sd(x)/sqrt(n)
+}
+
+dfwies5b <- field23 %>%
+  filter(hydrodots == "No") %>%
+  select(treatment,
+         S1, S2, S3, S4) %>%
+  group_by(treatment) %>%
+  drop_na() %>%
+  dplyr::summarise_at(vars(S1, S2, S3, S4),
+                      list(se = se)) %>%   
+  pivot_longer(-treatment,
+               names_to =  "timepoint",
+               values_to = "se") %>% 
+  mutate(timepoint = recode(timepoint, 
+                            "S1_se" = "1", 
+                            "S2_se" = "2",
+                            "S3_se" = "3",
+                            "S4_se" = "4"))
+
+
+dfwies5 <- merge(dfwies5a, dfwies5b, 
+             by = c("treatment", "timepoint")) %>% 
+  mutate(treatment = fct_relevel(treatment, 
+                                 "Control",
+                                 "RR2_5_10",
+                                 "C11_M4_B1"))
+
+my_colors <- c("#564787", "#9a93d9", "#BEBAEC")
+pwies5 <- ggplot(data = dfwies5, 
+            aes(x = timepoint, 
+                y = mean,
+                group = treatment,
+                color = treatment)) +
+  geom_line(size = 2, alpha = 0.7) +
+  geom_point(size = 4, alpha = 0.7) +
+  geom_errorbar(aes(ymin = mean - se * 1.96,
+                    ymax = mean + se * 1.96),
+                width = 0.05,
+                size = 1,
+                alpha = 0.7) +
+  theme_classic() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.y = element_blank(),
+    axis.title.x = element_text(size = 12),
+    axis.title.y = element_text(size = 12),
+    axis.text.x = element_text(size = 12,
+                               angle = 0,
+                               hjust = 1),
+    axis.text.y = element_text(size = 12),
+    legend.position = "none",
+    legend.title = element_text(size = 12),
+    legend.text = element_text(size = 12)) +
+  scale_color_manual(values = my_colors) +
+  scale_y_continuous(expand = expand_scale(mult = c(0, 0.05))) +
+  scale_x_discrete(expand = expand_scale(mult = c(0.05, 0.05))) +
+  labs(x = "Timepoint", y = "Stalk diameter [cm]", color = "") +
+  geom_text(aes(x = 1, y = 8, label = "***"),
+            color = "black", size = 5) +
+  geom_text(aes(x = 2, y = 19, label = "****"),
+            color = "black", size = 5) +
+  geom_text(aes(x = 2, y = 15, label = "*"),
+            color = "black", size = 5) +
+  geom_text(aes(x = 3, y = 28.4, label = "****"),
+            color = "black", size = 5) +
+  geom_text(aes(x = 3, y = 21.5, label = "***"),
+            color = "black", size = 5) +
+  geom_text(aes(x = 4, y = 29, label = "****"),
+            color = "black", size = 5) +
+  geom_text(aes(x = 4, y = 22, label = "***"),
+            color = "black", size = 5); pwies5
+
+# ggsave("outputs/visual/fig_4/stalk-lineplot.png",
+#         width = 20,
+#         height = 18,
+#         units = "cm",
+#         scale = 1,
+#         dpi = 600)
+
+```
+
+## Merge plots
+
+```{r}
+p_AB <- cowplot::plot_grid(plab4, pwies1,
+                           labels = c("a", "b"),
+                           label_size = 12,
+                           ncol = 1,
+                           rel_widths = c(1, 1),
+                           rel_heights = c(1, 1),
+                           axis = "lb"); p_AB
+
+# png("outputs/visual/fig_4/field-line-AB.png",
+#     bg = "white",
+#     width = 20,
+#     height = 18,
+#     units = "cm",
+#     res = 600); print(p_AB); dev.off()
+# 
+# save(p_AB,
+#      file = "outputs/r/fig_4/field-line_AB.RData")
+
+p_CD <- cowplot::plot_grid(pwies4, pwies5,
+                           labels = c("c", "d"),
+                           label_size = 12,
+                           ncol = 1,
+                           rel_widths = c(1, 1),
+                           rel_heights = c(1, 1),
+                           axis = "lb"); p_CD
+
+png("outputs/visual/fig_4/field-line-CD.png",
+    bg = "white",
+    width = 20,
+    height = 18,
+    units = "cm",
+    res = 600); print(p_CD); dev.off()
+
+# save(p_CD,
+#      file = "outputs/r/fig_4/field-line.RData")
+
+p_field <- cowplot::plot_grid(p_AB, p_CD,
+                           labels = c("", ""),
+                           ncol = 2,
+                           rel_widths = c(1, 0.75),
+                           rel_heights = c(1, 1),
+                           axis = "bt",
+                           greedy = T)
+
+# png("outputs/visual/fig_4/field-line2.png",
+#     bg = "white",
+#     width = 45,
+#     height = 31,
+#     units = "cm",
+#     res = 600); print(p_field); dev.off()
+# 
+# save(p_field,
+#      file = "outputs/r/fig_4/field-line.RData")
+
+```

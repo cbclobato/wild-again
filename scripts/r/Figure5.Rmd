@@ -1,0 +1,223 @@
+---
+title: "Figure 5"
+author: "Carolina Lobato"
+date: "2024-03-22"
+output: html_document
+---
+
+# Load Libraries
+
+```{r, include = F}
+library(tidyverse)
+```
+
+# WGS
+
+```{r}
+genes <- read.table(
+  "data/metadata/PLaBase-genefreq.tsv",
+  sep = "\t",
+  header = TRUE,
+  fill = TRUE) #1726
+
+stat <- genes$freq %>% sum() #3186
+
+krona <- read.table(
+  "data/metadata/PLaBase-krona-mod.tsv",
+  sep = "\t",
+  header = TRUE,
+  fill = TRUE) #3196
+
+# Excluding putative entries (n = 21) and repeated genes (n = 3)
+krona %>% summary() # length = 3196, min = 1, median = 1.83, max = 38
+sapply(krona, function(x) n_distinct(x))
+# level1 level2 level3 level4 level5 level6   code   freq 
+#      2      7     41    215    908   1572   1578     17
+
+krona2 <- krona
+krona2$freq <- 1 * ((krona2$freq > 0) == 1)
+df <- krona2 %>%
+  group_by(level1, level2, level3) %>%
+  summarize(n_genes = n_distinct(level6)) %>%
+  mutate(n_genes = n_genes*2, n_genes) %>%
+  as.data.frame()
+df %>% summary() # length = 41, min = 2, 1st = 30, median = 80, max = 1108
+
+df_pivot <- krona2 %>%
+  select(level3, level5, level6) %>%
+  as.data.frame() %>% 
+  count(level3, level5, level6,  name = "Count")
+  # pivot_wider(names_from = level6, values_from = level3) %>%
+  # t() %>%
+  # list()
+# 
+# print(df_pivot)
+# common.ft <- Reduce(intersect, df_pivot); common.ft
+# all.ft <- Reduce(union, df_pivot); all.ft
+# ft <- unlist(df_pivot[[1]], recursive = F); ft
+
+```
+
+## Prep
+
+```{r}
+# Set a number of 'empty bar' to add at the end of each group
+empty_bar <- 3
+to_add <- data.frame(matrix(1, 
+                            empty_bar*nlevels(as.factor(df$level1)), 
+                            ncol(df)))
+colnames(to_add) <- colnames(df)
+
+to_add$level1 <- rep(levels(as.factor(df$level1)),
+                     each = empty_bar)
+
+data <- rbind(df, to_add)
+data <- data %>% arrange(level1)
+data$id <- seq(1, nrow(data))
+data <- data %>% 
+  mutate(level2 = recode(level2,
+                         "BIO-FERTILIZATION" = "Bio-fertilization", 
+                         "BIO-REMEDIATION" = "Bio-remediation",
+                         "PHYTOHORMONE | PLANT SIGNAL PRODUCTION" = "Phytohormone or plant signal production",
+                         "STRESS_CONTROL | BIOCONTROL" = "Stress control or Biocontrol",
+                         "PLANT SYSTEM COLONIZATION" = "Plant system colonization",
+                         "IMMUNE RESPONSE STIMULATION" = "Immune response stimulation",
+                         "COMPETITIVE EXCLUSION" = "Competitive exclusion"))
+
+data$level2 <- factor(data$level2, 
+                      levels = c("Bio-fertilization",
+                                 "Bio-remediation",
+                                 "Phytohormone or plant signal production",
+                                 "Competitive exclusion",
+                                 "Immune response stimulation",
+                                 "Plant system colonization",
+                                 "Stress control or Biocontrol"))
+
+ 
+# Get the name and the y position of each label
+label_data <- data
+label_data["level2"][label_data["level2"] == "1"] <- NA
+label_data["level3"][label_data["level3"] == "1"] <- NA
+number_of_bar <- nrow(label_data)
+angle <- 90 - 360 * (label_data$id - 0.5)/number_of_bar # Substract 0.5 bc the letter must have the angle of the center of the bars. Not extreme right(1) or extreme left (0)
+label_data$hjust <- ifelse(angle < -90, 1, 0)
+label_data$angle <- ifelse(angle < -90, angle + 180, angle)
+ 
+# prepare a data frame for base lines
+base_data <- data %>% 
+  group_by(level1) %>% 
+  summarize(start = min(id), 
+            end = max(id) - empty_bar) %>%
+  rowwise() %>% 
+  mutate(title = mean(c(start, end)))
+ 
+# prepare a data frame for grid (scales)
+grid_data <- base_data
+grid_data$end <- grid_data$end[c(nrow(grid_data),
+                                 1:nrow(grid_data) - 1)] + 1
+grid_data$start <- grid_data$start - 1
+grid_data <- grid_data[-1, ]
+```
+
+## Plot
+
+```{r}
+#mycolors <- colorRampPalette(brewer.pal(42, "Paired"))(42)
+mycolors <- c("#db3f29","#feae01","#E65E93",
+              "#5964a4","#69d1a2","#2cb5f2","#0a719f",
+              "#cc0025") 
+
+p5 <- ggplot(data, 
+            aes(x = as.factor(id),
+                y = n_genes, 
+                fill = level2)) +
+  geom_bar(aes(x = as.factor(id),
+               y = n_genes,
+               fill = level2),
+           stat = "identity",
+           alpha = 1) +
+  geom_segment(data = grid_data, aes(x = end, y = 1108,
+                                     xend = start, yend = 1108), 
+               colour = "#a6a6a6", alpha = 0.6, size = 0.3, inherit.aes = F) +
+  geom_segment(data = grid_data, aes(x = end, y = 200,
+                                     xend = start, yend = 200), 
+               colour = "#a6a6a6", alpha = 0.6, size = 0.3, inherit.aes = F) +
+  geom_segment(data = grid_data, aes(x = end, y = 80,
+                                     xend = start, yend = 80), 
+               colour = "#a6a6a6", alpha = 0.6, size = 0.3, inherit.aes = F) +
+    geom_segment(data = grid_data, aes(x = end, y = 30,
+                                     xend = start, yend = 30), 
+               colour = "#a6a6a6", alpha = 0.6, size = 0.3, inherit.aes = F) +
+  geom_segment(data = grid_data, aes(x = end, y = 2,
+                                     xend = start, yend = 2), 
+               colour = "#a6a6a6", alpha = 0.6, size = 0.3, inherit.aes = F) +
+  annotate("text", 
+           x = rep(max(data$id)-1, 5), 
+           y = c(2, 30, 80, 200, 1108), 
+           label = c("1", "15", "40", "100", "554"),
+           color = "#a6a6a6",
+           size = 5,
+           angle = 0,
+           alpha = 0.6,
+           fontface = "bold",
+           hjust = 0.5) +
+  theme_classic() +
+  theme(
+    axis.line.y = element_blank(), 
+    axis.line.x = element_blank(),
+    axis.ticks = element_blank(),
+    legend.position = "right",
+    legend.text = element_text(size = 12),
+    legend.title = element_text(size = 12, face = "bold"),
+    legend.key.size = unit(0.8, "cm"),
+    axis.text = element_blank(),
+    axis.title = element_blank(),
+    panel.grid = element_blank(),
+    plot.margin = unit(rep(-1, 4), "cm")) +
+  scale_fill_manual(values = mycolors, 
+                    na.translate = F) +
+  scale_y_continuous(trans = "log10",
+                     limits = c(0.001, 5540)) +
+  coord_polar() + 
+  geom_segment(data = base_data, 
+               aes(x = start, 
+                   y = 0.5, 
+                   xend = end, 
+                   yend = 0.5), 
+               colour = "black", 
+               alpha = 0.6,
+               size = 0.6,
+               inherit.aes = F) +
+  geom_text(data = base_data,
+            aes(x = title,
+                y = 0.15,
+                label = level1),
+            hjust = c(0.45, 0.45),
+            colour = "black",
+            angle = c(270, 90),
+            alpha = 0.6,
+            size = 5,
+            fontface = "bold",
+            inherit.aes = F) +
+  geom_text(data = label_data, 
+            aes(x = id,
+                y = log10(100),
+                hjust = hjust,
+                label = level3),
+            color = "black", 
+            fontface = "bold",
+            alpha = 0.6,
+            size = 4,
+            angle = label_data$angle,
+            inherit.aes = F) + # Add base line information
+  labs(fill = "Class")
+p5
+
+ggsave("outputs/visual/fig_5/WGS.png",
+       width = 45,
+       height = 31,
+       units = "cm",
+       bg = "white",
+       scale = 1,
+       dpi = 600)
+```

@@ -1,0 +1,515 @@
+---
+title: "Figure 1"
+author: "Carolina Lobato"
+date: "23/02/2023"
+output: html_document
+---
+
+# Load Libraries
+
+```{r, include = FALSE}
+library(phyloseq)
+library(tidyverse)
+library(stats)
+library(asremlPlus)
+library(cowplot)
+library(grid)
+library(ggtext)
+```
+
+# Diversity Metrics
+
+```{r, echo = FALSE}
+load("outputs/r/supplementary/bh-raref.RData")
+
+bh_new <- subset_samples(bh, domestication != ""); bh_new
+bh_new <- prune_taxa(taxa_sums(bh_new) > 0, bh_new); bh_new
+bh_new <- subset_samples(bh_raref, provider == "Sensi Seeds"); bh_new
+check <- unique(bh_new@sam_data[["replicates"]]);check
+
+richness <- phyloseq::estimate_richness(
+  bh_new, # bh_raref
+  measures = c("Observed", "Shannon"))
+head(richness) # returns a data.frame
+summary(richness)
+
+# Check distribution
+hist(richness$Observed, main = "Richness", xlab = "")
+hist(richness$Shannon, main = "Shannon index", xlab = "") 
+
+# Correlation between a given sample and the normal distribution.
+ggpubr::ggqqplot(richness$Observed) 
+ggpubr::ggqqplot(richness$Shannon) 
+
+# Normality test: p < 0.05 implies sign. differences from the normal dist.
+shapiro.test(richness$Observed) # p = 8.341e-15
+shapiro.test(richness$Shannon) # p = 8.651e-10
+
+# Non-parametric
+alpha <- cbind(sample_data(bh_new), richness); alpha #bh_raref
+
+kt_obs <- kruskal.test(Observed ~ domestication, alpha); kt_obs 
+kt_sh <- kruskal.test(Shannon ~ domestication, alpha); kt_sh 
+```
+
+## Mean and Std. Error
+
+```{r}
+se <- function(x) {
+  n <- length(x)
+  sd(x)/sqrt(n)
+}
+
+alpha_x <- alpha %>% 
+  group_by(chemotype2) %>% # domestication
+  dplyr::summarise_at(vars(Observed, Shannon),
+                      list(median = median, # median
+                           quantile = quantile))
+
+write.table(alpha_x,
+            "outputs/r/fig_1/alpha-stat-chem.csv",
+            sep = "\t",
+            row.names = T,
+            quote = FALSE)
+
+# IQR, report Q3-Q1
+stats::IQR(richness$Observed)
+stats::quantile(richness$Observed)
+
+stats::IQR(richness$Shannon)
+stats::quantile(richness$Shannon)
+
+summary(alpha) # 402 samples
+sd(alpha$Observed)/sqrt(402) # 1.186414
+sd(alpha$Shannon)/sqrt(402) # 0.03268286
+```
+
+### Significance
+
+#### Heatmaps Prep
+
+```{r}
+# Pairwise Observed
+wt_obs <- pairwise.wilcox.test(
+  alpha$Observed,
+  as.factor(alpha$chemotype2), # domestication
+  p.adjust.method = "bonf"); wt_obs 
+
+wt_obs <- as.data.frame(wt_obs[["p.value"]])
+wt_obs_long <- rownames_to_column(wt_obs,
+                                  var = "G1") %>%
+  pivot_longer(cols = everything() & !G1,
+               names_to = "G2", 
+               values_to = "p") %>%
+  filter(!is.na(p))
+summary(wt_obs_long)
+
+# Pairwise Shannon
+wt_sh <- pairwise.wilcox.test(
+  alpha$Shannon,
+  as.factor(alpha$chemotype2), # domestication
+  p.adjust.method = "bonf"); wt_sh
+
+wt_sh <- as.data.frame(wt_sh[["p.value"]])
+wt_sh_long <- rownames_to_column(wt_sh,
+                                 var = "G1") %>% 
+  pivot_longer(cols = everything() & !G1, 
+               names_to = "G2", 
+               values_to = "p") %>%
+  filter(!is.na(p))
+summary(wt_sh_long)
+
+# save
+save(wt_obs_long,
+     file = "outputs/r/fig_1/alpha-obs-chem-long.RData")
+save(wt_sh_long,
+     file = "outputs/r/fig_1/alpha-sh-chem-long.RData")
+```
+
+##### Heatmaps
+
+```{r}
+load("outputs/r/fig_1/alpha-obs-gen-long.RData") # wt_obs_long
+load("outputs/r/fig_1/alpha-sh-gen-long.RData") # wt_sh_long
+
+load("outputs/r/fig_1/alpha-obs-dom-long.RData") # wt_obs_long
+load("outputs/r/fig_1/alpha-sh-dom-long.RData") # wt_sh_long
+
+load("outputs/r/fig_1/alpha-obs-chem-long.RData") # wt_obs_long
+load("outputs/r/fig_1/alpha-sh-chem-long.RData") # wt_sh_long
+
+sig_obs <- plotPvalues(wt_obs_long,
+                       p = "p",
+                       x = "G1",
+                       y = "G2", 
+                       gridspacing = 0, 
+                       show.sig = T,
+                       alpha = 0.05, 
+                       sig.size = 3,
+                       sig.colour = "black", 
+                       sig.face = "plain", 
+                       triangles = "both", 
+                       title = "", 
+                       axis.labels = NULL, 
+                       axis.text.size = 8, 
+                       colours = c("#ce232a","#ff6682","#918bc0"),
+                       ggplotFuncs = NULL, 
+                       printPlot = T)
+
+sig_sh <- plotPvalues(wt_sh_long,
+                      p = "p",
+                      x = "G1",
+                      y = "G2", 
+                      gridspacing = 0, 
+                      show.sig = T,
+                      alpha = 0.05, 
+                      sig.size = 3,
+                      sig.colour = "black", 
+                      sig.face = "plain", 
+                      triangles = "both", 
+                      title = "", 
+                      axis.labels = NULL, 
+                      axis.text.size = 8, 
+                      colours =  c("#ce232a","#ff6682","#918bc0"),
+                      ggplotFuncs = NULL, 
+                      printPlot = T)
+
+```
+
+###### Merge
+
+```{r}
+M <- cowplot::plot_grid(sig_obs, 
+                        sig_sh, 
+                        labels = c("A", "B"),
+                        align = "h",
+                        nrow = 1); M
+
+ggsave("outputs/visual/fig_1/sig-wt-gen.png",
+       bg = "white",
+       width = 45, # 45
+       height = 31, #31
+       units = "cm",
+       dpi = 600)
+```
+
+# Plot
+
+## Genotype Observed
+
+```{r, echo = FALSE}
+load("outputs/r/supplementary/bh-raref.RData")
+
+palette <- c("#6159a4","#feae01","#0ea5e9","#ff6682")
+breaks <- c(0, 15, 30, 45, 60, 75, 90, 105, 120, 180)
+
+p_alpha_gen_obs <- phyloseq::plot_richness(
+  bh_raref,
+  x = "code",
+  measures = c("Observed"),
+  sortby = "Observed") +
+  geom_boxplot(aes(fill = domestication, 
+                   color = domestication),
+               outlier.shape = NA,
+               alpha = 0.7,
+               lwd = 0.5,
+               show.legend = F) +
+  geom_jitter(aes(color = domestication),
+              size = 1.5,
+              width = 0.2) +
+  theme_classic() +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.border = element_rect(colour = "black", fill = NA, size = 1),
+    plot.margin = margin(0.25, 0.05, 0.25, 0.25, unit = "cm"),
+    axis.text.x = element_text(angle = 0,
+                               hjust = 0.5,
+                               size = 12),
+    axis.text.y = element_text(angle = 0,
+                               hjust = 0.5,
+                               size = 12),
+    axis.ticks.y = element_blank(),
+    legend.position = "none",
+    strip.background = element_blank(),
+    strip.text = element_blank()) +
+  scale_fill_manual(values = palette,
+                    aesthetics = c("color", "fill"),
+                    na.translate = T) +
+  scale_y_continuous(breaks = breaks, labels = breaks, limits = c(0, 180), 
+                     expand = expand_scale(mult = c(0.01, 0.03))) +
+  labs(x = "", y = "") +
+  facet_wrap(~factor(domestication, levels = c("Landrace", 
+                                               "Selected line", 
+                                               "Cross hybrid", 
+                                               "Inbred line")), 
+             scales = "free_y", 
+             nrow = 5, 
+             strip.position = "right") +
+  coord_flip()
+p_alpha_gen_obs$layers[1] <- NULL
+p_alpha_gen_obs
+```
+
+## Domestication Observed
+
+```{r}
+load("outputs/r/supplementary/bh-raref.RData")
+
+palette <- c("#feae01","#6159a4","#0ea5e9","#ff6682")
+breaks <- c(0, 15, 30, 45, 60, 75, 90, 105, 120, 180)
+
+p_alpha_dom_obs <- phyloseq::plot_richness(
+  bh_raref,
+  x = "domestication",
+  scales = "free_y",
+  measures = c("Observed"),
+  sortby = "Observed") +
+  geom_boxplot(aes(fill = domestication, 
+                   color = domestication),
+               outlier.shape = NA,
+               alpha = 0.7,
+               lwd = 0.5,
+               show.legend = F) +
+  geom_jitter(aes(color = domestication),
+              size = 1.5,
+              width = 0.2) +
+  theme_classic() +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.border = element_rect(colour = "black", fill = NA, size = 1),
+    plot.margin = margin(0.25, 0, 0.25, 0.05, unit = "cm"),
+    axis.text.x = element_text(angle = 0,
+                               hjust = 0.5,
+                               size = 12),
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "none",
+    strip.background = element_blank(),
+    strip.text.y = element_text(angle = 0,
+                                size = 12)) +
+  scale_fill_manual(values = palette,
+                    aesthetics = c("color", "fill"),
+                    na.translate = T) +
+  scale_y_continuous(breaks = breaks, labels = breaks, limits = c(0, 180),
+                     expand = expand_scale(mult = c(0.01, 0.03))) + 
+  scale_x_discrete(position = "bottom") + # na.translate = FALSE
+  labs(x = "", y = "") +
+  facet_wrap(~factor(domestication, levels = c("Landrace", 
+                                               "Selected line", 
+                                               "Cross hybrid",
+                                               "Inbred line")),
+             scales = "free_y", 
+             nrow = 5, 
+             strip.position = "right",
+             labeller = label_wrap_gen(width = 5)) +
+  coord_flip()
+p_alpha_dom_obs$layers[1] <- NULL
+p_alpha_dom_obs
+```
+
+### Merge
+
+```{r}
+obs <- cowplot::plot_grid(p_alpha_gen_obs, p_alpha_dom_obs, 
+                          labels = ""); obs
+```
+
+## Domestication Shannon
+
+```{r}
+load("outputs/r/supplementary/bh-raref.RData")
+
+palette <- c("#feae01","#6159a4","#0ea5e9","#ff6682")
+breaks <- c(0, 0.5, 1, 1.5, 2, 2.5, 3)
+
+p_alpha_dom_sha <- phyloseq::plot_richness(
+  bh_raref,
+  x = "domestication",
+  scales = "free_y",
+  measures = c("Shannon"), 
+  sortby = "Shannon") +
+  geom_boxplot(aes(fill = domestication, 
+                   color = domestication),
+               outlier.shape = NA,
+               alpha = 0.7,
+               lwd = 0.5,
+               show.legend = F) +
+  geom_jitter(aes(color = domestication),
+              size = 1.5,
+              width = 0.2) +
+  theme_classic() +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.border = element_rect(colour = "black", fill = NA, size = 1),
+    plot.margin = margin(0.25, 0.05, 0.25, 0, unit = "cm"),
+    axis.text.x = (element_text(angle = 0,
+                                hjust = 0.5,
+                                size = 12)),
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "none",
+    strip.background = element_blank(),
+    strip.text.y = element_blank()) +
+  scale_fill_manual(values = palette,
+                    aesthetics = c("color", "fill"),
+                    na.translate = T) +
+  scale_y_continuous(breaks = breaks, labels = breaks, limits = c(0, 3),
+                     expand = expand_scale(mult = c(0.01, 0.01))) +
+  scale_x_discrete(position = "top") +
+  labs(x = "", y = "") +
+  facet_wrap(~factor(domestication, levels = c("Landrace", 
+                                               "Selected line", 
+                                               "Cross hybrid", 
+                                               "Inbred line")), 
+             scales = "free_y", 
+             nrow = 5, 
+             strip.position = "right") +
+  coord_flip()
+p_alpha_dom_sha$layers[1] <- NULL
+p_alpha_dom_sha
+```
+
+## Genotype Shannon
+
+```{r, echo = FALSE}
+load("outputs/r/supplementary/bh-raref.RData")
+
+palette <- c("#6159a4","#feae01","#0ea5e9","#ff6682")
+breaks <- c(0, 0.5, 1, 1.5, 2, 2.5, 3)
+
+p_alpha_gen_sha <- phyloseq::plot_richness(
+  bh_raref,
+  x = "code",
+  measures = c("Shannon"), 
+  sortby = "Shannon") +
+  geom_boxplot(aes(fill = domestication, 
+                   color = domestication),
+               outlier.shape = NA,
+               alpha = 0.7,
+               lwd = 0.5,
+               show.legend = F) +
+  geom_jitter(aes(color = domestication),
+              size = 1.5,
+              width = 0.2) +
+  theme_classic() +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.border = element_rect(colour = "black", fill = NA, size = 1),
+    plot.margin = margin(0.25, 0.25, 0.25, 0.05, unit = "cm"),
+    axis.text.x = (element_text(angle = 0,
+                                hjust = 0.5,
+                                size = 12)),
+    axis.text.y = (element_text(angle = 0,
+                                hjust = 0.5,
+                                size = 12)),
+    axis.ticks.y = element_blank(),
+    legend.position = "none",
+    strip.background = element_blank(),
+    strip.text = element_blank()) +
+  scale_fill_manual(values = palette,
+                    aesthetics = c("color", "fill"),
+                    na.translate = T) +
+  scale_y_continuous(breaks = breaks, labels = breaks, limits = c(0, 3),
+                     expand = expand_scale(mult = c(0.01, 0.01))) +
+  scale_x_discrete(position = "top") +
+  labs(x = "", y = "") +
+  facet_wrap(~factor(domestication, levels = c("Landrace", 
+                                               "Selected line", 
+                                               "Cross hybrid", 
+                                               "Inbred line")), 
+             scales = "free_y", 
+             nrow = 5, 
+             strip.position = "right") +
+  coord_flip()
+p_alpha_gen_sha$layers[1] <- NULL
+p_alpha_gen_sha
+```
+
+### Merge
+
+```{r}
+sha <- cowplot::plot_grid(p_alpha_dom_sha, p_alpha_gen_sha, 
+                          labels = ""); sha
+```
+
+```{r}
+A <- cowplot::plot_grid(obs, sha, 
+                        labels = c("", "")); A
+
+A2 <- A +
+  theme(plot.margin = margin(0.6,0.3,0,0.3, "cm")) +
+  geom_text(aes(x = rep(0.01, 9),
+                y = c(0.868, 0.8545, 0.7275, 0.5789, 0.547, 0.515, 0.2163, 0.187, 0.1338), 
+                label = "*"),
+            size = 5,
+            fontface = "bold") +
+  geom_text(aes(x = rep(0.99, 9),
+                y = c(0.897, 0.8545, 0.639, 0.547, 0.53, 0.448, 0.2163, 0.16, 0.061), 
+                label = "*"),
+            size = 5,
+            fontface = "bold") +
+  geom_text(aes(x = 0.256,
+                y = 1.01,
+                label = "Observed ASV richness"),
+            size = 5,
+            fontface = "bold") +
+  geom_text(aes(x = 0.744,
+                y = 1.01,
+                label = "Shannon H' index"),
+            size = 5,
+            fontface = "bold"); A2
+
+ggsave("outputs/visual/fig_1/p-alpha2.png",
+       bg = "white",
+       width = 45,
+       height = 31,
+       units = "cm",
+       dpi = 600)
+```
+
+```{r}
+B2 <- grid::rasterGrob(png::readPNG("outputs/visual/fig_1/sig-wt-gen-mod.png"), 
+                       interpolate = TRUE)
+
+C2 <- grid::rasterGrob(png::readPNG("outputs/visual/fig_1/sig-wt-dom-mod.png"), 
+                       interpolate = TRUE)
+
+BC2 <- cowplot::plot_grid(B2, C2, 
+                          labels = "",
+                          label_size = 12,
+                          nrow = 1,
+                          rel_heights = c(2, 1)); BC2
+
+cowplot::plot_grid(A, BC2, 
+                   labels = c("A", "B"),
+                   label_size = 12,
+                   nrow = 2,
+                   rel_heights = c(1, 1))
+
+# ggsave("outputs/visual/fig_1/p-alpha-ABC.png", 
+#        bg = "white",
+#        width = 40,
+#        height = 18,
+#        units = "cm",
+#        dpi = 600)
+```
+
+------------------------------------------------------------------------
+
+# Domestication low cannabinoid
+
+## Subset
+
+```{r}
+load("outputs/r/supplementary/bh-raref.RData")
+
+bh_raref_dom <- subset_samples(bh_raref, !is.na(domestication) & chemotype2 == "Low")
+bh_raref_dom <- prune_taxa(taxa_sums(bh_raref_dom) > 0, bh_raref_dom)
+
+save(bh_raref_dom, 
+     file = "outputs/r/supplementary/bh-raref-dom.RData")
+```

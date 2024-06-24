@@ -1,0 +1,441 @@
+---
+title: "Chapter 3: Host-features"
+author: "Carolina Lobato"
+date: "27/02/20237"
+output: html_document
+---
+
+## Check Metadata
+```{r, echo = FALSE}
+bh_entry <- subset_samples(
+  bh_cannabis,
+  domestication == "Hybrid" & chemotype2 == "> 3% cannabinoid"
+)
+bh_entry # select samples
+bh_mer <- merge_samples(bh_entry, "cultivar")
+bh_mer
+sample_names(bh_mer)
+nsamples(bh_mer)
+
+# total cultivars: n = 46
+
+# Monoecious: n = 10
+# Dioecious: n = 30
+# Subdioecious: n = 1
+
+# < 3% cannabinoid: n = 28
+# > 3% cannabinoid: n = 9
+
+# C. sativa ssp. sativa var. sativa: n = 25
+# C. sativa ssp. sativa var. spontanea: n = 2
+# C. sativa subsp. sativa var. sativa x subsp. indica var. indica: n = 1
+# C. sativa subsp. indica var. indica: n = 4
+# C. sativa subsp. indica var. kafiristanica: n = 3
+# C. sativa subsp. indica var. indica x subsp. sativa var. spontanea: n = 1
+
+# < 10 days: n = 46
+# > 10 days: n = 7
+
+# High: n = 11
+# Low: n = 23
+
+# Early: n = 10
+# Intermediate: n = 5
+# Late: n = 14
+
+# 5 min: n = 27
+# 7 min: n = 19
+# 10 min: n = 8
+# 15 min: n = 3
+
+# < 3% cannabinoid & Dioecious: n = 15
+# < 3% cannabinoid & Monoecious: n = 10
+# > 3% cannabinoid & Dioecious: n = 9
+
+# Hybrid: n = 22
+# Low cannabinoid hybrid: n = 18
+# High cannabinoid hybrid: n = 4, Hybrid S1: n = 2, Unstable hybrid: n = 1
+# Wild/Feral: n = 6
+# Landrace: n = 5
+```
+
+
+## Plant-specific patterns in community composition/structure
+
+### Bargraphs taxonomy by plant
+
+```{r}
+library(phyloseq)
+#For each plant species, Merge all samples from the same study together
+physeq_16S_merged = merge_samples(physeq_16S, "PlantbyStudy")
+physeq_16S_merged
+```
+
+```{r}
+#Turn all OTUs into class (or phylum or order level) counts
+glom16S <- tax_glom(physeq_16S_merged, taxrank = 'Phylum')
+glom16S # should list taxa as phyla
+glom16S2 = transform_sample_counts(glom16S, function(x) x / sum(x))
+glom16S2
+```
+
+```{r}
+data_glom16S <- psmelt(glom16S2) # create dataframe from phyloseq object
+data_glom16S$Phylum <- as.character(data_glom16S$Phylum) #convert to character
+
+### Recreate the Plant and Study_ID columns lost during sample merging
+library(stringr)
+col16S = str_split_fixed(data_glom16S$Sample, "--", 2)
+col16S = data.frame(col16S)
+names(col16S)[1] <- "Plant2"
+names(col16S)[2] <- "Study_ID2"
+data_glom16S = cbind(data_glom16S, col16S)
+```
+
+```{r}
+#rename phyla "Others" with < 0.3% abundance
+data_glom_16S3=data_glom16S
+data_glom_16S3$Phylum[data_glom_16S3$Abundance < 0.003] <- "Other"
+
+#Count # phyla to set color palette
+Count = length(unique(data_glom_16S3$Phylum))
+Count
+#write.table(data_glom16S, file = "Subset2-16S-V4-table_glom_phylum.txt", sep = "\t")
+```
+
+
+####  Bar graph 16S taxonomy
+```{r}
+data_glom_16S3$Plant2 <-
+  ordered(
+    data_glom_16S3$Plant2,
+    levels = c(
+      "Carrot",
+      "Great Masterwort",
+      "Sunflower",
+      "Alliaria petiolata",
+      "Arabidopsis thaliana",
+      "Barbarea vulgaris ",
+      "Berteroa incana",
+      "Brassica nigra",
+      "Broccoli",
+      "Cabbage",
+      "Capsella bursa-pastoris",
+      "Cardamine hirsuta",
+      "Cauliflower",
+      "Erophila verna ",
+      "Garden rocket",
+      "Radish",
+      "Rapeseed",
+      "Rorippa sylvestris",
+      "Sinapis arvensis",
+      "Turnip",
+      "Pincushion Flower",
+      "Heliosperma alpestre",
+      "Grass of Parnassus",
+      "Melon",
+      "Alfalfa",
+      "Bean",
+      "Hairy vetch",
+      "Medicago truncatula",
+      "Pea",
+      "Oak",
+      "Chiltern Gentian",
+      "Willow Gentian",
+      "Eyebright",
+      "Phelipanche ramosa",
+      "Rhinanthus glacialis",
+      "Dahurian wildrye",
+      "Festuca rubra",
+      "Lolium arundinacea",
+      "Lolium perenne",
+      "Oat",
+      "Rice",
+      "Setaria pumila",
+      "Setaria viridis",
+      "Siberian wildrye",
+      "Wheat",
+      "Tobacco",
+      "Tomato"
+    )
+  )
+
+data_glom_16S3$Phylum <-
+  ordered(
+    data_glom_16S3$Phylum,
+    levels = c(
+      'Other',
+      'Unclassified',
+      'Acidobacteria',
+      'Actinobacteria',
+      'Bacteroidetes',
+      "Chloroflexi",
+      'Cyanobacteria',
+      "Deinococcus-Thermus",
+      "Epsilonbacteraeota",
+      'Firmicutes',
+      'Proteobacteria',
+      'Spirochaetes',
+      'Tenericutes',
+      'Microbotryomycetes',
+      'Tremellomycetes',
+      "Verrucomicrobia",
+      "WPS-2",
+      'Wallemiomycetes',
+      "Thaumarchaeota"
+    )
+  )
+
+tax_colors_16S <-
+  c(
+    'Acidobacteria' = '#ffbb94',
+    'Actinobacteria' = '#cf7773' ,
+    'Bacteroidetes' = '#82e4de',
+    'Cyanobacteria' = '#547dae',
+    'Firmicutes' = '#d69ec9' ,
+    'Proteobacteria' = '#d4e79c',
+    'Spirochaetes' = '#4f6457',
+    'Unclassified' = '#b4b4b4' ,
+    'Tenericutes' = '#c05805',
+    'Other' = 'black',
+    'Verrucomicrobia' = "#f4cc95",
+    "WPS-2" = "#cfa7da",
+    "Epsilonbacteraeota" = "#acd0c0",
+    "Chloroflexi" = "#b76c3b",
+    "Deinococcus-Thermus" = "#b29e54",
+    "Thaumarchaeota" = "#90639f"
+  )
+
+#plot with condensed phyla into "unknown" category
+f5_16S <- 
+  ggplot(data_glom_16S3, aes(x = Abundance, y = Study_ID2, fill = Phylum)) +
+  facet_grid(Plant2 ~ ., scales = "free", space = "free") +
+  geom_bar(aes(), stat ="identity", position = "stack") +
+  ggtitle("16S rRNA gene - Bacteria & Archaea") +
+  xlab("Relative Abundance") +
+  ylab("Studies") +
+  scale_x_continuous(
+    labels = scales::percent_format(accuracy = 1), limits = c(0, 1)
+  ) +
+  scale_fill_manual(values = tax_colors_16S) +
+  guides(fill = guide_legend(nrow = 4, byrow = TRUE)) +
+  theme_classic() +
+  theme(
+    legend.position = "bottom",
+    axis.title = element_text(color = "black",    size = 11, face = "bold"),
+    axis.text = element_text(color = "black",size = 9,face = "bold"),
+    legend.text = element_text(color = "black",size = 10,face = "bold"),
+    legend.title = element_text(color = "black",size = 11,face = "bold"),
+    strip.background = element_rect(fill = "#f0eeec"),
+    strip.text = element_text(colour = "black", face = "bold"),
+    panel.background = element_rect(
+      fill = "white", colour = "black",size = 0.5,linetype = "solid"
+    ),
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 13),
+    strip.text.y = element_text(size = 10, angle = 0, face = "bold"),
+    legend.position = "bottom",
+    panel.spacing.y = unit(0.01, "lines"),
+    legend.margin = margin(c(0, 1, 1, 1))
+  )
+f5_16S
+```
+
+#### 16S-Relative abundance of specific phyla by plant species
+```{r}
+physeq_16S_Plant <- subset_samples(physeq_16S, Plant%in%c("Radish", "Rapeseed", "Rice", "Bean"))
+
+#Transform into relative abundance
+physeq_OTU_rel <- transform_sample_counts(physeq_16S_Plant, function(x) x / sum(x) )
+#Extract OTU table
+physeq_OTU_rel_table <- data.frame(otu_table(physeq_OTU_rel))
+physeq_OTU_rel_table <- cbind(Sample = rownames(physeq_OTU_rel_table), physeq_OTU_rel_table)
+row.names(physeq_OTU_rel_table) <- NULL
+physeq_OTU_rel_table$Sample <- as.factor(physeq_OTU_rel_table$Sample)
+head(physeq_OTU_rel_table)
+#Extract metadata
+META2 <- data.frame(sample_data(physeq_OTU_rel))
+META2 <- cbind(Sample = rownames(META2), META2)
+row.names(META2) <- NULL
+META2$SampleID <- as.factor(META2$SampleID)
+```
+
+
+#### Transform table matrix into long table format
+
+```{r}
+library(reshape2)
+library(dplyr)
+table_rel_abund_long=setNames(
+  melt(physeq_OTU_rel_table),
+  c('SV', 'Sample', 'Relative_Abundance')
+)
+table_rel_abund_long <- filter(table_rel_abund_long, Relative_Abundance > 0)
+head(table_rel_abund_long)
+dim(table_rel_abund_long)
+## merge with metadata
+table_rel_abund_long_meta<-merge(META2,table_rel_abund_long,by="Sample")
+dim(table_rel_abund_long_meta)
+head(table_rel_abund_long_meta)
+##merge with taxonomic info
+taxo <- read.table(
+  file="Subset1-2_All_studies_merged_16S-rep-seqs-FINAL-V4-MiSeq-taxonomy.tsv", sep='\t', header=TRUE,check.names=FALSE
+)
+table_rel_abund_long_meta<-merge(taxo,table_rel_abund_long_meta,by="SV")
+dim(table_rel_abund_long_meta)
+head(table_rel_abund_long_meta)
+```
+
+#### Calculate cumulative Relative Abundance by taxonomic Classes and by Sample
+```{r}
+cum_rel_abund_phylum=table_rel_abund_long_meta %>% 
+  group_by(SampleID, Phylum, Plant) %>%                            # multiple group columns
+  summarise(Relative_Abundance = sum(Relative_Abundance))  
+
+head(cum_rel_abund_phylum)
+dim(cum_rel_abund_phylum)
+#subset just dominant phyla
+phyla=c("Acidobacteria", "Actinobacteria", "Bacteroidetes", "Chloroflexi","Cyanobacteria", "Firmicutes", "Proteobacteria", "Verrucomicrobia")
+cum_rel_abund_phylum_dom=subset(cum_rel_abund_phylum, Phylum %in% phyla)
+dim(cum_rel_abund_phylum_dom)
+
+# Calculate median by plant
+cum_rel_abund_phylum_dom <- cum_rel_abund_phylum_dom %>% group_by(Plant, Phylum) %>%mutate(median_Relative_Abundance_plant = median(Relative_Abundance))
+head(cum_rel_abund_phylum_dom)
+```
+
+#### Stat plant effect on relative abundance phyla
+```{r}
+#subset phlya one by one
+cum_rel_abund_phylum_dom2 <- subset(cum_rel_abund_phylum_dom, Phylum=="Verrucomicrobia")
+library(car)
+res <- leveneTest(Relative_Abundance ~ Plant, data = cum_rel_abund_phylum_dom2)
+res
+#the homogeneity of variances is not verified, so we will do a Kruskall Wallis test
+mod <- kruskal.test(Relative_Abundance ~ Plant, data = cum_rel_abund_phylum_dom2) 
+mod
+wilcox <- pairwise.wilcox.test(
+  cum_rel_abund_phylum_dom2$Relative_Abundance,
+  cum_rel_abund_phylum_dom2$Plant,
+  p.adjust.method = "BH"
+)
+library(rcompanion)
+Table2 = wilcox$p.value
+Table3 = fullPTable(Table2)
+library(multcompView)
+multcompLetters(Table3)
+```
+
+#### Relative abundance of specific phyla by botanical family
+```{r}
+#subset families included in analysis
+physeq_16S_Family <- subset_samples(
+  physeq_16S,
+  Family %in% c("Brassicaceae", "Fabaceae", "Orobanchaceae", "Poaceae")
+)
+#Transform into relative abundance
+physeq_OTU_rel2 <- transform_sample_counts(physeq_16S_Family, function(x) x / sum(x) )
+physeq_OTU_rel2
+#Extract OTU table
+physeq_OTU_rel_table2 <- data.frame(otu_table(physeq_OTU_rel2))
+physeq_OTU_rel_table2 <- cbind(
+  Sample = rownames(physeq_OTU_rel_table2),
+  physeq_OTU_rel_table2
+)
+row.names(physeq_OTU_rel_table2) <- NULL
+physeq_OTU_rel_table2$Sample <- as.factor(physeq_OTU_rel_table2$Sample)
+#Extract metadata
+META3 <- data.frame(sample_data(physeq_OTU_rel2))
+META3 <- cbind(Sample = rownames(META3), META3)
+row.names(META3) <- NULL
+META3$SampleID <- as.factor(META3$SampleID)
+```
+
+#### Transform table matrix into long table format
+```{r}
+library(reshape2)
+library(dplyr)
+table_rel_abund_long2 <- setNames(
+  melt(physeq_OTU_rel_table2), c('SV', 'Sample', 'Relative_Abundance')
+  )
+table_rel_abund_long2 <- filter(table_rel_abund_long2, Relative_Abundance > 0)
+head(table_rel_abund_long2)
+dim(table_rel_abund_long2)
+
+## merge with metadata
+table_rel_abund_long_meta2<-merge(META3,table_rel_abund_long2,by="Sample")
+dim(table_rel_abund_long_meta2)
+head(table_rel_abund_long_meta2)
+
+##merge with taxonomic info
+taxo <- read.table(
+  file="Subset1-2_All_studies_merged_16S-rep-seqs-FINAL-V4-MiSeq-taxonomy.tsv",
+  sep='\t',
+  header=TRUE,
+  check.names=FALSE
+)
+table_rel_abund_long_meta2<-merge(taxo,table_rel_abund_long_meta2,by="SV")
+dim(table_rel_abund_long_meta2)
+head(table_rel_abund_long_meta2)
+```
+
+#### Calculate cumulative Relative Abundance by taxonomic phylum and by Sample
+```{r}
+cum_rel_abund_phylum2 <- 
+  table_rel_abund_long_meta2 %>% 
+  group_by(SampleID, Phylum, Family.y) %>% # multiple group columns
+  summarise(Relative_Abundance = sum(Relative_Abundance))  
+
+head(cum_rel_abund_phylum2)
+dim(cum_rel_abund_phylum2)
+#subset just dominant phyla
+
+phyla <- c(
+  "Acidobacteria",
+  "Actinobacteria",
+  "Bacteroidetes",
+  "Chloroflexi",
+  "Cyanobacteria",
+  "Firmicutes",
+  "Proteobacteria",
+  "Verrucomicrobia"
+)
+cum_rel_abund_phylum_dom2 <- subset(cum_rel_abund_phylum2, Phylum %in% phyla)
+dim(cum_rel_abund_phylum_dom2)
+
+# Calculate median by family
+cum_rel_abund_phylum_dom2 <-
+  cum_rel_abund_phylum_dom2 %>%
+  group_by(Family.y, Phylum) %>%
+  mutate(median_Relative_Abundance_plant = median(Relative_Abundance))
+head(cum_rel_abund_phylum_dom2)
+```
+
+#### Stat family effect on relative abundance phyla
+```{r}
+#subset phlya one by one
+cum_rel_abund_phylum_dom3 <- subset(
+  cum_rel_abund_phylum_dom2,
+  Phylum=="Verrucomicrobia"
+)
+library(car)  # ?
+res <- leveneTest(Relative_Abundance ~ Family.y, data = cum_rel_abund_phylum_dom3)
+res
+#the homogeneity of variances is not verified, so we will do a Kruskall Wallis test
+mod=kruskal.test(
+  Relative_Abundance ~ Family.y,
+  data = cum_rel_abund_phylum_dom3
+) 
+mod
+wilcox <- pairwise.wilcox.test(
+  cum_rel_abund_phylum_dom3$Relative_Abundance,
+  cum_rel_abund_phylum_dom3$Family.y,
+  p.adjust.method = "BH"
+)
+
+library(rcompanion)
+Table2 = wilcox$p.value
+Table3 = fullPTable(Table2)
+
+library(multcompView)
+multcompLetters(Table3)
+```

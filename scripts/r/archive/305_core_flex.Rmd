@@ -1,0 +1,441 @@
+---
+title: "Chapter 3.5: Overlaps"
+author: "Carolina Lobato"
+date: "21/02/2023"
+output: html_document
+---
+
+# Load Libraries
+
+```{r, include = F}
+library(phyloseq)
+library(microbiome)
+library(tidyverse)
+library(ggplot2)
+library(ggrepel)
+library(colorspace)
+```
+
+# General Core Taxa Prep
+
+```{r, echo = FALSE}
+load("outputs/r/204_setup/bh.RData")
+
+bh_core <- microbiome::core(bh,
+                            detection = 0.1,
+                            prevalence = 0.75,
+                            include.lowest = TRUE) # phyloseq object
+
+gen.core <- taxa_names(bh_core); gen.core # 9
+# ASV 2062: Pelomonas
+# ASV 2280: Ralstonia
+# ASV 2328: Ralstonia
+# ASV 2389: Burkholderia_sp.
+# ASV 3007: Bacillus  
+# ASV 3198: Pseudomonas_sp.
+# ASV 3353: Pantoea_agglomerans
+# ASV 3464: Enhydrobacter
+# ASV 4544: Rhodococcus_erythropolis
+
+sample_sums(bh) # sum of all reads observed in each sample
+sample_sums(bh_core) # sum of all core reads observed in each sample
+taxa_sums(bh) # sum of all reads observed in each taxa
+taxa_sums(bh_core) # sum of all reads observed in each core taxa
+
+# save(gen.core, file = "outputs/r/305_core_flex/gen-core.RData")
+```
+
+```{r}
+load("outputs/r/305_core_flex/gen-core.RData") #gen.core
+
+## Merge samples
+counts.merged <- 
+  merge_samples(bh, group = "cultivar", fun = mean) %>%
+  otu_table() %>% 
+  t() %>%
+  as.data.frame()
+
+counts <- 
+  bh %>%
+  otu_table() %>% 
+  as.data.frame()
+
+## Relative abundance
+rel.abundance <- vegan::decostand(counts.merged, 
+                                  method = "total", 
+                                  MARGIN = 2) # counts
+rel.abundance <- rel.abundance * 100
+colSums(rel.abundance) 
+
+## Filter out non-core ASVs and (rare (<0.1%))
+gen.core.rel <- rel.abundance %>%
+  filter(row.names(.) %in% gen.core) #%>%
+  #filter(if_any(everything(), ~ .x > 0.1))
+
+## Reshape   
+gen.core.rel.long <- rownames_to_column(gen.core.rel, 
+                                        var = "ASV") %>%
+  pivot_longer(-ASV, names_to = c("cultivar"), 
+               values_to = "rel_abundance")
+
+## Save
+# save(gen.core.rel, file = "outputs/r/305_core_flex/gen-core-rel.RData")
+# save(gen.core.rel.long, file = "outputs/r/305_core_flex/gen-core-rel-long.RData")
+
+# from counts (not merged)
+# save(gen.core.rel, file = "outputs/r/305_core_flex/gen-core-rel-s.RData")
+# save(gen.core.rel.long, file = "outputs/r/305_core_flex/gen-core-rel-long-s.RData")
+```
+
+# General Core Taxa Across Varieties
+
+```{r}
+load("outputs/r/204_setup/bh.RData")
+load("outputs/r/305_core_flex/gen-core-rel-long.RData") #gen.core.rel.long
+
+# Histogram
+ra <- gen.core.rel.long$rel_abundance
+# hist((as.vector(ra)))
+# hist((as.vector(log((1-ra)/(ra+0.000001))))) # looks good
+# hist((as.vector(exp(ra)/(1+exp(ra)))))
+
+taxo <- as.data.frame(tax_table(bh))
+taxo$ASV <- rownames(taxo)
+
+# Merging long format table with metadata
+gcore_taxo <- merge(gen.core.rel.long, 
+                    taxo, 
+                    by = "ASV")
+summary(gcore_taxo) # to decide breaks
+```
+
+## Bubble Plot Setup
+
+```{r, echo = FALSE}
+class_list <- unique(as.character(gcore_taxo$Class)); class_list # 3
+
+df3 <- select(gcore_taxo, 
+              cultivar, 
+              rel_abundance) %>%
+  group_by(cultivar) %>% 
+  summarise(sum_rel = sum(rel_abundance)) %>%
+  arrange(sum_rel) %>%
+  mutate(cultivar = factor(cultivar, 
+                           levels = cultivar))
+
+idx <- match(gcore_taxo$cultivar, df3$cultivar)
+sorting_idx <- order(idx, decreasing = F, na.last = NA)
+gcore_taxo_o <- gcore_taxo[sorting_idx,]
+gcore_taxo_o$cultivar <- factor(gcore_taxo_o$cultivar, 
+                                levels = levels(df3$cultivar))
+```
+
+### Bubble Plot
+
+```{r, echo = FALSE}
+palette_name <- "Geyser"
+mycolors <- divergingx_hcl(4, palette = palette_name, rev = F)
+
+core_dist <- ggplot() +
+  geom_point(
+    data = gcore_taxo_o, 
+    aes(x = cultivar,
+        y = ASV, 
+        size = rel_abundance,
+        color = Class),
+    alpha = 1) + 
+  geom_text(data = df3,
+            aes(x = cultivar,
+                y = 9.5,
+                label = scales::label_percent(accuracy = 0.01, scale = 1)(sum_rel)),
+            size = 3.5,
+            angle = 45) +
+    scale_y_discrete(expand = expansion(mult = c(0.05, 0.1))) +
+    scale_size_area(
+    limits = c(0.1, 100),
+    breaks = c(0.1, 0.5, 1, 3, 10, 94),
+    name = "Rel. abundance (%)", 
+    max_size = 10) +
+  theme_classic() +
+  theme(
+    panel.grid.major.x = element_line(),
+    axis.text.x = element_text(angle = 45, 
+                               hjust = 1,
+                               vjust = 1,
+                               size = 10),
+    axis.text.y = element_text(size = 10),
+    legend.position = "right",
+    legend.box = "vertical",
+    legend.direction = "vertical") +
+  labs(x = "", 
+       y = "", 
+       size = "") +
+  scale_color_manual(values = mycolors)  
+core_dist
+
+# ggsave(
+#   "outputs/visual/r/305_core_flex/gen-bubble.png",
+#    width = 50,
+#    height = 25,
+#    units = "cm",
+#    scale = 1,
+#    dpi = 600)
+# 
+# write.csv(gcore_taxo_o,
+#           "outputs/r/305_core_flex/core-ASV-cultivar-rel.csv",
+#            row.names = T)
+```
+
+# Prevalence and %RA of core and flexible taxa
+
+```{r, echo = FALSE}
+load("outputs/r/204_setup/bh.RData")
+
+asv <- otu_table(bh) 
+taxo <- tax_table(bh) 
+meta <- microbiome::meta(bh) 
+
+# presence-absence data
+ASV_PA <- 1 * ((asv > 0) == 1)
+
+# occupancy calculation
+ASV_prev <- rowSums(ASV_PA) / ncol(ASV_PA)
+
+# relative abundance
+ASV_rel <- apply(vegan::decostand(asv, 
+                                  method = "total", 
+                                  MARGIN = 2), 1, mean)
+
+# combine occupancy and RA of each ASV in a table
+ASV_prev_rel <- rownames_to_column(as.data.frame(cbind(ASV_prev, ASV_rel)), "ASV")
+
+ASV_prev_rel_taxo <- rownames_to_column(as.data.frame(taxo),
+                                        "ASV") 
+ASV_prev_rel_taxo <- merge(ASV_prev_rel_taxo, 
+                           ASV_prev_rel, 
+                           by = "ASV")
+
+# merge with metadata
+ASV1 <- rownames_to_column(as.data.frame(t(asv)),
+                           "replicates")
+
+ASV_use1 <- merge(meta, 
+                  ASV1, 
+                  by = "replicates")
+
+# keep only the one feature column for collapsing table
+ASV_use1_1 <- ASV_use1[-c(1:3, 5:17)]
+
+ASV_cultivar <- ASV_use1_1 %>% 
+  group_by(cultivar) %>% 
+  summarise_each(list(sum))
+
+# make a ASV P/A table
+ASV_cultivar_PA <- 1 * ((ASV_cultivar > 0) == 1)
+
+# merge prevalence, RA and taxa with the nº of observations
+ASV_obs_cultivar <- data.frame(colSums(ASV_cultivar_PA)) %>%
+  na.omit() %>% 
+  rownames_to_column("ASV")
+names(ASV_obs_cultivar)[names(ASV_obs_cultivar) == "colSums.ASV_cultivar_PA."] <- 'Obs'
+
+ASV_prev_rel_taxo_obs_cultivar <- merge(ASV_prev_rel_taxo, 
+                                        ASV_obs_cultivar, 
+                                        by = "ASV")
+
+# save(ASV_prev_rel_taxo_obs_cultivar,
+#      file = "outputs/r/305_core_flex/prev-rel-taxo-obs-cultivar.RData")
+```
+
+## Scatter Plot Prep
+
+```{r}
+load("outputs/r/305_core_flex/prev-rel-taxo-obs-cultivar.RData") #ASV_prev_rel_taxo_obs_cultivar
+load("outputs/r/305_core_flex/gen-core.RData") #gen.core
+
+ASV_prev_rel_taxo_obs_cultivar_core <-
+  ASV_prev_rel_taxo_obs_cultivar %>% 
+  mutate(core_asv = ASV %in% gen.core) %>% 
+  mutate(core_asv = if_else(.$core_asv == TRUE, 
+                            "Core", 
+                            "Flexible")) %>% 
+  mutate(ASV_rel_p = ASV_rel * 100, ASV_prev_p = ASV_prev * 100)
+
+ASV_prev_rel_taxo_obs_cultivar_core$core_asv <-
+  ordered(ASV_prev_rel_taxo_obs_cultivar_core$core_asv, 
+          levels = c("Core", "Flexible"))
+```
+
+### Scatter Plot
+
+```{r}
+color_core = c(Core = "#C7522B", Flexible = "#C7D6B2")
+
+p_core_flex1 <- 
+  ggplot(
+    ASV_prev_rel_taxo_obs_cultivar_core,
+    aes(x = ASV_rel_p, 
+        y = ASV_prev_p, 
+        color = core_asv)) +
+      geom_point(size = 3, 
+                 alpha = 0.7) + 
+  ggrepel::geom_text_repel(data = subset(ASV_prev_rel_taxo_obs_cultivar_core, 
+                          ASV_rel_p > 0.1 & ASV_prev_p > 75),
+            aes(ASV_rel_p, 
+                ASV_prev_p, 
+                label = Genus), 
+            size = 3,
+            show.legend = F) +
+  geom_hline(yintercept = 75,
+             linetype = "dashed", 
+             color = "black") +
+  geom_vline(xintercept = 0.1, 
+             linetype = "dashed", 
+             color = "black") +
+      theme_classic() +
+      theme(
+        axis.title = element_text(size = 10),
+        axis.text = element_text(size = 10),
+        legend.text = element_text(size = 10),
+        legend.position = "right",
+        legend.direction = "vertical",
+        panel.spacing = unit(0.1, "lines")) +
+      scale_x_log10(breaks = c(10, 0.1, 0.001), 
+                    labels = c(10, 0.1, 0.001)) +
+      scale_color_manual(values = color_core)	+
+      labs(x = "Relative Abundance (%)", 
+           y = "ASV Prevalence (%)", 
+           color = "")
+p_core_flex1
+
+# ggsave("outputs/visual/r/305_core_flex/gen-core-flex1.png",
+#         width = 20,
+#         height = 18,
+#         units = "cm",
+#         scale = 1,
+#         dpi = 600)
+```
+
+# Number and %RA of core and flexible taxa
+
+## Barplot Prep
+
+```{r}
+load("outputs/r/305_core_flex/prev-rel-taxo-obs-cultivar.RData") #ASV_prev_rel_taxo_obs_cultivar
+load("outputs/r/305_core_flex/gen-core.RData") #gen.core
+
+ASV_prev_rel_taxo_obs_cultivar_core <-
+  ASV_prev_rel_taxo_obs_cultivar %>% 
+  mutate(core_asv = ASV %in% gen.core) %>% 
+  mutate(core_asv = if_else(.$core_asv == TRUE, 
+                            "Core", 
+                            "Flexible")) %>% 
+  mutate(ASV_rel_p = ASV_rel * 100, ASV_prev_p = ASV_prev * 100)
+
+ASV_prev_rel_taxo_obs_cultivar_core$core_asv <-
+  ordered(ASV_prev_rel_taxo_obs_cultivar_core$core_asv, 
+          levels = c("Flexible", "Core"))
+
+df <- ASV_prev_rel_taxo_obs_cultivar_core %>%
+  group_by(core_asv) %>%
+  summarise(n_taxa = n(), 
+            rel_ab = sum(ASV_rel_p)) 
+```
+
+### Barplot Core vs Flexible
+
+```{r}
+color_core = c(Core = "#C7522B", Flexible = "#C7D6B2")
+color_num = c(Core = "#C7D6B2", Flexible = "#C7522B")
+
+p_core_flex2 <-
+  ggplot(df, 
+         aes(x = "", 
+             y = rel_ab, 
+             fill = core_asv)) +
+  geom_bar(aes(), 
+           stat = "identity", 
+           position = "stack") + 
+  theme_classic() +
+  theme(axis.title = element_text(size = 10),
+        axis.text = element_text(size = 10),
+        legend.position = "none") +
+  scale_y_continuous(expand = c(0, 0)) +
+  scale_x_discrete(expand = c(0, 0)) +
+  scale_fill_manual(values = color_core) +
+  scale_color_manual(values = color_num) +
+  labs(x = "", 
+       y = "Relative Abundance (%)", 
+       fill = "") + 
+  geom_text(aes(label = n_taxa,
+                fontface = "bold",
+                colour = core_asv,
+                size = 10),
+            position = position_stack(vjust = 0.5))
+p_core_flex2
+
+# ggsave("outputs/visual/r/305_core_flex/gen-core-flex2.png",
+#         width = 10,
+#         height = 9,
+#         units = "cm",
+#         scale = 1,
+#         dpi = 600)
+```
+
+### Barplot Core Taxa
+
+```{r}
+load("outputs/r/305_core_flex/gen-core-rel-long-s.RData") #gen.core.rel.long
+
+palette_name <- "Geyser"
+mycolors <- divergingx_hcl(9, palette = palette_name, rev = F)
+
+p_core_flex3 <-
+  ggplot(data = gen.core.rel.long, 
+         aes(x = "", 
+             y = rel_abundance/450, 
+             fill = ASV)) +
+  geom_bar(aes(), 
+           stat = "identity", 
+           position = "stack") +
+  theme_classic() +
+  theme(axis.title = element_text(size = 10),
+        axis.text = element_text(size = 10),
+        legend.text = element_text(size = 10),
+        legend.title = element_text(size = 10),
+        legend.position = "right") +
+  labs(y = "Relative Abundance (%)", 
+       x = "", 
+       fill = "") + 
+  scale_y_continuous(expand = c(0, 0), limits = c(0, 100)) +
+  scale_x_discrete(expand = c(0, 0)) +
+  scale_fill_manual(values = mycolors) +
+  guides(fill = guide_legend(ncol = 1))
+p_core_flex3
+
+# ggsave("outputs/visual/r/305_core_flex/gen-core-flex-rel-members.png",
+#         width = 20,
+#         height = 18,
+#         units = "cm",
+#         scale = 1,
+#         dpi = 600)
+```
+
+# Merge plots
+
+```{r}
+p_core_flex123 <- cowplot::plot_grid(p_core_flex2, 
+                   p_core_flex3, 
+                   p_core_flex1, 
+                   labels = c("A", "B", "C"), 
+                   label_size = 12, 
+                   ncol = 3, 
+                   rel_widths = c(0.25, 0.75, 2))
+
+png("outputs/visual/r/305_core_flex/core_flex-1-2-3.png",
+    bg = "white",
+    width = 45,
+    height = 20,
+    units = "cm",
+    res = 256); print(p_core_flex123); dev.off()
+```

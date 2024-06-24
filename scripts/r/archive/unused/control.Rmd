@@ -1,0 +1,433 @@
+---
+title: "Quality-crtl"
+author: "Carolina Lobato"
+date: "2023-04-20"
+output: html_document
+---
+
+```{r, include = FALSE}
+library(phyloseq)
+library(microbiome)
+library(microbiomeutilities)
+library(ranacapa)
+library(tidyverse)
+library(colorspace)
+```
+
+# Subset
+
+```{r}
+load("outputs/r/204_setup/ps0.RData")
+x <- meta(ps0)
+
+## Subset bacterial taxa
+ps_sub <- subset_taxa(ps0, Domain == "d__Bacteria")
+ps_sub <- prune_taxa(taxa_sums(ps_sub) > 0, ps_sub)
+ps_sub # 5990 taxa and 467 samples
+summarize_phyloseq(ps_sub) # Average number of reads = 85642, Total number of reads = 39995034, Sgtons = 0
+
+ss <- sample_sums(ps_sub)
+ss <- as.matrix(ss)
+colSums(ss) # total reads = 39995034
+summary(ss) # mean reads/sample = 85642
+sample_data(ps_sub)$total_reads <- sample_sums(ps_sub)
+
+## Subset samples based on minimum number of reads per sample
+ps_sub2 <- prune_samples(sample_sums(ps_sub) > 1000, ps_sub)
+ps_sub2 <- prune_taxa(taxa_sums(ps_sub2) > 0, ps_sub2)
+ps_sub2 # 5977 taxa and 460 samples
+
+ps_ctl <- subset_samples(ps_sub2, replicates %in% c("NC_P1_ext",
+                                                   "NC_P2_ext",
+                                                   "NC_P3_ext",
+                                                   "NC_P1_amp",
+                                                   "NC_P2_amp",
+                                                   "NC_P3_amp",
+                                                   "Mock_P1", 
+                                                   "Mock_P2", 
+                                                   "Mock_P3",
+                                                   "C34_01",
+                                                   "C34_01B"))
+ps_ctl <- prune_samples(sample_sums(ps_ctl) > 0, ps_ctl)
+ps_ctl <- prune_taxa(taxa_sums(ps_ctl) > 0, ps_ctl)
+ps_ctl # 5859 taxa and 450 samples
+
+sort(sample_sums(ps_ctl))
+summary(sample_sums(ps_ctl)) # mean reads/sample = 86496
+summarize_phyloseq(ps_ctl) # Average number of reads = 86496, Total number of reads = 38923382, Singletons = 0%
+
+# Find unknown names and iterate all of them through the tax table to be replaced
+tax_table(ps_ctl)[tax_table(ps_ctl) == "d__uncultured"] <-
+  ""
+tax_table(ps_ctl)[tax_table(ps_ctl) == "p__uncultured"] <-
+  ""
+tax_table(ps_ctl)[tax_table(ps_ctl) == "c__uncultured"] <-
+  ""
+tax_table(ps_ctl)[tax_table(ps_ctl) == "o__uncultured"] <-
+  ""
+tax_table(ps_ctl)[tax_table(ps_ctl) == "f__uncultured"] <-
+  ""
+tax_table(ps_ctl)[tax_table(ps_ctl) == "f__Unknown_Family"] <-
+  ""
+tax_table(ps_ctl)[tax_table(ps_ctl) == "g__uncultured"] <-
+  ""
+tax_table(ps_ctl)[tax_table(ps_ctl) == "s__uncultured_bacterium"] <-
+  ""
+tax_table(ps_ctl)[tax_table(ps_ctl) == "s__metagenome"] <-
+  ""
+tax_table(ps_ctl)[tax_table(ps_ctl) == "g__possible_genus_04"] <-
+  ""
+
+tax_table(ps_ctl)[, colnames(tax_table(ps_ctl))] <- gsub(
+  tax_table(ps_ctl)[, colnames(tax_table(ps_ctl))],
+  pattern = "[a-z]__",
+  replacement = "")
+
+taxa_names(ps_ctl) <- paste(
+  "ASV ", 1:length(taxa_names(ps_ctl)),
+  ": ",
+  taxa_names(ps_ctl),
+  sep = "")
+ps_ctl <- microbiomeutilities::format_to_besthit(ps_ctl)
+taxa_names(ps_ctl) <- sub(": [a-z0-9]*:[a-z_]{0,3}",
+                           ": ", 
+                           taxa_names(ps_ctl))
+```
+
+## Plot
+
+```{r}
+ps_rel <- microbiome::transform(ps_ctl, "compositional")
+ps_agr <- microbiome::aggregate_rare(
+  ps_rel,
+  level = "Genus",
+  detection = 0.01,
+  prevalence = 0,
+  include.lowest = F)
+
+palette_name <- "Geyser"
+mycolors <- divergingx_hcl(28, palette = palette_name, rev = F)
+set.seed(1234); mycolors <- sample(mycolors)
+par(oma = c(12, 4, 4, 6) + 0.1)
+microbiome::plot_composition(
+  ps_agr,
+#sample.sort = "neatmap",
+#  otu.sort = otu_order,
+  plot.type = "barplot") +
+  geom_bar(stat = "identity", position = "stack") +
+  scale_fill_manual(values = mycolors) +
+  scale_y_continuous(expand = c(0, 0)) +
+  scale_x_discrete(expand = c(0, 0)) +
+  theme_classic() +
+  theme(
+    panel.grid.major.y = element_line(),
+    axis.text.x = element_text(size = 12, angle = 45, hjust = 1), #element_blank(), 
+    axis.text.y = element_text(size = 12),
+    axis.title.y = element_text(size = 12),
+    legend.position = "right",
+    legend.box = "vertical",
+    legend.direction = "vertical",
+    legend.key.size = unit(0.2, 'cm'),
+    legend.text = element_text(size = 8)) +
+  labs(x = "", y = "Relative abundance", fill = "") +
+  guides(fill = guide_legend(ncol = 1))
+
+
+ggsave(
+  "outputs/control.png",
+   width = 60,
+   height = 30,
+   units = "cm",
+   scale = 1,
+   dpi = 600)
+```
+
+```{r}
+table_ctl <-
+ ps_ctl %>%
+ phyloseq::transform_sample_counts(function(x) x / sum(x) * 100) %>%
+ microbiome::aggregate_rare(level = "Genus", detection = 0.01, prevalence = 0, include.lowest = F) %>%
+ psmelt() %>%
+ select(Sample, Abundance, total_reads, Genus) %>%
+ group_by(Genus) 
+```
+
+# Sample 34
+
+```{r}
+ps_34 <- subset_samples(ps_ctl, replicates %in% c("C34_01", "C34_01B"))
+ps_34 <- prune_samples(sample_sums(ps_34) > 0, ps_34)
+ps_34 <- prune_taxa(taxa_sums(ps_34) > 0, ps_34)
+ps_34 # 86 taxa and 2 samples
+```
+
+## Plot
+
+```{r}
+ps_rel <- microbiome::transform(ps_34, "compositional")
+ps_agr <- microbiome::aggregate_rare(
+  ps_rel,
+  level = "Genus",
+  detection = 0.01,
+  prevalence = 0,
+  include.lowest = F)
+
+palette_name <- "Geyser"
+mycolors <- divergingx_hcl(9, palette = palette_name, rev = F)
+set.seed(1234); mycolors <- sample(mycolors)
+par(oma = c(12, 4, 4, 6) + 0.1)
+microbiome::plot_composition(
+  ps_agr,
+#sample.sort = "neatmap",
+#  otu.sort = otu_order,
+  plot.type = "barplot") +
+  geom_bar(stat = "identity", position = "stack") +
+  scale_fill_manual(values = mycolors) +
+  scale_y_continuous(expand = c(0, 0)) +
+  scale_x_discrete(expand = c(0, 0)) +
+  theme_classic() +
+  theme(
+    panel.grid.major.y = element_line(),
+    axis.text.x = element_text(size = 12, angle = 45, hjust = 1), #element_blank(), 
+    axis.text.y = element_text(size = 12),
+    axis.title.y = element_text(size = 12),
+    legend.position = "right",
+    legend.box = "vertical",
+    legend.direction = "vertical",
+    legend.key.size = unit(0.2, 'cm'),
+    legend.text = element_text(size = 8)) +
+  labs(x = "", y = "Relative abundance", fill = "") +
+  guides(fill = guide_legend(ncol = 1))
+
+
+ggsave(
+  "outputs/control-34.png",
+   width = 60,
+   height = 30,
+   units = "cm",
+   scale = 1,
+   dpi = 600)
+```
+
+# Mock
+
+```{r}
+ps_m <- subset_samples(ps_ctl, replicates %in% c("Mock_P1", "Mock_P2", "Mock_P3"))
+ps_m <- prune_samples(sample_sums(ps_m) > 0, ps_m)
+ps_m <- prune_taxa(taxa_sums(ps_m) > 0, ps_m)
+ps_m # 136 taxa and 3 samples
+
+check <- unique(ps_m@sam_data[["replicates"]]);check # n = 3 
+```
+
+## Check Contaminants
+
+```{r}
+m.list <- c()
+metadata <- sample_data(ps_m)
+categories <- unique(na.omit(metadata[["replicates"]]))
+
+for (item in categories)
+{
+  print(paste0("Identifying Taxa for ", item))
+  ps.subset <- subset_samples(ps_m, replicates == item)
+  subset.list <- core_members(ps.subset, detection = 0 , prevalence = 0)
+  print(paste0("No. of Taxa in ", item, ": ", length(subset.list)))
+  m.list[[item]] <- subset.list
+}
+
+print(m.list)
+save(m.list, file = "outputs/visual/co-factors/controls/mock-list.RData")
+
+common.asv <- Reduce(intersect, m.list); common.asv # n = 24
+all.asv <- Reduce(union, m.list); all.asv # n = 136
+
+write.csv(m.list["Mock_P1"], 
+          file = "outputs/visual/co-factors/controls/mock1-list.csv")
+
+```
+
+```{r}
+load("outputs/visual/co-factors/controls/mock-list.RData")# m.list
+
+varieties <- c("Mock_P1")
+other_varieties <- setdiff(names(m.list), varieties)
+set1 <- Reduce(intersect, m.list[varieties])
+set2 <- unique(unlist(m.list[other_varieties]))
+setdiff(set1, set2)
+
+# Mock:
+# Pseudomonas aeruginosa 
+# Escherichia coli 
+# Salmonella enterica 
+# Lactobacillus fermentum 
+# Enterococcus faecalis 
+# Staphylococcus aureus 
+# Listeria monocytogenes 
+# Bacillus subtilis
+```
+
+## Plot
+
+```{r}
+ps_rel <- microbiome::transform(ps_m, "compositional")
+ps_agr <- microbiome::aggregate_rare(
+  ps_rel,
+  level = "Genus",
+  detection = 0.01,
+  prevalence = 0,
+  include.lowest = F)
+
+palette_name <- "Geyser"
+mycolors <- divergingx_hcl(10, palette = palette_name, rev = F)
+set.seed(1234); mycolors <- sample(mycolors)
+
+par(oma = c(12, 4, 4, 6) + 0.1)
+microbiome::plot_composition(
+  ps_agr,
+  plot.type = "barplot") +
+  geom_bar(stat = "identity", position = "stack") +
+  scale_fill_manual(values = mycolors) +
+  scale_y_continuous(expand = c(0, 0)) +
+  scale_x_discrete(expand = c(0, 0)) +
+  theme_classic() +
+  theme(
+    panel.grid.major.y = element_line(),
+    axis.text.x = element_text(size = 12, angle = 45, hjust = 1), #element_blank(), 
+    axis.text.y = element_text(size = 12),
+    axis.title.y = element_text(size = 12),
+    legend.position = "right",
+    legend.box = "vertical",
+    legend.direction = "vertical",
+    legend.key.size = unit(0.2, 'cm'),
+    legend.text = element_text(size = 8)) +
+  labs(x = "", y = "Relative abundance", fill = "") +
+  guides(fill = guide_legend(ncol = 1))
+
+
+ggsave(
+  "outputs/visual/co-factors/controls/control-mock.png",
+   width = 60,
+   height = 30,
+   units = "cm",
+   scale = 1,
+   dpi = 600)
+```
+
+# Extraction Kit
+
+```{r}
+ps_ex <- subset_samples(ps_ctl, replicates %in% c("NC_P1_ext",
+                                                 "NC_P2_ext",
+                                                 "NC_P3_ext"))
+ps_ex <- prune_samples(sample_sums(ps_ex) > 0, ps_ex)
+ps_ex <- prune_taxa(taxa_sums(ps_ex) > 0, ps_ex)
+ps_ex # 160 taxa and 3 samples
+```
+
+## Plot
+
+```{r}
+ps_rel <- microbiome::transform(ps_ex, "compositional")
+ps_agr <- microbiome::aggregate_rare(
+  ps_rel,
+  level = "Genus",
+  detection = 0.01,
+  prevalence = 0,
+  include.lowest = F)
+
+palette_name <- "Geyser"
+mycolors <- divergingx_hcl(17, palette = palette_name, rev = F)
+set.seed(1234); mycolors <- sample(mycolors)
+par(oma = c(12, 4, 4, 6) + 0.1)
+microbiome::plot_composition(
+  ps_agr,
+#sample.sort = "neatmap",
+#  otu.sort = otu_order,
+  plot.type = "barplot") +
+  geom_bar(stat = "identity", position = "stack") +
+  scale_fill_manual(values = mycolors) +
+  scale_y_continuous(expand = c(0, 0)) +
+  scale_x_discrete(expand = c(0, 0)) +
+  theme_classic() +
+  theme(
+    panel.grid.major.y = element_line(),
+    axis.text.x = element_text(size = 12, angle = 45, hjust = 1), #element_blank(), 
+    axis.text.y = element_text(size = 12),
+    axis.title.y = element_text(size = 12),
+    legend.position = "right",
+    legend.box = "vertical",
+    legend.direction = "vertical",
+    legend.key.size = unit(0.2, 'cm'),
+    legend.text = element_text(size = 8)) +
+  labs(x = "", y = "Relative abundance", fill = "") +
+  guides(fill = guide_legend(ncol = 1))
+
+
+ggsave(
+  "outputs/control-kit.png",
+   width = 60,
+   height = 30,
+   units = "cm",
+   scale = 1,
+   dpi = 600)
+```
+
+# PCR
+
+```{r}
+ps_pcr <- subset_samples(ps_ctl, replicates %in% c("NC_P1_amp",
+                                                 "NC_P2_amp",
+                                                 "NC_P3_amp"))
+ps_pcr <- prune_samples(sample_sums(ps_pcr) > 0, ps_pcr)
+ps_pcr <- prune_taxa(taxa_sums(ps_pcr) > 0, ps_pcr)
+ps_pcr # 230 taxa and 3 samples
+```
+
+## Plot
+
+```{r}
+ps_rel <- microbiome::transform(ps_pcr, "compositional")
+ps_agr <- microbiome::aggregate_rare(
+  ps_rel,
+  level = "Genus",
+  detection = 0.01,
+  prevalence = 0,
+  include.lowest = F)
+
+palette_name <- "Geyser"
+mycolors <- divergingx_hcl(21, palette = palette_name, rev = F)
+set.seed(1234); mycolors <- sample(mycolors)
+par(oma = c(12, 4, 4, 6) + 0.1)
+microbiome::plot_composition(
+  ps_agr,
+#sample.sort = "neatmap",
+#  otu.sort = otu_order,
+  plot.type = "barplot") +
+  geom_bar(stat = "identity", position = "stack") +
+  scale_fill_manual(values = mycolors) +
+  scale_y_continuous(expand = c(0, 0)) +
+  scale_x_discrete(expand = c(0, 0)) +
+  theme_classic() +
+  theme(
+    panel.grid.major.y = element_line(),
+    axis.text.x = element_text(size = 12, angle = 45, hjust = 1), #element_blank(), 
+    axis.text.y = element_text(size = 12),
+    axis.title.y = element_text(size = 12),
+    legend.position = "right",
+    legend.box = "vertical",
+    legend.direction = "vertical",
+    legend.key.size = unit(0.2, 'cm'),
+    legend.text = element_text(size = 8)) +
+  labs(x = "", y = "Relative abundance", fill = "") +
+  guides(fill = guide_legend(ncol = 1))
+
+
+ggsave(
+  "outputs/control-pcr.png",
+   width = 60,
+   height = 30,
+   units = "cm",
+   scale = 1,
+   dpi = 600)
+```

@@ -1,0 +1,226 @@
+
+SpiecEasi Instructions
+
+otu.table <- as(otu_table(bh_pruned), "matrix")
+otu.table.all <- t(otu.table)
+env.all <- as(sample_data(bh_pruned), "data.frame")
+row.names(env.all) == row.names(otu.table.all)
+
+env <- env.all[which(env.all$cultivar == "NA BG China"),]
+otu.table <- otu.table.all[which(env.all$cultivar == "NA BG China"),]
+
+spieceasi.net <- spiec.easi(
+  otu.table,
+  method = "mb",
+  sel.criterion = "bstars",
+  lambda.min.ratio = 0.1,
+  nlambda = 10,
+  pulsar.params = list(rep.num = 20, seed = 54321),
+  verbose = T)
+
+spieceasi.matrix <- SymBeta(getOptBeta(spieceasi.net),
+                            mode = "maxabs")
+spieceasi.matrix.dsc <- spieceasi.matrix
+spieceasi.matrix <- as.matrix(spieceasi.matrix)
+
+rownames(spieceasi.matrix) <- colnames(otu.table)
+colnames(spieceasi.matrix) <- colnames(otu.table)
+otu.names <- colnames(otu.table)
+
+net <- graph.adjacency(spieceasi.matrix, 
+                       mode = "undirected",
+                       weighted = T,
+                       diag = F)
+
+V(net)$name <- otu.names
+
+# Convert the edge weights into distances, where larger weights become shorter distances:
+net.dist <- net 
+max(abs(E(net.dist)$weight))
+weights.dist <- 1 - abs(E(net.dist)$weight)
+E(net.dist)$weight <- weights.dist
+# Convert the weighted network to a separate absolute network
+net.abs <- net
+E(net.abs)$weight <- abs(E(net.abs)$weight)
+
+# Calculate centrality metrics and create a summary
+net.alpha <- alpha.centrality(net)
+net.strength <- strength(net.abs)
+bet <- betweenness(net.dist, v = V(net.dist))
+
+summary_cent <- as.data.frame(net.alpha)
+colnames(summary_cent) <- ("Alpha_centrality")
+rownames(summary_cent) <- colnames(otu.table)
+summary_cent$Weighted_vertex_degree <- net.strength
+summary_cent$Betweenness_centrality <- bet
+metrics <- summary_cent
+
+# Cluster nodes into modules
+wt <- cluster_louvain(net, weights = E(net.dist)$weigth)
+temp <- V(net)$name
+temp <- as.data.frame(temp)
+temp$louvain <- membership(wt)
+V(net)$louvain <- temp$louvain
+
+# See which nodes have been put into modules with less than or equal to three members and then combine them into a single group that should be consider as not having been assigned a module
+
+length(unique(temp$louvain))
+summary_modules <- data.frame(table(temp$louvain))
+colnames(summary_modules) <- c("louvain", "n")
+summary_modules
+modules <- as.numeric(summary_modules$louvain[which(summary_modules$n
+>3)])
+x <- max(modules)+1
+for (i in c(1:length(temp$temp))) {
+if(temp$louvain[i] %!in% modules){
+temp$louvain[i] <- paste(x)
+}}
+modules <- temp
+modules$louvain <- as.numeric(modules$louvain)
+modules <- modules[order(modules$louvain),]
+module.lookup <-
+data.frame("louvain"=unique(modules$louvain),"new_louvain" =
+c(1:length(unique(modules$louvain))))
+new <- merge(modules,module.lookup)
+modules <- new
+modules <- modules[,2:3]
+summary_modules <- data.frame(table(modules$new_louvain))
+summary_modules
+max(modules$new_louvain)
+
+#  Test whether the centrality metrics of nodes differ between
+groups, when considered as a multivariate dataset. Here, we
+examine whether an OTU’s relative abundance affects its
+centrality metrics
+
+# to include multiple metrics in the same model they must be z score
+transformed to all be on the same scale
+# z score transformation
+metrics.stand <- decostand(metrics, method = "standardize")
+# they also cannot be negative so we transform them all to make them
+positive
+x <- abs(floor(min(metrics.stand)))
+metrics.stand.abs <- metrics.stand + x
+# Extract the average abundance of each OTU
+av.abund <- as.data.frame(colMeans(otu.table))
+colnames(av.abund) <- "average_abundance"
+# test whether abundance of an OTU significantly influences how
+important it is in this network?
+adonis(metrics.stand.abs ~ av.abund$average_abundance)
+#non-sig
+
+# Differences in individual metrics between groups can also be
+evaluated.
+
+cor.test(av.abund$average_abundance, metrics$Alpha_centrality, method
+= "pearson")
+#non-sig
+cor.test(av.abund$average_abundance, metrics$Weighted_vertex_degree,
+method = "pearson")
+#non-sig
+cor.test(av.abund$average_abundance, metrics$Betweenness_centrality,
+method = "pearson")
+#non-sig
+
+# Test whether certain modules have higher centrality than
+other modules.
+
+# for this we will need to remove the x module category we created
+(no module)
+modules.test <- as.data.frame(modules[which(modules$new_louvain !=
+x),])
+colnames(modules.test) <- c("OTU","louvain")
+metrics.stand.abs.test <- metrics.stand.abs[which(modules$new_louvain
+!= x),]
+metrics.test <- metrics[which(modules$new_louvain != x),]
+# we now test whether modules differ when considering all metrics in
+a single model
+adonis(metrics.stand.abs.test ~ modules.test$louvain)
+#non-sig
+
+# Predict age using only the top ten most central nodes. This
+step is simply an example of how important nodes can be
+treated separately
+
+env.age <- env.all[-which(is.na(env.all$age)),]
+otu.table.age <-
+otu.table.all[which(rownames(otu.table.all)%in%rownames(env.age)),]
+adonis(otu.table.age ~ env.age$age)
+#p<0.001
+order.alpha <- metrics[order(-metrics$Alpha_centrality),]
+top.alpha <- row.names(order.alpha)[1:10]
+order.deg <- metrics[order(-metrics$Weighted_vertex_degree),]
+top.deg <- row.names(order.deg)[1:10]
+order.bet <- metrics[order(-metrics$Betweenness_centrality),]
+top.bet <- row.names(order.bet)[1:10]
+otu.table.age.alpha <- otu.table.age[,top.alpha]
+otu.table.age.deg <- otu.table.age[,top.deg]
+
+otu.table.age.bet <- otu.table.age[,top.bet]
+adonis(otu.table.age.alpha ~ env.age$age)
+adonis(otu.table.age.deg ~ env.age$age)
+adonis(otu.table.age.bet ~ env.age$age
+#all significant
+
+# We can then select the four OTUs that appear in the top ten of both lists
+
+top.final <- top.deg[which(top.deg %in% top.alpha)]
+otu.table.age.final <- otu.table.age[,top.final]
+top.final
+adonis(otu.table.age.final ~ env.age$age)
+
+# Having identified four OTUs that are significantly associated
+with age we can now export the network to Gephi to view the
+graph
+
+# melt the network to prepare for gephi
+spieceasi.matrix.m <- melt(spieceasi.matrix)
+#name cols
+colnames(spieceasi.matrix.m) <- c("source","target","weight")
+# get the names of all nodes
+node.names <-
+unique(c(as.character(unique(spieceasi.matrix.m$source)),as.character
+(unique(spieceasi.matrix.m$target))))
+# number them as an alphabetical node list, write to a csv
+node.names <- as.data.frame(node.names)
+node.names <- as.data.frame(node.names)
+node.names$node_number <- c(1:length(node.names$node.names))
+node.names$node_number2 <- c(1:length(node.names$node.names))
+colnames(node.names) <- c("Taxonomy", "Label", "Id")
+row.names(node.names) <- node.names$Taxonomy
+row.names(modules) <- modules$temp
+
+modules <- modules[order(modules$temp),]
+row.names(node.names) ==row.names(metrics)
+row.names(node.names) ==row.names(modules)
+node.names.final <- cbind(node.names, metrics,modules)
+write.table(node.names.final, "node.names.csv", sep = ",", row.names
+= FALSE)
+# create a legend for the network
+node.names.label <- data.frame(node.names$Taxonomy, node.names$Label)
+colnames(node.names.label) <- c("Taxonomy","Node Label")
+g <- tableGrob(node.names.label, rows = NULL)
+grid.draw(g)
+
+svg("node_legend.svg", height=37, width=4)
+grid.draw(g)
+dev.off()
+# convert node names to numbers, write to a csv
+temp <- merge(x = spieceasi.matrix.m, y = node.names, by.x =
+"source", by.y = "Taxonomy")
+# create the edge list
+colnames(temp) <-
+c("source","target","weight","remove","source_number")
+temp <- temp[,-4]
+edge.list <- merge(x = temp, y = node.names, by.x = "target", by.y =
+"Taxonomy")
+colnames(edge.list) <- c("source","target","weight","source.number",
+"target.number")
+edge.list <- edge.list[,c(3,4,6)]
+colnames(edge.list) <- c("weight","source","target")
+edge.list$Type <- "Undirected"
+negative <- ifelse(edge.list$weight<0, "negative", "positive")
+edge.list$Negative <- negative
+edge.list$weight <- abs(edge.list$weight)
+edge.list <- edge.list[which(abs(edge.list$weight)>0),]
+write.table(edge.list, "edge_list.csv", sep = ",", row.names = FALSE)

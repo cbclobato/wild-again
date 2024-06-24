@@ -1,0 +1,66 @@
+---
+title: "Prepare data for Machine Learning"
+author: "João Machado de Freitas"
+date: "21/02/2023"
+output: html_document
+---
+
+# Dependencies
+
+```{r, setup, include=FALSE}
+knitr::opts_knit$set(root.dir = normalizePath("../../.."))
+getwd()
+```
+
+# SHAP
+
+Save feature importance datasets
+
+```{r}
+source("scripts/r/biomarkers/data.R")
+
+## Test
+load("outputs/r/supplementary/bh.RData")  
+d <- get_dataset(bh, "domestication") # 36 cultivars
+unique(sample_data(d$ps)[[d$label_name]])
+length(unique(sample_data(d$ps)[["genotype"]]))
+```
+
+### Preprocess
+
+> DATASET = cultivar, chemotype, hemp, domestication, flower, marijuana-chemotype, marijuana-domestication dataset: `[all-]{DATASET}[-css].RData`
+
+## Run All
+
+```{r}
+library(foreach)
+library(doParallel)
+
+registerDoParallel(2)
+
+set.seed(54321)
+
+dir.create("data/biomarkers", FALSE, TRUE)
+
+# true_false <- c(TRUE, FALSE)
+true_false <- c(TRUE)
+
+datasets <- c(
+  "domestication"
+)
+
+# for (dataset in datasets) {
+foreach(dataset=datasets) %dopar% {
+  for (normalize in true_false) {
+    for (filter_features in true_false) {
+      load("outputs/r/supplementary/bh.RData")  
+      preprocess(
+        bh,
+        dataset,
+        normalize = normalize,
+        filter_features = filter_features
+      )
+    }
+  }
+}
+```

@@ -1,0 +1,391 @@
+---
+title: "unused code"
+author: "Carolina Lobato"
+date: "2023-07-28"
+output: html_document
+---
+
+# Load Libraries
+
+```{r, include = FALSE}
+library(ggpubr)
+library(multcompView)
+library(asremlPlus)
+library(rasterdiv)
+library(treemap)
+library(microshades)
+```
+
+# From setup
+
+## Preprocessing
+
+```{r, echo = FALSE}
+load("outputs/r/204_setup/ps0.RData")
+
+## Subset bacterial taxa
+ps_sub <- subset_taxa(ps0, Domain == "d__Bacteria")
+ps_sub <- prune_taxa(taxa_sums(ps_sub) > 0, ps_sub)
+ps_sub # 5990 taxa and 467 samples
+summarize_phyloseq(ps_sub) # Average number of reads = 85642, Total number of reads = 39995034, Sgtons = 0
+
+ss <- sample_sums(ps_sub)
+ss <- as.matrix(ss)
+colSums(ss) # total reads = 39995034
+summary(ss) # mean reads/sample = 85642
+sample_data(ps_sub)$total_reads <- sample_sums(ps_sub)
+
+## Subset samples based on minimum number of reads per sample
+ps_sub2 <- prune_samples(sample_sums(ps_sub) > 1000, ps_sub)
+ps_sub2 <- prune_taxa(taxa_sums(ps_sub2) > 0, ps_sub2)
+ps_sub2 # 5977 taxa and 460 samples
+
+ps_sub <- ps_sub2
+save(ps_sub, 
+     file = "outputs/r/204_setup/ps_sub.RData")
+```
+
+## Check Contaminants
+
+```{r}
+load("outputs/r/204_setup/ps0.RData")
+
+all.list <- c()
+metadata <- sample_data(ps0)
+categories <- unique(na.omit(metadata[["cultivar"]]))
+
+for (item in categories)
+{
+  print(paste0("Identifying Taxa for ", item))
+  ps.subset <- subset_samples(ps0, cultivar == item)
+  subset.list <- core_members(ps.subset, detection = 0 , prevalence = 0)
+  print(paste0("No. of Taxa in ", item, ": ", length(subset.list)))
+  all.list[[item]] <- subset.list
+}
+
+print(all.list)
+save(all.list, file = "outputs/r/204_setup/list-all.RData")
+
+common.asv <- Reduce(intersect, all.list); common.asv # n = 7
+all.asv <- Reduce(union, all.list); all.asv # n = 5467
+
+write.csv(all.list["M3"], 
+          file = "outputs/r/204_setup/mock3-list.csv")
+```
+
+## Barplot Control
+
+```{r, echo = FALSE}
+mycolors <- colorRampPalette(brewer.pal(65, "Paired"))(132)
+
+ps0_control <- subset_samples(ps0, type == c("M"))
+ps0_control <- prune_taxa(taxa_sums(ps0_control) > 0, ps0_control)
+ps0_control <- microbiome::transform(ps0_control, "compositional")
+
+plot_bar(ps0_control, 
+         x = "replicates", 
+         fill = "Genus") +
+    facet_wrap(~cultivar, 
+               nrow = 5, 
+               ncol = 10, 
+               shrink = T, 
+               scales = "free") +
+    theme_classic() +
+  scale_fill_manual(values = mycolors) +
+  scale_y_continuous(expand = c(0, 0), 
+                     label = scales::percent) +
+  scale_x_discrete(expand = c(0, 0)) +
+  theme(
+    panel.grid.major.y = element_line(),
+    axis.text.x = element_blank(),
+    axis.text.y = element_text(size = 12),
+    axis.title.y = element_blank(),
+    legend.position = "right",
+    legend.box = "vertical",
+    legend.direction = "vertical",
+    legend.key.size = unit(0.5, 'cm'),
+    legend.text = element_text(size = 12)) +
+  labs(x = "", 
+       y = "Relative abundance", 
+       fill = "") +
+  guides(fill = guide_legend(ncol = 1))
+
+ggsave("outputs/visual/r/204_setup/co-factors/controls/pre-decontam-mocks.png",
+       width = 40,
+       height = 40,
+       units = "cm",
+       dpi = 600)
+```
+
+# From alpha-div
+
+```{r}
+load("outputs/r/204_setup/bh_raref.RData")
+
+metadata <- sample_data(bh_raref)
+categories <- unique(na.omit(metadata[["cultivar"]]))
+my_comparisons <- tidyr::crossing(categories, categories) %>% list()
+
+x <- compare_means(Shannon ~ cultivar,
+#                   comparisons = my_comparisons,
+                   group.by	= cultivar,
+                   data = alpha,
+                   method = "anova")
+```
+
+## Plot Alpha-diversity within the replicates of each sample
+
+```{r, echo = FALSE}
+load("outputs/r/204_setup/bh_raref.RData")
+
+cultivars <- unique(sample_data(bh_raref)$cultivar); cultivars # 46 cultivars
+
+for (c in cultivars) {
+  physeq <- bh_raref
+  oldDF <- as(sample_data(physeq), "data.frame")
+  newDF <- subset(oldDF, cultivar == c)
+  if (class(physeq) == "sample_data") {
+    ps_s <- sample_data(newDF)
+  }
+  else {
+    sample_data(physeq) <- sample_data(newDF)
+    ps_s <- physeq
+  }
+  attributes(ps_s)
+  
+  richness <- estimate_richness(ps_s, measures = "Shannon")
+  p <- plot_richness(
+    ps_s,
+    x = "replicates",
+    color = "cultivar",
+    measures = "Shannon") +
+    labs(x = "Replicates", y = "Alpha Diversity Measure\n") +
+    theme_bw()
+  print(p)
+}
+```
+
+# From beta-div
+
+```{r}
+# test dispersion
+dispersion <- vegan::betadisper(bh_css_bray, 
+                                df_css$cultivar, 
+                                bias.adjust = TRUE, 
+                                sqrt.dist = TRUE)
+anova(dispersion) # under the H0 = no difference in dispersion between groups
+vegan::permutest(dispersion, 
+                 pairwise = TRUE, 
+                 permutations = 999)
+plot(dispersion)
+boxplot(dispersion, 
+        main = "", 
+        xlab = "")
+
+# If there is no difference in dispersion use ANOSIM
+anosim(dist_matrix_t, df_css$cultivar, permutations = 999, distance = "bray")
+```
+
+# From Composition
+
+## Dominante taxa
+
+```{r}
+bh_mer <- phyloseq::merge_samples(bh, group = "cultivar", fun = mean)
+
+# dominant taxonomic group, n and percent sample that are dominated by each taxon
+dom_sum <- microbiomeutilities::dominant_taxa(
+  bh,
+  level = "Class")
+dom_sum$dominant_overview
+
+# retrieves the dominant taxonomic group of each sample
+sample_dom <- dominant(
+  bh_mer, 
+  level = "Genus"); sample_dom
+
+# gives the relative abundance of the most abundant taxa per sample
+dom_ab <- dominance(
+  bh_mer,
+  index = "relative",
+  rank = 2,
+  relative = T,
+  aggregate = T); dom_ab
+summary(dom_ab)
+```
+
+## Barplot: Abundant Classes
+
+```{r, echo = FALSE}
+source("scripts/utils/plot_composition_v2.R")
+load("outputs/r/204_setup/bh.RData")
+bh_mer <- merge_samples(bh, "cultivar")
+bh_rel <- microbiome::transform(bh_mer, "compositional")
+bh_agr <- microbiome::aggregate_rare(
+  bh_rel,
+  level = "Class",
+  detection = 0.01,
+  prevalence = 0,
+  include.lowest = F); bh_agr # 6 taxa and 46 samples
+
+tax_table(bh_agr)
+
+sorting_asv <- ordered(bh_agr@tax_table@.Data[,"Class"],
+                       levels = c("Gammaproteobacteria",
+                                  "Bacilli",
+                                  "Actinobacteria",
+                                  "Alphaproteobacteria",
+                                  "Bacteroidia",
+                                  "Other"))
+sorting_idx <- order(sorting_asv, decreasing = F, na.last = NA)
+otu_order <- bh_agr@tax_table@.Data[sorting_idx,"Class"]
+color = c("#6A221D","#004953","#C9690A","#3F7856","#524F81","#8D9091")
+
+par(oma = c(12, 4, 4, 6) + 0.1)
+plot_composition_v2(
+  bh_agr,
+  sample.sort = "neatmap",
+  otu.sort = otu_order,
+  plot.type = "barplot") +
+  geom_bar(stat = "identity",
+           position = "stack") +
+  scale_fill_manual(values = color) +
+  scale_y_continuous(expand = c(0, 0), 
+                     label = scales::percent) +
+  scale_x_discrete(expand = c(0, 0)) +
+  theme_classic() +
+  theme(
+    panel.grid.major.y = element_line(),
+    axis.text.x = element_text(size = 12, 
+                               angle = 45, 
+                               hjust = 1),
+    axis.text.y = element_text(size = 12),
+    axis.title.y = element_text(size = 12),
+    legend.position = "right",
+    legend.box = "vertical",
+    legend.direction = "vertical",
+    legend.key.size = unit(0.8, 'cm'),
+    legend.text = element_text(size = 12)) +
+  labs(x = "", 
+       y = "Relative abundance", 
+       fill = "") +
+  guides(fill = guide_legend(ncol = 1))
+
+ggsave("outputs/visual/r/303_bac_comp/class-0.01.png",
+       width = 60,
+       height = 35,
+       units = "cm",
+       dpi = 600)
+```
+
+## Microshades Setup
+
+```{r}
+# agglomerate, normalize, and melt the phyloseq object
+mdf_prep <- prep_mdf(bh_rel, 
+                     subgroup_level = "Genus")
+
+
+# create a color object for the specified data
+color_df <- create_color_dfs(mdf_prep, 
+                             selected_groups = c("Actinobacteria", 
+                                                 "Alphaproteobacteria", 
+                                                 "Bacilli", 
+                                                 "Bacteroidia",
+                                                 "Gammaproteobacteria"),
+                             group_level = "Class", 
+                             subgroup_level = "Genus", 
+                             cvd = T,
+                             top_orientation = T)
+
+# Extract
+mdf_color_df <- color_df$mdf
+cdf_color_df <- color_df$cdf
+```
+
+### Microshades Plot
+
+```{r}
+legend_df <- custom_legend(mdf_color_df, 
+                           cdf_color_df, 
+                           group_level = "Class",
+                           subgroup_level = "Genus")
+
+plot_diff <- plot_microshades(mdf_color_df, cdf_color_df) +
+  scale_y_continuous(labels = scales::percent, 
+                     expand = expansion(0)) +
+  theme_classic() +
+  theme(legend.position = "none",
+        panel.grid.major.y = element_line(),
+        axis.text.x = element_text(size = 10, angle = 45, hjust = 1), #element_blank(), 
+        axis.text.y = element_text(size = 10),
+        axis.title.y = element_text(size = 12),
+        legend.key.size = unit(2, 'cm'),
+        legend.text = element_text(size = 12)) +
+  labs(x = "",
+       y = "Relative abundance (%)",
+       fill = "") +
+  guides(fill = guide_legend(ncol = 1)) 
+
+cowplot::plot_grid(plot_diff, 
+                   legend_df,
+                   scale = 1)
+
+ggsave("outputs/visual/dom-taxa/microshades.png", #.svg
+       width = 60,
+       height = 35,
+       units = "cm",
+       bg = "white",
+       dpi = 600)
+```
+
+# From Core/Flex
+
+## General core taxa
+
+```{r}
+core_ab <- core_abundance(
+  bh,
+  detection = 0,
+  prevalence = 0.5,
+  include.lowest = TRUE)
+core_ab # relative proportion of the core SPECIES
+
+hist(core_ab)
+summary(core_ab)
+sd(core_ab)
+core_ab <- as.data.frame(core_ab)
+```
+
+## Treemap
+
+```{r}
+load("outputs/r/204_setup/bh.RData")
+
+meta <- 
+  sample_data(bh) %>% 
+  as.matrix() %>% 
+  data.frame()
+
+core_tm <- core_ab %>%
+  data.frame() %>%
+  rownames_to_column("replicates") %>% 
+  inner_join(meta, by = "replicates")
+names(core_tm)[names(core_tm) == "core_ab"] <- 'rel'
+core_tm
+
+palette_name <- "Geyser"
+mycolors <- divergingx_hcl(46, palette = palette_name, rev = F)
+
+treemap(core_tm,
+        index = c("cultivar", "replicates"),  #A list of categorical variables
+        vSize = "rel",  #This is your quantitative variable
+        vColor = "rel", #This is a categorical variable
+        type = "index", #Sets the organization and color scheme of your treemap
+        palette = mycolors,
+        fontsize.labels = c(15, 0),
+        bg.labels = 0,
+        title = "")
+
+#png("outputs/visual/core/gen-core-treemap.png")
+```

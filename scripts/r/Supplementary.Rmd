@@ -1,0 +1,154 @@
+---
+title: "Supplementary"
+author: "Carolina Lobato"
+date: "2024-02-14"
+output: html_document
+---
+
+# Load Libraries
+
+```{r, include = F}
+library(phyloseq)
+library(microbiome)
+library(tidyverse)
+library(ggplot2)
+library(ggrepel)
+library(colorspace)
+```
+
+# 16S and gamma copy number
+
+```{r, echo = FALSE}
+qpcr <- read.table(
+  "outputs/qiime2/qpcr-results-newct.tsv",
+  sep = "\t",
+  header = TRUE,
+  fill = TRUE,
+  row.names = "OTUID") %>% filter(CopyNr_g_16S > CopyNr_g_gamma)
+
+qpcr_long <- gather(qpcr, target, copy, CopyNr_g_16S:CopyNr_g_gamma)
+
+qpcr_df <- qpcr_long %>%
+  group_by(Genotype, target) %>%
+  summarise(mean = mean(copy),
+            sd = sd(copy)) %>%
+  filter(mean > sd) %>%
+  filter(! Genotype %in% c("Futura 75", "Mexican Sativa", "RV Korea-87"))
+
+qpcr_p <- ggplot(qpcr_df, 
+         aes(x = Genotype, 
+             y = mean,
+            fill = target)) +
+  geom_bar(stat = "identity", 
+           position = "dodge") +
+  geom_errorbar(aes(ymin = mean-sd,
+                    ymax = mean+sd),
+                width = .1,
+                position = position_dodge(.9))  +
+  theme_classic() +
+  theme(axis.title.x = element_text(size = 10),
+        axis.title.y = element_text(size = 10),
+        axis.text.x = element_text(size = 10, 
+                                   hjust = 1,
+                                   angle = 45),
+        legend.position = "right",
+        plot.margin = margin(t = 0.5, r = 1, b = 0.5, l = 1, unit = "cm")) + 
+  scale_y_continuous(expand = c(0, 0)) + 
+  scale_x_discrete(expand = c(0, 0)) +
+  scale_fill_manual(values = c("#918bc0", "#0ea5e9")) +
+  labs(x = "Genotype", 
+       y = "copies/g", 
+       fill = "Target")
+qpcr_p
+
+
+# ggsave("outputs/visual/supplementary/qpcr-16s-gamma.png",
+#        width = 80,
+#        height = 40,
+#        units = "cm",
+#        dpi = 600)
+
+
+# HOW to consider the plant DNA?
+# The table describes the prokaryote to eukaryote ratio within the total microbial gene copies detected in the seeds of the respective plant genotype. 
+```
+
+# Just gamma
+
+```{r}
+qpcr2 <- read.table(
+  "outputs/qiime2/qpcr-results-newct.tsv",
+  sep = "\t",
+  header = TRUE,
+  fill = TRUE,
+  row.names = "OTUID") %>% select(Genotype, CopyNr_g_gamma)
+
+qpcr_df2 <- qpcr %>%
+  group_by(Genotype) %>%
+  summarise(mean = mean(CopyNr_g_gamma),
+            sd = sd(CopyNr_g_gamma)) %>%
+  filter(mean > sd)
+
+qpcr_gamma <- ggplot(qpcr_df2, 
+         aes(x = Genotype, 
+             y = mean)) +
+  geom_bar(stat = "identity", 
+           position = "dodge",
+           fill = "#0ea5e9") +
+  geom_errorbar(aes(ymin = mean-sd,
+                    ymax = mean+sd),
+                width = .1,
+                position = position_dodge(.9))  +
+  theme_classic() +
+  theme(axis.title.x = element_text(size = 10),
+        axis.title.y = element_text(size = 10),
+        axis.text.x = element_text(size = 10, 
+                                   hjust = 1,
+                                   angle = 45),
+        legend.position = "right",
+        plot.margin = margin(t = 0.5, 
+                             r = 1, 
+                             b = 0.5, 
+                             l = 1, 
+                             unit = "cm")) + 
+  scale_y_continuous(expand = c(0, 0)) + 
+  scale_x_discrete(expand = c(0, 0)) +
+  labs(x = "Genotype", 
+       y = "copies/g")
+qpcr_gamma
+
+# ggsave("outputs/visual/supplementary/qpcr-gamma.png",
+#        width = 80,
+#        height = 40,
+#        units = "cm",
+#        dpi = 600)
+```
+
+# get total counts and gamma counts
+
+```{r}
+load("outputs/r/supplementary/bh.RData")
+
+sample_data(bh)$total_reads <- sample_sums(bh)
+
+data <- bh %>% 
+  sample_data() %>%
+  data.frame() %>%
+  select(total_reads)
+
+# write.csv(data, "outputs/qiime2/total-counts.csv")
+
+class_table <-
+ bh %>%
+#  phyloseq::transform_sample_counts(function(x) x / sum(x) * 100) %>%
+  tax_glom(taxrank = "Class") %>%
+  psmelt() %>%
+  select(Sample,
+         Abundance, 
+         Class) %>%
+  group_by(Class, Sample) %>% 
+  summarise(Abundance = mean(Abundance)) %>%
+  filter(Class == "Gammaproteobacteria")
+
+# write.csv(class_table, "outputs/qiime2/gamma-counts.csv")
+```

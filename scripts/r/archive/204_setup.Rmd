@@ -1,0 +1,379 @@
+---
+title: "Setup"
+author: "Carolina Lobato"
+date: "27/02/2023"
+output: html_document
+---
+
+***Create, preprocess, and save PhyloSeq objects and count tables***
+
+# Load Libraries
+
+```{r include = FALSE}
+library(Biostrings)
+library(phyloseq)
+library(decontam)
+library(microbiome)
+library(microbiomeutilities)
+library(ranacapa)
+library(ggplot2)
+library(RColorBrewer)
+library(tidyverse)
+```
+
+# Import Data
+
+```{r, echo = FALSE}
+## Import metadata file
+metadata <- read.table(
+  "data/metadata/metadata.csv",
+  sep = ";",
+  header = TRUE,
+  fill = TRUE,
+  row.names = "OTUID",
+  na.strings = "")
+metadata$replicates <- row.names(metadata)
+metadata <- sample_data(metadata)
+# attributes(metadata)
+# summary(metadata)
+
+## Import feature table
+asv_tab <- read.table("outputs/qiime2/8-export/feature-table.txt",
+                        header = TRUE,
+                        row.names = "OTUID")
+asv_tab <- otu_table(asv_tab, taxa_are_rows = TRUE)
+# head(asv_tab)
+# summary(asv_tab)
+
+## Import taxonomy file
+tax_tab <- read.table(
+  "outputs/qiime2/8-export/16S-taxonomy-vsearch-adapt.tsv",
+  sep = "\t",
+  header = TRUE,
+  fill = TRUE,
+  row.names = "OTUID")
+tax_tab <- as.matrix(tax_tab)
+tax_tab <- tax_table(tax_tab)
+# head(tax_tab)
+# summary(tax_tab)
+
+## Import reference sequences
+rs_table <- Biostrings::readDNAStringSet(
+  "outputs/qiime2/8-export/dna-sequences.fasta",
+  format = "fasta",
+  nrec = -1L,
+  skip = 0L,
+  seek.first.rec = FALSE,
+  use.names = TRUE,
+  with.qualities = FALSE)
+# rs_table
+# attributes(rs_table)
+
+## Import rooted tree
+rtree <- read_tree("outputs/qiime2/8-export/rooted-tree.nwk")
+rtree
+# attributes(rtree)
+
+## Convert to phyloseq object
+ps <- merge_phyloseq(
+  metadata,
+  asv_tab,
+  tax_tab,
+  rs_table,
+  rtree)
+ps # 5467 taxa and 461 samples
+summarize_phyloseq(ps) # Average reads = 88381, Total reads = 40743740, Singletons = 0
+
+# sample_names(ps)
+# rank_names(ps)
+# sample_variables(ps)
+# taxa_names(ps)
+# taxa_sums(ps)
+
+ps0 <- ps
+# save(ps0,
+#      file = "outputs/r/204_setup/ps0.RData")
+```
+
+# Decontam
+
+## Inspect
+
+```{r, echo = FALSE}
+load("outputs/r/204_setup/ps0.RData")
+
+df <- as.data.frame(sample_data(ps0))
+df$Library_Size <- sample_sums(ps0)
+df <- df[order(df$Library_Size),]
+df$Index <- seq(nrow(df))
+
+# df.sub <- subset(df, batch == "pool1")
+
+ggplot(data = df, 
+       aes(x = Index,
+           y = Library_Size,
+           color = type)) +
+  geom_point()
+
+# ggsave(file = "outputs/visual/r/204_setup/co-factors/controls/decontam_inspect.png",
+#        scale = 1,
+#        width = 20,
+#        height = 18,
+#        units = "cm",
+#        dpi = 600)
+```
+
+## By Prevalence
+
+```{r, echo = FALSE}
+load("outputs/r/204_setup/ps0.RData")
+
+sample_data(ps0)$is.neg <- sample_data(ps0)$type == "NC"
+
+contamdf.prev <- isContaminant(ps0, 
+                               method = "prevalence",
+                               batch = "batch",
+                               batch.combine = "fisher", 
+                               neg = "is.neg")
+table(contamdf.prev$contaminant) #FALSE: 5399, TRUE: 68
+
+# new phy-obj
+ps0_nc <- prune_taxa(!contamdf.prev$contaminant, ps0); ps0_nc # 5399 taxa and 461 samples
+ss <- sample_sums(ps0_nc)
+ss <- as.matrix(ss)
+colSums(ss) # total reads = 37372480
+summary(ss) # mean reads/sample = 81068 
+sample_data(ps0_nc)$total_reads <- sample_sums(ps0_nc)
+
+# Check for the number of reads and ASVs
+contam <- prune_taxa(contamdf.prev$contaminant, ps0)
+View(data.frame(tax_table(contam)))
+
+samples <- prune_samples(sample_data(contam)$type == "sample", contam)
+View(data.frame(sample_data(samples)))
+
+controls <- prune_samples(sample_data(contam)$type == "NC", contam)
+View(data.frame(sample_data(controls)))
+
+mocks <- prune_samples(sample_data(contam)$type == "M", contam)
+View(data.frame(tax_table(mocks)))
+
+sum(sample_sums(samples))/sum(sample_sums(ps0)) * 100 # 6.5%
+
+# Make phyloseq object of presence-absence in negative controls and true samples
+ps.pa <- transform_sample_counts(ps0, function(abund) 1 * (abund > 0))
+ps.pa.neg <- prune_samples(sample_data(ps.pa)$type == "NC", ps.pa)
+ps.pa.pos <- prune_samples(sample_data(ps.pa)$type != "NC", ps.pa)
+
+# Make data.frame of prevalence in positive and negative samples
+df.pa <- data.frame(pa.pos = taxa_sums(ps.pa.pos),
+                    pa.neg = taxa_sums(ps.pa.neg),
+                    contaminant = contamdf.prev$contaminant)
+
+ggplot(data = df.pa, 
+       aes(x = pa.neg, 
+           y = pa.pos, 
+           color = contaminant)) +
+  geom_point() +
+  xlab("Prevalence (Negative Controls)") +
+  ylab("Prevalence (True Samples)")
+
+# ggsave(file = "outputs/visual/r/204_setup/co-factors/controls/decontam_prev.png",
+#        scale = 1,
+#        width = 20,
+#        height = 18,
+#        units = "cm",
+#        dpi = 600)
+# 
+# save(ps0_nc,
+#      file = "outputs/r/204_setup/ps0_decontam.RData")
+```
+
+# Clean
+
+```{r, echo = FALSE}
+load("outputs/r/204_setup/ps0_decontam.RData") #ps0_nc
+
+ps_clean <- subset_samples(ps0_nc, type != "M")
+ps_clean <- subset_samples(ps_clean, type != "NC")
+ps_clean <- subset_samples(ps_clean, replicates != "C34_01B")
+ps_clean <- prune_samples(sample_sums(ps_clean) > 0, ps_clean)
+ps_clean <- prune_taxa(taxa_sums(ps_clean) > 0, ps_clean)
+ps_clean # 5300 taxa and 451 samples
+
+sort(sample_sums(ps_clean))
+summary(sample_sums(ps_clean)) # mean reads/sample = 82033
+summarize_phyloseq(ps_clean) # Average reads = 82033, Total reads = 36996923, Singletons = 0
+taxa_names(ps_clean)[1:5]
+
+# Find unknown names and iterate all of them through the tax table to be replaced
+tax_table(ps_clean)[tax_table(ps_clean) == "d__uncultured"] <-
+  ""
+tax_table(ps_clean)[tax_table(ps_clean) == "p__uncultured"] <-
+  ""
+tax_table(ps_clean)[tax_table(ps_clean) == "c__uncultured"] <-
+  ""
+tax_table(ps_clean)[tax_table(ps_clean) == "o__uncultured"] <-
+  ""
+tax_table(ps_clean)[tax_table(ps_clean) == "f__uncultured"] <-
+  ""
+tax_table(ps_clean)[tax_table(ps_clean) == "g__uncultured"] <-
+  ""
+tax_table(ps_clean)[tax_table(ps_clean) == "f__Unknown_Family"] <-
+  ""
+tax_table(ps_clean)[tax_table(ps_clean) == "g__possible_genus_04"] <-
+  ""
+tax_table(ps_clean)[tax_table(ps_clean) == "s__uncultured_bacterium"] <-
+  ""
+tax_table(ps_clean)[tax_table(ps_clean) == "s__metagenome"] <-
+  ""
+tax_tab <- phyloseq::tax_table(ps_clean); tax_tab
+
+taxa_names(ps_clean) <- paste(
+  "ASV ", 1:length(taxa_names(ps_clean)),
+  ": ",
+  taxa_names(ps_clean),
+  sep = "")
+taxa_names(ps_clean)[1:5]
+
+tax_table(ps_clean)[, colnames(tax_table(ps_clean))] <- gsub(
+  tax_table(ps_clean)[, colnames(tax_table(ps_clean))],
+  pattern = "[a-z]__",
+  replacement = "")
+
+ps <- ps_clean
+# save(ps, file = "outputs/r/204_setup/ps.RData")
+# conversion <- taxa_names(ps_clean); conversion
+# write.table(conversion, "outputs/r/204_setup/tax-conv.csv")
+
+bh <- microbiomeutilities::format_to_besthit(ps_clean)
+taxa_names(bh) <- sub(": [a-z0-9]*:[a-z_]{0,3}", ": ", taxa_names(bh))
+taxa_names(bh)[1:5]
+
+tax_table(bh)[, colnames(tax_table(bh))] <- gsub(
+  tax_table(bh)[, colnames(tax_table(bh))],
+  pattern = "[a-z]__",
+  replacement = "")
+
+# save(bh, file = "outputs/r/204_setup/bh.RData")
+# 
+# taxtable <- bh %>%
+#   tax_table %>%
+#   as.matrix %>%
+#   data.frame
+# 
+# write.table(taxtable,
+#             "outputs/r/204_setup/bh_tax_table.csv",
+#             sep = ",",
+#             row.names = FALSE,
+#             quote = FALSE)
+#
+# otutable <- bh %>%
+#   otu_table %>%
+#   as.matrix %>%
+#   data.frame
+# 
+# write.table(otutable,
+#             "outputs/r/204_setup/bh_otu_table.csv",
+#             sep = "\t",
+#             row.names = T,
+#             quote = FALSE)
+```
+
+# Rarefy Samples
+
+```{r, echo = FALSE}
+load("outputs/r/204_setup/bh.RData")
+
+bh_raref <- phyloseq::rarefy_even_depth(
+  bh,
+  sample.size = 5607,
+  rngseed = 711,
+  replace = FALSE,
+  trimOTUs = TRUE)
+bh_raref # 2802 taxa and 402 samples
+sample_names(bh_raref)
+bh_mer <- phyloseq::merge_samples(bh_raref, "cultivar"); bh_mer # n = 46, OK
+
+summarize_phyloseq(bh_raref) # Average reads = 5607, Total reads = 2254014, Singletons = 988
+
+# save(bh_raref, file = "outputs/r/204_setup/bh_raref.RData")
+
+ranacapa::ggrare(bh_raref,
+       step = 10,
+       color = "cultivar",
+       se = FALSE) +
+  theme(legend.position = "none") +
+  facet_wrap(~cultivar, scales = "free_x")
+
+ggsave(
+  "outputs/visual/r/301_alpha_div/rare-curves-5607.png",
+  width = 20,
+  height = 18,
+  units = "cm",
+  scale = 1,
+  dpi = 600)
+```
+
+# Subset Features
+
+```{r}
+load("outputs/r/204_setup/bh.RData")
+load("outputs/r/204_setup/bh_raref.RData")
+
+# flower (Subset A, n = 13)
+bh_flo <- subset_samples(bh, !is.na(inflorescence) & 
+                           chemotype2 == "Low" & 
+                           domestication %in% c("Cross hybrid",
+                                                "Inbred line")) 
+bh_flo <- prune_taxa(taxa_sums(bh_flo) > 0, bh_flo)
+
+bh_flo_raref <- subset_samples(bh_raref, !is.na(inflorescence) &
+                                 chemotype2 == "Low" & 
+                                 domestication %in% c("Cross hybrid",
+                                                      "Inbred line"))
+bh_flo_raref <- prune_taxa(taxa_sums(bh_flo_raref) > 0, bh_flo_raref)
+
+# chem (Subset B, n = 8)
+bh_chem <- subset_samples(bh, !is.na(chemotype2) &
+                            inflorescence == "Dioecious" &
+                            domestication == "Cross hybrid")
+bh_chem <- prune_taxa(taxa_sums(bh_chem) > 0, bh_chem)
+
+bh_chem_raref <- subset_samples(bh_raref, !is.na(chemotype2) &
+                                  inflorescence == "Dioecious" &
+                                  domestication == "Cross hybrid")
+bh_chem_raref <- prune_taxa(taxa_sums(bh_chem_raref) > 0, bh_chem_raref)
+
+# dom-hemp (Subset C, n = 26)
+bh_dom <- subset_samples(bh, !is.na(domestication) &
+                           chemotype2 == "Low")
+bh_dom <- prune_taxa(taxa_sums(bh_dom) > 0, bh_dom)
+
+bh_dom_raref <- subset_samples(bh_raref, !is.na(domestication) &
+                                 chemotype2 == "Low")
+bh_dom_raref <- prune_taxa(taxa_sums(bh_dom_raref) > 0, bh_dom_raref)
+
+# dom-chem-mj (Subset D, n = 9)
+bh_mj <- subset_samples(bh, !is.na(domestication) &
+                          chemotype2 == "High")
+bh_mj <- prune_taxa(taxa_sums(bh_mj) > 0, bh_mj)
+
+bh_mj_raref <- subset_samples(bh_raref, !is.na(domestication) &
+                                chemotype2 == "High")
+bh_mj_raref <- prune_taxa(taxa_sums(bh_mj_raref) > 0, bh_mj_raref)
+
+
+check <- unique(bh_dom@sam_data[["cultivar"]]);check
+
+# Save
+# save(bh_chem, file = "outputs/r/204_setup/subsets/bh-chem.RData")
+# save(bh_dom, file = "outputs/r/204_setup/subsets/bh-dom.RData")
+# save(bh_mj, file = "outputs/r/204_setup/subsets/bh-mj.RData")
+# save(bh_flo, file = "outputs/r/204_setup/subsets/bh-flo.RData")
+# 
+# save(bh_chem_raref, file = "outputs/r/204_setup/subsets/bh-chem-raref.RData")
+# save(bh_dom_raref, file = "outputs/r/204_setup/subsets/bh-dom-raref.RData")
+# save(bh_mj_raref, file = "outputs/r/204_setup/subsets/bh-mj-raref.RData")
+# save(bh_flo_raref, file = "outputs/r/204_setup/subsets/bh-flo-raref.RData")
+```
