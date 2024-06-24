@@ -40,22 +40,22 @@ project/
 │   │   ├── Figure4.Rmd
 │   │   └── Figure5.Rmd
 │   └── utils/
+│       ├── csv2fasta.sh
+│       ├── csv2tsv.sh
+│       ├── qiime2r.sh
+│       ├── install.R
+│       ├── plot_composition_v2.R
 │       ├── umap/
 │       │   ├── data.R
 │       │   ├── project.R
 │       │   ├── cluster-analysis.R
 │       │   └── run-all.R
-│       ├── biomarkers/
-│       │   ├── data.R
-│       │   ├── feature-importance.R
-│       │   ├── sv-importance-patch.R
-│       │   ├── train-eval.R 
-│       │   └── run-all.R
-│       ├── csv2fasta.sh
-│       ├── csv2tsv.sh
-│       ├── qiime2r.sh
-│       ├── install.R
-│       └── plot_composition_v2.R
+│       └── biomarkers/
+│           ├── data.R
+│           ├── feature-importance.R
+│           ├── sv-importance-patch.R
+│           ├── train-eval.R 
+│           └── run-all.R
 ├── README.md
 └── LICENSE
 ```
@@ -73,7 +73,7 @@ project/
       - the output gene class table from PLaBase (PLaBase.tsv)
 
 - scripts/
-  - qiime2/  This subdirectory contains the pipeline used for:
+  - qiime2/  This subdirectory contains the pipeline (bioprocessing_pipeline.sh) used for:
       - demultiplexing with CUTADAPT v4.2.
       - importing into QIIME2 v2023.5 and the further bioinformatic processing steps using the DADA2 pipeline and the VSEARCH algorithm using the SILVA v138 reference database, which generated the feature table, taxonomy file, representative sequences and phylogenetic tree.
       - exporting from QIIME2.
