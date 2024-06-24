@@ -1,0 +1,468 @@
+OTUID;batch;type;genotype;code;provider;origin;species;domestication;dom2;progenitors;chemotype;chemotype2;inflorescence;maturation;application;pb
+C1_01;pool1;sample;Fedora 17;C1;Hanfland GmbH;France;C. sativa ssp. sativa var. sativa;Inbred line;High;(Fibrimon 21 x Jus 9) x Fibrimon 21;Low;Low;Monoecious;Early;Hybrid;M
+C1_02;pool1;sample;Fedora 17;C1;Hanfland GmbH;France;C. sativa ssp. sativa var. sativa;Inbred line;High;(Fibrimon 21 x Jus 9) x Fibrimon 21;Low;Low;Monoecious;Early;Hybrid;M
+C1_03;pool1;sample;Fedora 17;C1;Hanfland GmbH;France;C. sativa ssp. sativa var. sativa;Inbred line;High;(Fibrimon 21 x Jus 9) x Fibrimon 21;Low;Low;Monoecious;Early;Hybrid;M
+C1_04;pool1;sample;Fedora 17;C1;Hanfland GmbH;France;C. sativa ssp. sativa var. sativa;Inbred line;High;(Fibrimon 21 x Jus 9) x Fibrimon 21;Low;Low;Monoecious;Early;Hybrid;M
+C1_05;pool1;sample;Fedora 17;C1;Hanfland GmbH;France;C. sativa ssp. sativa var. sativa;Inbred line;High;(Fibrimon 21 x Jus 9) x Fibrimon 21;Low;Low;Monoecious;Early;Hybrid;M
+C1_06;pool1;sample;Fedora 17;C1;Hanfland GmbH;France;C. sativa ssp. sativa var. sativa;Inbred line;High;(Fibrimon 21 x Jus 9) x Fibrimon 21;Low;Low;Monoecious;Early;Hybrid;M
+C1_07;pool1;sample;Fedora 17;C1;Hanfland GmbH;France;C. sativa ssp. sativa var. sativa;Inbred line;High;(Fibrimon 21 x Jus 9) x Fibrimon 21;Low;Low;Monoecious;Early;Hybrid;M
+C1_08;pool1;sample;Fedora 17;C1;Hanfland GmbH;France;C. sativa ssp. sativa var. sativa;Inbred line;High;(Fibrimon 21 x Jus 9) x Fibrimon 21;Low;Low;Monoecious;Early;Hybrid;M
+C1_09;pool1;sample;Fedora 17;C1;Hanfland GmbH;France;C. sativa ssp. sativa var. sativa;Inbred line;High;(Fibrimon 21 x Jus 9) x Fibrimon 21;Low;Low;Monoecious;Early;Hybrid;M
+C1_10;pool1;sample;Fedora 17;C1;Hanfland GmbH;France;C. sativa ssp. sativa var. sativa;Inbred line;High;(Fibrimon 21 x Jus 9) x Fibrimon 21;Low;Low;Monoecious;Early;Hybrid;M
+C10_01;pool1;sample;RV Slovakia 77;C10;IPK;Slovakia;C. sativa ssp. sativa;Landrace;Low;;Low;Low;Dioecious;Early;;M
+C10_02;pool1;sample;RV Slovakia 77;C10;IPK;Slovakia;C. sativa ssp. sativa;Landrace;Low;;Low;Low;Dioecious;Early;;M
+C10_03;pool1;sample;RV Slovakia 77;C10;IPK;Slovakia;C. sativa ssp. sativa;Landrace;Low;;Low;Low;Dioecious;Early;;M
+C10_04;pool1;sample;RV Slovakia 77;C10;IPK;Slovakia;C. sativa ssp. sativa;Landrace;Low;;Low;Low;Dioecious;Early;;M
+C10_05;pool1;sample;RV Slovakia 77;C10;IPK;Slovakia;C. sativa ssp. sativa;Landrace;Low;;Low;Low;Dioecious;Early;;M
+C10_06;pool1;sample;RV Slovakia 77;C10;IPK;Slovakia;C. sativa ssp. sativa;Landrace;Low;;Low;Low;Dioecious;Early;;M
+C10_07;pool1;sample;RV Slovakia 77;C10;IPK;Slovakia;C. sativa ssp. sativa;Landrace;Low;;Low;Low;Dioecious;Early;;M
+C10_08;pool1;sample;RV Slovakia 77;C10;IPK;Slovakia;C. sativa ssp. sativa;Landrace;Low;;Low;Low;Dioecious;Early;;M
+C10_09;pool1;sample;RV Slovakia 77;C10;IPK;Slovakia;C. sativa ssp. sativa;Landrace;Low;;Low;Low;Dioecious;Early;;M
+C10_10;pool1;sample;RV Slovakia 77;C10;IPK;Slovakia;C. sativa ssp. sativa;Landrace;Low;;Low;Low;Dioecious;Early;;M
+C11_01;pool3;sample;NA BG Hungary;C11;IPK;Hungary;C. sativa ssp. sativa;;;;Low;Low;Dioecious;Early;;M
+C11_02;pool3;sample;NA BG Hungary;C11;IPK;Hungary;C. sativa ssp. sativa;;;;Low;Low;Dioecious;Early;;M
+C11_03;pool3;sample;NA BG Hungary;C11;IPK;Hungary;C. sativa ssp. sativa;;;;Low;Low;Dioecious;Early;;M
+C11_04;pool3;sample;NA BG Hungary;C11;IPK;Hungary;C. sativa ssp. sativa;;;;Low;Low;Dioecious;Early;;M
+C11_05;pool3;sample;NA BG Hungary;C11;IPK;Hungary;C. sativa ssp. sativa;;;;Low;Low;Dioecious;Early;;M
+C11_06;pool3;sample;NA BG Hungary;C11;IPK;Hungary;C. sativa ssp. sativa;;;;Low;Low;Dioecious;Early;;M
+C11_07;pool3;sample;NA BG Hungary;C11;IPK;Hungary;C. sativa ssp. sativa;;;;Low;Low;Dioecious;Early;;M
+C11_08;pool3;sample;NA BG Hungary;C11;IPK;Hungary;C. sativa ssp. sativa;;;;Low;Low;Dioecious;Early;;M
+C11_09;pool3;sample;NA BG Hungary;C11;IPK;Hungary;C. sativa ssp. sativa;;;;Low;Low;Dioecious;Early;;M
+C11_10;pool3;sample;NA BG Hungary;C11;IPK;Hungary;C. sativa ssp. sativa;;;;Low;Low;Dioecious;Early;;M
+C13_01;pool2;sample;RV Italy 88;C13;IPK;Italy;C. sativa ssp. sativa;Landrace;Low;;Low;Low;Subdioecious;Early;;M
+C13_02;pool2;sample;RV Italy 88;C13;IPK;Italy;C. sativa ssp. sativa;Landrace;Low;;Low;Low;Subdioecious;Early;;M
+C13_03;pool2;sample;RV Italy 88;C13;IPK;Italy;C. sativa ssp. sativa;Landrace;Low;;Low;Low;Subdioecious;Early;;M
+C13_04;pool2;sample;RV Italy 88;C13;IPK;Italy;C. sativa ssp. sativa;Landrace;Low;;Low;Low;Subdioecious;Early;;M
+C13_05;pool2;sample;RV Italy 88;C13;IPK;Italy;C. sativa ssp. sativa;Landrace;Low;;Low;Low;Subdioecious;Early;;M
+C13_06;pool3;sample;RV Italy 88;C13;IPK;Italy;C. sativa ssp. sativa;Landrace;Low;;Low;Low;Subdioecious;Early;;M
+C13_07;pool3;sample;RV Italy 88;C13;IPK;Italy;C. sativa ssp. sativa;Landrace;Low;;Low;Low;Subdioecious;Early;;M
+C13_08;pool3;sample;RV Italy 88;C13;IPK;Italy;C. sativa ssp. sativa;Landrace;Low;;Low;Low;Subdioecious;Early;;M
+C13_09;pool3;sample;RV Italy 88;C13;IPK;Italy;C. sativa ssp. sativa;Landrace;Low;;Low;Low;Subdioecious;Early;;M
+C13_10;pool3;sample;RV Italy 88;C13;IPK;Italy;C. sativa ssp. sativa;Landrace;Low;;Low;Low;Subdioecious;Early;;M
+C15_01;pool3;sample;NA BG Romania;C15;IPK;Romania;C. sativa ssp. sativa var. sativa;Landrace;Low;;Low;Low;Dioecious;;;
+C15_02;pool3;sample;NA BG Romania;C15;IPK;Romania;C. sativa ssp. sativa var. sativa;Landrace;Low;;Low;Low;Dioecious;;;
+C15_03;pool3;sample;NA BG Romania;C15;IPK;Romania;C. sativa ssp. sativa var. sativa;Landrace;Low;;Low;Low;Dioecious;;;
+C15_04;pool3;sample;NA BG Romania;C15;IPK;Romania;C. sativa ssp. sativa var. sativa;Landrace;Low;;Low;Low;Dioecious;;;
+C15_05;pool3;sample;NA BG Romania;C15;IPK;Romania;C. sativa ssp. sativa var. sativa;Landrace;Low;;Low;Low;Dioecious;;;
+C15_06;pool3;sample;NA BG Romania;C15;IPK;Romania;C. sativa ssp. sativa var. sativa;Landrace;Low;;Low;Low;Dioecious;;;
+C15_07;pool3;sample;NA BG Romania;C15;IPK;Romania;C. sativa ssp. sativa var. sativa;Landrace;Low;;Low;Low;Dioecious;;;
+C15_08;pool3;sample;NA BG Romania;C15;IPK;Romania;C. sativa ssp. sativa var. sativa;Landrace;Low;;Low;Low;Dioecious;;;
+C15_11;pool3;sample;NA BG Romania;C15;IPK;Romania;C. sativa ssp. sativa var. sativa;Landrace;Low;;Low;Low;Dioecious;;;
+C15_12;pool3;sample;NA BG Romania;C15;IPK;Romania;C. sativa ssp. sativa var. sativa;Landrace;Low;;Low;Low;Dioecious;;;
+C16_01;pool3;sample;RV Georgia 86;C16;IPK;Georgia;C. sativa ssp. sativa var. spontanea;Landrace;Low;;Low;Low;Dioecious;Auto;;M
+C16_02;pool3;sample;RV Georgia 86;C16;IPK;Georgia;C. sativa ssp. sativa var. spontanea;Landrace;Low;;Low;Low;Dioecious;Auto;;M
+C16_03;pool3;sample;RV Georgia 86;C16;IPK;Georgia;C. sativa ssp. sativa var. spontanea;Landrace;Low;;Low;Low;Dioecious;Auto;;M
+C16_04;pool3;sample;RV Georgia 86;C16;IPK;Georgia;C. sativa ssp. sativa var. spontanea;Landrace;Low;;Low;Low;Dioecious;Auto;;M
+C16_05;pool3;sample;RV Georgia 86;C16;IPK;Georgia;C. sativa ssp. sativa var. spontanea;Landrace;Low;;Low;Low;Dioecious;Auto;;M
+C16_06;pool3;sample;RV Georgia 86;C16;IPK;Georgia;C. sativa ssp. sativa var. spontanea;Landrace;Low;;Low;Low;Dioecious;Auto;;M
+C16_07;pool3;sample;RV Georgia 86;C16;IPK;Georgia;C. sativa ssp. sativa var. spontanea;Landrace;Low;;Low;Low;Dioecious;Auto;;M
+C16_08;pool3;sample;RV Georgia 86;C16;IPK;Georgia;C. sativa ssp. sativa var. spontanea;Landrace;Low;;Low;Low;Dioecious;Auto;;M
+C16_09;pool3;sample;RV Georgia 86;C16;IPK;Georgia;C. sativa ssp. sativa var. spontanea;Landrace;Low;;Low;Low;Dioecious;Auto;;M
+C16_10;pool3;sample;RV Georgia 86;C16;IPK;Georgia;C. sativa ssp. sativa var. spontanea;Landrace;Low;;Low;Low;Dioecious;Auto;;M
+C17_01;pool2;sample;RV Korea 87;C17;IPK;North Korea;C. sativa ssp. sativa var. sativa;Landrace;Low;;Low;Low;Dioecious;;;M
+C17_02;pool2;sample;RV Korea 87;C17;IPK;North Korea;C. sativa ssp. sativa var. sativa;Landrace;Low;;Low;Low;Dioecious;;;M
+C17_03;pool2;sample;RV Korea 87;C17;IPK;North Korea;C. sativa ssp. sativa var. sativa;Landrace;Low;;Low;Low;Dioecious;;;M
+C17_04;pool2;sample;RV Korea 87;C17;IPK;North Korea;C. sativa ssp. sativa var. sativa;Landrace;Low;;Low;Low;Dioecious;;;M
+C17_05;pool2;sample;RV Korea 87;C17;IPK;North Korea;C. sativa ssp. sativa var. sativa;Landrace;Low;;Low;Low;Dioecious;;;M
+C17_06;pool2;sample;RV Korea 87;C17;IPK;North Korea;C. sativa ssp. sativa var. sativa;Landrace;Low;;Low;Low;Dioecious;;;M
+C17_07;pool2;sample;RV Korea 87;C17;IPK;North Korea;C. sativa ssp. sativa var. sativa;Landrace;Low;;Low;Low;Dioecious;;;M
+C17_08;pool2;sample;RV Korea 87;C17;IPK;North Korea;C. sativa ssp. sativa var. sativa;Landrace;Low;;Low;Low;Dioecious;;;M
+C17_09;pool2;sample;RV Korea 87;C17;IPK;North Korea;C. sativa ssp. sativa var. sativa;Landrace;Low;;Low;Low;Dioecious;;;M
+C17_10;pool2;sample;RV Korea 87;C17;IPK;North Korea;C. sativa ssp. sativa var. sativa;Landrace;Low;;Low;Low;Dioecious;;;M
+C18_01;pool2;sample;RV Italy 84;C18;IPK;Italy;C. sativa ssp. sativa;Landrace;Low;;Low;Low;Dioecious;Late;;M
+C18_02;pool2;sample;RV Italy 84;C18;IPK;Italy;C. sativa ssp. sativa;Landrace;Low;;Low;Low;Dioecious;Late;;M
+C18_03;pool2;sample;RV Italy 84;C18;IPK;Italy;C. sativa ssp. sativa;Landrace;Low;;Low;Low;Dioecious;Late;;M
+C18_04;pool2;sample;RV Italy 84;C18;IPK;Italy;C. sativa ssp. sativa;Landrace;Low;;Low;Low;Dioecious;Late;;M
+C18_05;pool2;sample;RV Italy 84;C18;IPK;Italy;C. sativa ssp. sativa;Landrace;Low;;Low;Low;Dioecious;Late;;M
+C18_06;pool2;sample;RV Italy 84;C18;IPK;Italy;C. sativa ssp. sativa;Landrace;Low;;Low;Low;Dioecious;Late;;M
+C18_07;pool2;sample;RV Italy 84;C18;IPK;Italy;C. sativa ssp. sativa;Landrace;Low;;Low;Low;Dioecious;Late;;M
+C18_08;pool2;sample;RV Italy 84;C18;IPK;Italy;C. sativa ssp. sativa;Landrace;Low;;Low;Low;Dioecious;Late;;M
+C18_09;pool2;sample;RV Italy 84;C18;IPK;Italy;C. sativa ssp. sativa;Landrace;Low;;Low;Low;Dioecious;Late;;M
+C18_10;pool2;sample;RV Italy 84;C18;IPK;Italy;C. sativa ssp. sativa;Landrace;Low;;Low;Low;Dioecious;Late;;M
+C2_01;pool1;sample;Silvana x Manitoba P.;C2;KFU Botanical Garden;Romania/South Africa;C. sativa ssp. sativa var. sativa x ssp. Indica var. indica;;;Silvana x African landraces;THC-rich;High;Dioecious;Late;Drug;M
+C2_02;pool1;sample;Silvana x Manitoba P.;C2;KFU Botanical Garden;Romania/South Africa;C. sativa ssp. sativa var. sativa x ssp. Indica var. indica;;;Silvana x African landraces;THC-rich;High;Dioecious;Late;Drug;M
+C2_03;pool1;sample;Silvana x Manitoba P.;C2;KFU Botanical Garden;Romania/South Africa;C. sativa ssp. sativa var. sativa x ssp. Indica var. indica;;;Silvana x African landraces;THC-rich;High;Dioecious;Late;Drug;M
+C2_04;pool1;sample;Silvana x Manitoba P.;C2;KFU Botanical Garden;Romania/South Africa;C. sativa ssp. sativa var. sativa x ssp. Indica var. indica;;;Silvana x African landraces;THC-rich;High;Dioecious;Late;Drug;M
+C2_05;pool1;sample;Silvana x Manitoba P.;C2;KFU Botanical Garden;Romania/South Africa;C. sativa ssp. sativa var. sativa x ssp. Indica var. indica;;;Silvana x African landraces;THC-rich;High;Dioecious;Late;Drug;M
+C2_06;pool1;sample;Silvana x Manitoba P.;C2;KFU Botanical Garden;Romania/South Africa;C. sativa ssp. sativa var. sativa x ssp. Indica var. indica;;;Silvana x African landraces;THC-rich;High;Dioecious;Late;Drug;M
+C2_07;pool1;sample;Silvana x Manitoba P.;C2;KFU Botanical Garden;Romania/South Africa;C. sativa ssp. sativa var. sativa x ssp. Indica var. indica;;;Silvana x African landraces;THC-rich;High;Dioecious;Late;Drug;M
+C2_08;pool1;sample;Silvana x Manitoba P.;C2;KFU Botanical Garden;Romania/South Africa;C. sativa ssp. sativa var. sativa x ssp. Indica var. indica;;;Silvana x African landraces;THC-rich;High;Dioecious;Late;Drug;M
+C2_09;pool1;sample;Silvana x Manitoba P.;C2;KFU Botanical Garden;Romania/South Africa;C. sativa ssp. sativa var. sativa x ssp. Indica var. indica;;;Silvana x African landraces;THC-rich;High;Dioecious;Late;Drug;M
+C2_10;pool1;sample;Silvana x Manitoba P.;C2;KFU Botanical Garden;Romania/South Africa;C. sativa ssp. sativa var. sativa x ssp. Indica var. indica;;;Silvana x African landraces;THC-rich;High;Dioecious;Late;Drug;M
+C28_01;pool2;sample;Cinepa;C28;IPK;Romania;C. sativa ssp. sativa;Landrace;Low;;Low;Low;;Late;;M
+C28_02;pool2;sample;Cinepa;C28;IPK;Romania;C. sativa ssp. sativa;Landrace;Low;;Low;Low;;Late;;M
+C28_03;pool2;sample;Cinepa;C28;IPK;Romania;C. sativa ssp. sativa;Landrace;Low;;Low;Low;;Late;;M
+C28_04;pool2;sample;Cinepa;C28;IPK;Romania;C. sativa ssp. sativa;Landrace;Low;;Low;Low;;Late;;M
+C28_05;pool2;sample;Cinepa;C28;IPK;Romania;C. sativa ssp. sativa;Landrace;Low;;Low;Low;;Late;;M
+C28_06;pool2;sample;Cinepa;C28;IPK;Romania;C. sativa ssp. sativa;Landrace;Low;;Low;Low;;Late;;M
+C28_07;pool2;sample;Cinepa;C28;IPK;Romania;C. sativa ssp. sativa;Landrace;Low;;Low;Low;;Late;;M
+C28_08;pool2;sample;Cinepa;C28;IPK;Romania;C. sativa ssp. sativa;Landrace;Low;;Low;Low;;Late;;M
+C28_09;pool2;sample;Cinepa;C28;IPK;Romania;C. sativa ssp. sativa;Landrace;Low;;Low;Low;;Late;;M
+C28_10;pool2;sample;Cinepa;C28;IPK;Romania;C. sativa ssp. sativa;Landrace;Low;;Low;Low;;Late;;M
+C30_01;pool1;sample;NA France;C30;IPK;France;C. sativa ssp. sativa var. sativa;;;;Low;Low;;;;M
+C30_02;pool1;sample;NA France;C30;IPK;France;C. sativa ssp. sativa var. sativa;;;;Low;Low;;;;M
+C30_03;pool1;sample;NA France;C30;IPK;France;C. sativa ssp. sativa var. sativa;;;;Low;Low;;;;M
+C30_04;pool1;sample;NA France;C30;IPK;France;C. sativa ssp. sativa var. sativa;;;;Low;Low;;;;M
+C30_05;pool1;sample;NA France;C30;IPK;France;C. sativa ssp. sativa var. sativa;;;;Low;Low;;;;M
+C30_06;pool1;sample;NA France;C30;IPK;France;C. sativa ssp. sativa var. sativa;;;;Low;Low;;;;M
+C30_07;pool1;sample;NA France;C30;IPK;France;C. sativa ssp. sativa var. sativa;;;;Low;Low;;;;M
+C30_08;pool1;sample;NA France;C30;IPK;France;C. sativa ssp. sativa var. sativa;;;;Low;Low;;;;M
+C30_09;pool1;sample;NA France;C30;IPK;France;C. sativa ssp. sativa var. sativa;;;;Low;Low;;;;M
+C30_10;pool1;sample;NA France;C30;IPK;France;C. sativa ssp. sativa var. sativa;;;;Low;Low;;;;M
+C32_01;pool3;sample;NA BG China;C32;IPK;China;C. sativa ssp. sativa;;;;Low;Low;;;;M
+C32_02;pool3;sample;NA BG China;C32;IPK;China;C. sativa ssp. sativa;;;;Low;Low;;;;M
+C32_03;pool3;sample;NA BG China;C32;IPK;China;C. sativa ssp. sativa;;;;Low;Low;;;;M
+C32_04;pool3;sample;NA BG China;C32;IPK;China;C. sativa ssp. sativa;;;;Low;Low;;;;M
+C32_05;pool3;sample;NA BG China;C32;IPK;China;C. sativa ssp. sativa;;;;Low;Low;;;;M
+C32_06;pool3;sample;NA BG China;C32;IPK;China;C. sativa ssp. sativa;;;;Low;Low;;;;M
+C32_07;pool3;sample;NA BG China;C32;IPK;China;C. sativa ssp. sativa;;;;Low;Low;;;;M
+C32_08;pool3;sample;NA BG China;C32;IPK;China;C. sativa ssp. sativa;;;;Low;Low;;;;M
+C32_09;pool3;sample;NA BG China;C32;IPK;China;C. sativa ssp. sativa;;;;Low;Low;;;;M
+C32_10;pool3;sample;NA BG China;C32;IPK;China;C. sativa ssp. sativa;;;;Low;Low;;;;M
+C33_01;pool3;sample;NA BG Italy;C33;IPK;Italy;C. sativa ssp.;Landrace;Low;;;;;;;M
+C33_02;pool3;sample;NA BG Italy;C33;IPK;Italy;C. sativa ssp.;Landrace;Low;;;;;;;M
+C33_03;pool3;sample;NA BG Italy;C33;IPK;Italy;C. sativa ssp.;Landrace;Low;;;;;;;M
+C33_04;pool3;sample;NA BG Italy;C33;IPK;Italy;C. sativa ssp.;Landrace;Low;;;;;;;M
+C33_05;pool3;sample;NA BG Italy;C33;IPK;Italy;C. sativa ssp.;Landrace;Low;;;;;;;M
+C33_06;pool3;sample;NA BG Italy;C33;IPK;Italy;C. sativa ssp.;Landrace;Low;;;;;;;M
+C33_07;pool3;sample;NA BG Italy;C33;IPK;Italy;C. sativa ssp.;Landrace;Low;;;;;;;M
+C33_08;pool3;sample;NA BG Italy;C33;IPK;Italy;C. sativa ssp.;Landrace;Low;;;;;;;M
+C33_09;pool3;sample;NA BG Italy;C33;IPK;Italy;C. sativa ssp.;Landrace;Low;;;;;;;M
+C33_10;pool3;sample;NA BG Italy;C33;IPK;Italy;C. sativa ssp.;Landrace;Low;;;;;;;M
+C34_01;pool3;sample;NA BG Belgium;C34;IPK;;C. sativa ssp.;;;;;;;Late;;
+C34_01B;pool3;sample;NA BG Belgium;C34;IPK;;C. sativa ssp.;;;;;;;Late;;
+C34_02;pool3;sample;NA BG Belgium;C34;IPK;;C. sativa ssp.;;;;;;;Late;;
+C34_03;pool3;sample;NA BG Belgium;C34;IPK;;C. sativa ssp.;;;;;;;Late;;
+C34_04;pool3;sample;NA BG Belgium;C34;IPK;;C. sativa ssp.;;;;;;;Late;;
+C34_05;pool3;sample;NA BG Belgium;C34;IPK;;C. sativa ssp.;;;;;;;Late;;
+C34_06;pool3;sample;NA BG Belgium;C34;IPK;;C. sativa ssp.;;;;;;;Late;;
+C34_07;pool3;sample;NA BG Belgium;C34;IPK;;C. sativa ssp.;;;;;;;Late;;
+C34_08;pool3;sample;NA BG Belgium;C34;IPK;;C. sativa ssp.;;;;;;;Late;;
+C34_09;pool3;sample;NA BG Belgium;C34;IPK;;C. sativa ssp.;;;;;;;Late;;
+C34_10;pool3;sample;NA BG Belgium;C34;IPK;;C. sativa ssp.;;;;;;;Late;;
+C36_01;pool3;sample;Hohenthurmer G. R.;C36;IPK;Germany;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Waag valley landraces x Schurig x Kuhnow;Low;Low;Subdioecious;Early;Hybrid;
+C36_02;pool3;sample;Hohenthurmer G. R.;C36;IPK;Germany;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Waag valley landraces x Schurig x Kuhnow;Low;Low;Subdioecious;Early;Hybrid;
+C36_03;pool3;sample;Hohenthurmer G. R.;C36;IPK;Germany;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Waag valley landraces x Schurig x Kuhnow;Low;Low;Subdioecious;Early;Hybrid;
+C36_04;pool3;sample;Hohenthurmer G. R.;C36;IPK;Germany;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Waag valley landraces x Schurig x Kuhnow;Low;Low;Subdioecious;Early;Hybrid;
+C36_05;pool3;sample;Hohenthurmer G. R.;C36;IPK;Germany;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Waag valley landraces x Schurig x Kuhnow;Low;Low;Subdioecious;Early;Hybrid;
+C36_06;pool3;sample;Hohenthurmer G. R.;C36;IPK;Germany;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Waag valley landraces x Schurig x Kuhnow;Low;Low;Subdioecious;Early;Hybrid;
+C36_07;pool3;sample;Hohenthurmer G. R.;C36;IPK;Germany;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Waag valley landraces x Schurig x Kuhnow;Low;Low;Subdioecious;Early;Hybrid;
+C36_08;pool3;sample;Hohenthurmer G. R.;C36;IPK;Germany;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Waag valley landraces x Schurig x Kuhnow;Low;Low;Subdioecious;Early;Hybrid;
+C36_09;pool3;sample;Hohenthurmer G. R.;C36;IPK;Germany;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Waag valley landraces x Schurig x Kuhnow;Low;Low;Subdioecious;Early;Hybrid;
+C36_10;pool3;sample;Hohenthurmer G. R.;C36;IPK;Germany;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Waag valley landraces x Schurig x Kuhnow;Low;Low;Subdioecious;Early;Hybrid;
+C37_01;pool1;sample;Fibrimon;C37;IPK;Germany;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Havelander x Schurig x Italian and Turkish landraces;Low;Low;Monoecious;;Hybrid;M
+C37_02;pool1;sample;Fibrimon;C37;IPK;Germany;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Havelander x Schurig x Italian and Turkish landraces;Low;Low;Monoecious;;Hybrid;M
+C37_03;pool1;sample;Fibrimon;C37;IPK;Germany;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Havelander x Schurig x Italian and Turkish landraces;Low;Low;Monoecious;;Hybrid;M
+C37_04;pool1;sample;Fibrimon;C37;IPK;Germany;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Havelander x Schurig x Italian and Turkish landraces;Low;Low;Monoecious;;Hybrid;M
+C37_05;pool1;sample;Fibrimon;C37;IPK;Germany;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Havelander x Schurig x Italian and Turkish landraces;Low;Low;Monoecious;;Hybrid;M
+C37_06;pool1;sample;Fibrimon;C37;IPK;Germany;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Havelander x Schurig x Italian and Turkish landraces;Low;Low;Monoecious;;Hybrid;M
+C37_07;pool1;sample;Fibrimon;C37;IPK;Germany;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Havelander x Schurig x Italian and Turkish landraces;Low;Low;Monoecious;;Hybrid;M
+C37_08;pool1;sample;Fibrimon;C37;IPK;Germany;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Havelander x Schurig x Italian and Turkish landraces;Low;Low;Monoecious;;Hybrid;M
+C37_09;pool1;sample;Fibrimon;C37;IPK;Germany;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Havelander x Schurig x Italian and Turkish landraces;Low;Low;Monoecious;;Hybrid;M
+C37_10;pool1;sample;Fibrimon;C37;IPK;Germany;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Havelander x Schurig x Italian and Turkish landraces;Low;Low;Monoecious;;Hybrid;M
+C38_01;pool1;sample;Krasnoyarskaya;C38;IPK;Russia;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Russian landraces x Italian landraces;Low;Low;Dioecious;;Hybrid;M
+C38_02;pool1;sample;Krasnoyarskaya;C38;IPK;Russia;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Russian landraces x Italian landraces;Low;Low;Dioecious;;Hybrid;M
+C38_03;pool1;sample;Krasnoyarskaya;C38;IPK;Russia;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Russian landraces x Italian landraces;Low;Low;Dioecious;;Hybrid;M
+C38_04;pool1;sample;Krasnoyarskaya;C38;IPK;Russia;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Russian landraces x Italian landraces;Low;Low;Dioecious;;Hybrid;M
+C38_05;pool1;sample;Krasnoyarskaya;C38;IPK;Russia;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Russian landraces x Italian landraces;Low;Low;Dioecious;;Hybrid;M
+C38_06;pool1;sample;Krasnoyarskaya;C38;IPK;Russia;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Russian landraces x Italian landraces;Low;Low;Dioecious;;Hybrid;M
+C38_07;pool1;sample;Krasnoyarskaya;C38;IPK;Russia;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Russian landraces x Italian landraces;Low;Low;Dioecious;;Hybrid;M
+C38_08;pool1;sample;Krasnoyarskaya;C38;IPK;Russia;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Russian landraces x Italian landraces;Low;Low;Dioecious;;Hybrid;M
+C38_09;pool1;sample;Krasnoyarskaya;C38;IPK;Russia;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Russian landraces x Italian landraces;Low;Low;Dioecious;;Hybrid;M
+C38_10;pool1;sample;Krasnoyarskaya;C38;IPK;Russia;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Russian landraces x Italian landraces;Low;Low;Dioecious;;Hybrid;M
+C41_01;pool1;sample;Eletta Campana;C41;IPK;Italy;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Carmagnola x Fibridia;Low;Low;Dioecious;;Hybrid;
+C41_02;pool1;sample;Eletta Campana;C41;IPK;Italy;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Carmagnola x Fibridia;Low;Low;Dioecious;;Hybrid;
+C41_03;pool1;sample;Eletta Campana;C41;IPK;Italy;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Carmagnola x Fibridia;Low;Low;Dioecious;;Hybrid;
+C41_04;pool1;sample;Eletta Campana;C41;IPK;Italy;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Carmagnola x Fibridia;Low;Low;Dioecious;;Hybrid;
+C41_05;pool1;sample;Eletta Campana;C41;IPK;Italy;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Carmagnola x Fibridia;Low;Low;Dioecious;;Hybrid;
+C41_06;pool1;sample;Eletta Campana;C41;IPK;Italy;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Carmagnola x Fibridia;Low;Low;Dioecious;;Hybrid;
+C41_07;pool1;sample;Eletta Campana;C41;IPK;Italy;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Carmagnola x Fibridia;Low;Low;Dioecious;;Hybrid;
+C41_08;pool1;sample;Eletta Campana;C41;IPK;Italy;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Carmagnola x Fibridia;Low;Low;Dioecious;;Hybrid;
+C41_09;pool1;sample;Eletta Campana;C41;IPK;Italy;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Carmagnola x Fibridia;Low;Low;Dioecious;;Hybrid;
+C41_10;pool1;sample;Eletta Campana;C41;IPK;Italy;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Carmagnola x Fibridia;Low;Low;Dioecious;;Hybrid;
+C43_01;pool3;sample;NA Argentina;C43;IPK;Argentina;C. sativa ssp. sativa var. sativa;;;;;;;;;
+C43_02;pool3;sample;NA Argentina;C43;IPK;Argentina;C. sativa ssp. sativa var. sativa;;;;;;;;;
+C43_03;pool3;sample;NA Argentina;C43;IPK;Argentina;C. sativa ssp. sativa var. sativa;;;;;;;;;
+C43_04;pool3;sample;NA Argentina;C43;IPK;Argentina;C. sativa ssp. sativa var. sativa;;;;;;;;;
+C43_05;pool3;sample;NA Argentina;C43;IPK;Argentina;C. sativa ssp. sativa var. sativa;;;;;;;;;
+C43_06;pool3;sample;NA Argentina;C43;IPK;Argentina;C. sativa ssp. sativa var. sativa;;;;;;;;;
+C43_07;pool3;sample;NA Argentina;C43;IPK;Argentina;C. sativa ssp. sativa var. sativa;;;;;;;;;
+C43_08;pool3;sample;NA Argentina;C43;IPK;Argentina;C. sativa ssp. sativa var. sativa;;;;;;;;;
+C43_09;pool3;sample;NA Argentina;C43;IPK;Argentina;C. sativa ssp. sativa var. sativa;;;;;;;;;
+C43_10;pool3;sample;NA Argentina;C43;IPK;Argentina;C. sativa ssp. sativa var. sativa;;;;;;;;;
+C44_01;pool1;sample;Fibridia;C44;IPK;Germany;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Havelander x Italian and Turkish landraces;Low;Low;Dioecious;;Hybrid;M
+C44_02;pool1;sample;Fibridia;C44;IPK;Germany;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Havelander x Italian and Turkish landraces;Low;Low;Dioecious;;Hybrid;M
+C44_03;pool1;sample;Fibridia;C44;IPK;Germany;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Havelander x Italian and Turkish landraces;Low;Low;Dioecious;;Hybrid;M
+C44_04;pool1;sample;Fibridia;C44;IPK;Germany;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Havelander x Italian and Turkish landraces;Low;Low;Dioecious;;Hybrid;M
+C44_05;pool1;sample;Fibridia;C44;IPK;Germany;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Havelander x Italian and Turkish landraces;Low;Low;Dioecious;;Hybrid;M
+C44_06;pool1;sample;Fibridia;C44;IPK;Germany;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Havelander x Italian and Turkish landraces;Low;Low;Dioecious;;Hybrid;M
+C44_07;pool1;sample;Fibridia;C44;IPK;Germany;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Havelander x Italian and Turkish landraces;Low;Low;Dioecious;;Hybrid;M
+C44_08;pool1;sample;Fibridia;C44;IPK;Germany;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Havelander x Italian and Turkish landraces;Low;Low;Dioecious;;Hybrid;M
+C44_09;pool1;sample;Fibridia;C44;IPK;Germany;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Havelander x Italian and Turkish landraces;Low;Low;Dioecious;;Hybrid;M
+C44_10;pool1;sample;Fibridia;C44;IPK;Germany;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Havelander x Italian and Turkish landraces;Low;Low;Dioecious;;Hybrid;M
+C47_01;pool1;sample;Havellander;C47;IPK;Germany;C. sativa ssp. sativa var. sativa;Selected line;Low;Russian landraces;Low;Low;Dioecious;Early;Hybrid;
+C47_02;pool1;sample;Havellander;C47;IPK;Germany;C. sativa ssp. sativa var. sativa;Selected line;Low;Russian landraces;Low;Low;Dioecious;Early;Hybrid;
+C47_03;pool1;sample;Havellander;C47;IPK;Germany;C. sativa ssp. sativa var. sativa;Selected line;Low;Russian landraces;Low;Low;Dioecious;Early;Hybrid;
+C47_04;pool1;sample;Havellander;C47;IPK;Germany;C. sativa ssp. sativa var. sativa;Selected line;Low;Russian landraces;Low;Low;Dioecious;Early;Hybrid;
+C47_05;pool1;sample;Havellander;C47;IPK;Germany;C. sativa ssp. sativa var. sativa;Selected line;Low;Russian landraces;Low;Low;Dioecious;Early;Hybrid;
+C47_06;pool1;sample;Havellander;C47;IPK;Germany;C. sativa ssp. sativa var. sativa;Selected line;Low;Russian landraces;Low;Low;Dioecious;Early;Hybrid;
+C47_07;pool1;sample;Havellander;C47;IPK;Germany;C. sativa ssp. sativa var. sativa;Selected line;Low;Russian landraces;Low;Low;Dioecious;Early;Hybrid;
+C47_08;pool1;sample;Havellander;C47;IPK;Germany;C. sativa ssp. sativa var. sativa;Selected line;Low;Russian landraces;Low;Low;Dioecious;Early;Hybrid;
+C47_09;pool1;sample;Havellander;C47;IPK;Germany;C. sativa ssp. sativa var. sativa;Selected line;Low;Russian landraces;Low;Low;Dioecious;Early;Hybrid;
+C47_10;pool1;sample;Havellander;C47;IPK;Germany;C. sativa ssp. sativa var. sativa;Selected line;Low;Russian landraces;Low;Low;Dioecious;Early;Hybrid;
+C49_01;pool3;sample;NA Syria;C49;IPK;Syria;C. sativa ssp.;;;;;;;;;M
+C49_02;pool3;sample;NA Syria;C49;IPK;Syria;C. sativa ssp.;;;;;;;;;M
+C49_03;pool3;sample;NA Syria;C49;IPK;Syria;C. sativa ssp.;;;;;;;;;M
+C49_04;pool3;sample;NA Syria;C49;IPK;Syria;C. sativa ssp.;;;;;;;;;M
+C49_05;pool3;sample;NA Syria;C49;IPK;Syria;C. sativa ssp.;;;;;;;;;M
+C49_06;pool3;sample;NA Syria;C49;IPK;Syria;C. sativa ssp.;;;;;;;;;M
+C49_07;pool3;sample;NA Syria;C49;IPK;Syria;C. sativa ssp.;;;;;;;;;M
+C49_08;pool3;sample;NA Syria;C49;IPK;Syria;C. sativa ssp.;;;;;;;;;M
+C49_09;pool3;sample;NA Syria;C49;IPK;Syria;C. sativa ssp.;;;;;;;;;M
+C52_01;pool1;sample;Schurig;C52;IPK;Germany;C. sativa ssp. sativa ;Selected line;Low;Russian landraces;Low;Low;Dioecious;Intermediate;Hybrid;M
+C52_02;pool1;sample;Schurig;C52;IPK;Germany;C. sativa ssp. sativa ;Selected line;Low;Russian landraces;Low;Low;Dioecious;Intermediate;Hybrid;M
+C52_03;pool1;sample;Schurig;C52;IPK;Germany;C. sativa ssp. sativa ;Selected line;Low;Russian landraces;Low;Low;Dioecious;Intermediate;Hybrid;M
+C52_04;pool1;sample;Schurig;C52;IPK;Germany;C. sativa ssp. sativa ;Selected line;Low;Russian landraces;Low;Low;Dioecious;Intermediate;Hybrid;M
+C52_05;pool1;sample;Schurig;C52;IPK;Germany;C. sativa ssp. sativa ;Selected line;Low;Russian landraces;Low;Low;Dioecious;Intermediate;Hybrid;M
+C52_06;pool1;sample;Schurig;C52;IPK;Germany;C. sativa ssp. sativa ;Selected line;Low;Russian landraces;Low;Low;Dioecious;Intermediate;Hybrid;M
+C52_07;pool1;sample;Schurig;C52;IPK;Germany;C. sativa ssp. sativa ;Selected line;Low;Russian landraces;Low;Low;Dioecious;Intermediate;Hybrid;M
+C52_08;pool1;sample;Schurig;C52;IPK;Germany;C. sativa ssp. sativa ;Selected line;Low;Russian landraces;Low;Low;Dioecious;Intermediate;Hybrid;M
+C52_09;pool1;sample;Schurig;C52;IPK;Germany;C. sativa ssp. sativa ;Selected line;Low;Russian landraces;Low;Low;Dioecious;Intermediate;Hybrid;M
+C52_10;pool1;sample;Schurig;C52;IPK;Germany;C. sativa ssp. sativa ;Selected line;Low;Russian landraces;Low;Low;Dioecious;Intermediate;Hybrid;M
+C54_01;pool1;sample;Bredemann;C54;IPK;Germany;C. sativa ssp. sativa;;;;Low;Low;;;Hybrid;
+C54_02;pool1;sample;Bredemann;C54;IPK;Germany;C. sativa ssp. sativa;;;;Low;Low;;;Hybrid;
+C54_03;pool1;sample;Bredemann;C54;IPK;Germany;C. sativa ssp. sativa;;;;Low;Low;;;Hybrid;
+C54_04;pool1;sample;Bredemann;C54;IPK;Germany;C. sativa ssp. sativa;;;;Low;Low;;;Hybrid;
+C54_05;pool1;sample;Bredemann;C54;IPK;Germany;C. sativa ssp. sativa;;;;Low;Low;;;Hybrid;
+C54_06;pool1;sample;Bredemann;C54;IPK;Germany;C. sativa ssp. sativa;;;;Low;Low;;;Hybrid;
+C54_07;pool1;sample;Bredemann;C54;IPK;Germany;C. sativa ssp. sativa;;;;Low;Low;;;Hybrid;
+C54_08;pool1;sample;Bredemann;C54;IPK;Germany;C. sativa ssp. sativa;;;;Low;Low;;;Hybrid;
+C54_09;pool1;sample;Bredemann;C54;IPK;Germany;C. sativa ssp. sativa;;;;Low;Low;;;Hybrid;
+C54_10;pool1;sample;Bredemann;C54;IPK;Germany;C. sativa ssp. sativa;;;;Low;Low;;;Hybrid;
+C55_01;pool1;sample;Ramo;C55;IPK;Germany;C. sativa ssp. sativa var. sativa;Cross hybrid;High;;Low;Low;Dioecious;Intermediate;Hybrid;M
+C55_02;pool1;sample;Ramo;C55;IPK;Germany;C. sativa ssp. sativa var. sativa;Cross hybrid;High;;Low;Low;Dioecious;Intermediate;Hybrid;M
+C55_03;pool1;sample;Ramo;C55;IPK;Germany;C. sativa ssp. sativa var. sativa;Cross hybrid;High;;Low;Low;Dioecious;Intermediate;Hybrid;M
+C55_04;pool1;sample;Ramo;C55;IPK;Germany;C. sativa ssp. sativa var. sativa;Cross hybrid;High;;Low;Low;Dioecious;Intermediate;Hybrid;M
+C55_05;pool1;sample;Ramo;C55;IPK;Germany;C. sativa ssp. sativa var. sativa;Cross hybrid;High;;Low;Low;Dioecious;Intermediate;Hybrid;M
+C55_06;pool1;sample;Ramo;C55;IPK;Germany;C. sativa ssp. sativa var. sativa;Cross hybrid;High;;Low;Low;Dioecious;Intermediate;Hybrid;M
+C55_07;pool1;sample;Ramo;C55;IPK;Germany;C. sativa ssp. sativa var. sativa;Cross hybrid;High;;Low;Low;Dioecious;Intermediate;Hybrid;M
+C55_08;pool1;sample;Ramo;C55;IPK;Germany;C. sativa ssp. sativa var. sativa;Cross hybrid;High;;Low;Low;Dioecious;Intermediate;Hybrid;M
+C55_09;pool1;sample;Ramo;C55;IPK;Germany;C. sativa ssp. sativa var. sativa;Cross hybrid;High;;Low;Low;Dioecious;Intermediate;Hybrid;M
+C55_10;pool1;sample;Ramo;C55;IPK;Germany;C. sativa ssp. sativa var. sativa;Cross hybrid;High;;Low;Low;Dioecious;Intermediate;Hybrid;M
+C56_01;pool3;sample;NA Turkey;C56;IPK;Turkey;C. sativa ssp. sativa var. sativa;Landrace;Low;;Low;Low;Dioecious;Late;;M
+C56_02;pool3;sample;NA Turkey;C56;IPK;Turkey;C. sativa ssp. sativa var. sativa;Landrace;Low;;Low;Low;Dioecious;Late;;M
+C56_03;pool3;sample;NA Turkey;C56;IPK;Turkey;C. sativa ssp. sativa var. sativa;Landrace;Low;;Low;Low;Dioecious;Late;;M
+C56_04;pool3;sample;NA Turkey;C56;IPK;Turkey;C. sativa ssp. sativa var. sativa;Landrace;Low;;Low;Low;Dioecious;Late;;M
+C56_05;pool3;sample;NA Turkey;C56;IPK;Turkey;C. sativa ssp. sativa var. sativa;Landrace;Low;;Low;Low;Dioecious;Late;;M
+C56_06;pool3;sample;NA Turkey;C56;IPK;Turkey;C. sativa ssp. sativa var. sativa;Landrace;Low;;Low;Low;Dioecious;Late;;M
+C56_07;pool3;sample;NA Turkey;C56;IPK;Turkey;C. sativa ssp. sativa var. sativa;Landrace;Low;;Low;Low;Dioecious;Late;;M
+C56_08;pool3;sample;NA Turkey;C56;IPK;Turkey;C. sativa ssp. sativa var. sativa;Landrace;Low;;Low;Low;Dioecious;Late;;M
+C56_09;pool3;sample;NA Turkey;C56;IPK;Turkey;C. sativa ssp. sativa var. sativa;Landrace;Low;;Low;Low;Dioecious;Late;;M
+C56_10;pool3;sample;NA Turkey;C56;IPK;Turkey;C. sativa ssp. sativa var. sativa;Landrace;Low;;Low;Low;Dioecious;Late;;M
+C58_01;pool1;sample;Lovrin 110;C58;IPK;Romania;C. sativa ssp. sativa var. sativa;Selected line;Low;Bulgarian Silistra landraces;Low;Low;Dioecious;;Hybrid;
+C58_02;pool1;sample;Lovrin 110;C58;IPK;Romania;C. sativa ssp. sativa var. sativa;Selected line;Low;Bulgarian Silistra landraces;Low;Low;Dioecious;;Hybrid;
+C58_03;pool1;sample;Lovrin 110;C58;IPK;Romania;C. sativa ssp. sativa var. sativa;Selected line;Low;Bulgarian Silistra landraces;Low;Low;Dioecious;;Hybrid;
+C58_04;pool1;sample;Lovrin 110;C58;IPK;Romania;C. sativa ssp. sativa var. sativa;Selected line;Low;Bulgarian Silistra landraces;Low;Low;Dioecious;;Hybrid;
+C58_05;pool1;sample;Lovrin 110;C58;IPK;Romania;C. sativa ssp. sativa var. sativa;Selected line;Low;Bulgarian Silistra landraces;Low;Low;Dioecious;;Hybrid;
+C58_06;pool1;sample;Lovrin 110;C58;IPK;Romania;C. sativa ssp. sativa var. sativa;Selected line;Low;Bulgarian Silistra landraces;Low;Low;Dioecious;;Hybrid;
+C58_07;pool1;sample;Lovrin 110;C58;IPK;Romania;C. sativa ssp. sativa var. sativa;Selected line;Low;Bulgarian Silistra landraces;Low;Low;Dioecious;;Hybrid;
+C58_08;pool1;sample;Lovrin 110;C58;IPK;Romania;C. sativa ssp. sativa var. sativa;Selected line;Low;Bulgarian Silistra landraces;Low;Low;Dioecious;;Hybrid;
+C58_09;pool1;sample;Lovrin 110;C58;IPK;Romania;C. sativa ssp. sativa var. sativa;Selected line;Low;Bulgarian Silistra landraces;Low;Low;Dioecious;;Hybrid;
+C58_10;pool1;sample;Lovrin 110;C58;IPK;Romania;C. sativa ssp. sativa var. sativa;Selected line;Low;Bulgarian Silistra landraces;Low;Low;Dioecious;;Hybrid;
+C59_01;pool2;sample;Fasamo;C59;IPK;Germany;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Schurig x Bernburger-einhausigen;Low;Low;Monoecious;Early;Hybrid;M
+C59_02;pool2;sample;Fasamo;C59;IPK;Germany;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Schurig x Bernburger-einhausigen;Low;Low;Monoecious;Early;Hybrid;M
+C59_03;pool2;sample;Fasamo;C59;IPK;Germany;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Schurig x Bernburger-einhausigen;Low;Low;Monoecious;Early;Hybrid;M
+C59_04;pool2;sample;Fasamo;C59;IPK;Germany;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Schurig x Bernburger-einhausigen;Low;Low;Monoecious;Early;Hybrid;M
+C59_05;pool2;sample;Fasamo;C59;IPK;Germany;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Schurig x Bernburger-einhausigen;Low;Low;Monoecious;Early;Hybrid;M
+C59_06;pool2;sample;Fasamo;C59;IPK;Germany;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Schurig x Bernburger-einhausigen;Low;Low;Monoecious;Early;Hybrid;M
+C59_07;pool2;sample;Fasamo;C59;IPK;Germany;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Schurig x Bernburger-einhausigen;Low;Low;Monoecious;Early;Hybrid;M
+C59_08;pool2;sample;Fasamo;C59;IPK;Germany;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Schurig x Bernburger-einhausigen;Low;Low;Monoecious;Early;Hybrid;M
+C59_09;pool2;sample;Fasamo;C59;IPK;Germany;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Schurig x Bernburger-einhausigen;Low;Low;Monoecious;Early;Hybrid;M
+C59_10;pool2;sample;Fasamo;C59;IPK;Germany;C. sativa ssp. sativa var. sativa;Cross hybrid;High;Schurig x Bernburger-einhausigen;Low;Low;Monoecious;Early;Hybrid;M
+C62_01;pool2;sample;Kompolti;C62;IPK;Hungary;C. sativa ssp. sativa var. sativa;;;Fleischmann hemp;Low;Low;Dioecious;Late;Hybrid;M
+C62_02;pool2;sample;Kompolti;C62;IPK;Hungary;C. sativa ssp. sativa var. sativa;;;Fleischmann hemp;Low;Low;Dioecious;Late;Hybrid;M
+C62_03;pool2;sample;Kompolti;C62;IPK;Hungary;C. sativa ssp. sativa var. sativa;;;Fleischmann hemp;Low;Low;Dioecious;Late;Hybrid;M
+C62_04;pool2;sample;Kompolti;C62;IPK;Hungary;C. sativa ssp. sativa var. sativa;;;Fleischmann hemp;Low;Low;Dioecious;Late;Hybrid;M
+C62_05;pool2;sample;Kompolti;C62;IPK;Hungary;C. sativa ssp. sativa var. sativa;;;Fleischmann hemp;Low;Low;Dioecious;Late;Hybrid;M
+C62_06;pool2;sample;Kompolti;C62;IPK;Hungary;C. sativa ssp. sativa var. sativa;;;Fleischmann hemp;Low;Low;Dioecious;Late;Hybrid;M
+C62_07;pool2;sample;Kompolti;C62;IPK;Hungary;C. sativa ssp. sativa var. sativa;;;Fleischmann hemp;Low;Low;Dioecious;Late;Hybrid;M
+C62_08;pool2;sample;Kompolti;C62;IPK;Hungary;C. sativa ssp. sativa var. sativa;;;Fleischmann hemp;Low;Low;Dioecious;Late;Hybrid;M
+C62_09;pool2;sample;Kompolti;C62;IPK;Hungary;C. sativa ssp. sativa var. sativa;;;Fleischmann hemp;Low;Low;Dioecious;Late;Hybrid;M
+C62_10;pool2;sample;Kompolti;C62;IPK;Hungary;C. sativa ssp. sativa var. sativa;;;Fleischmann hemp;Low;Low;Dioecious;Late;Hybrid;M
+C65_01;pool2;sample;Beniko;C65;CRI;Poland;C. sativa ssp. sativa var. sativa;Inbred line;High;Fibrimon 24 x Fibrimon 21 selection;Low;Low;Monoecious;Early;Hybrid;M
+C65_02;pool2;sample;Beniko;C65;CRI;Poland;C. sativa ssp. sativa var. sativa;Inbred line;High;Fibrimon 24 x Fibrimon 21 selection;Low;Low;Monoecious;Early;Hybrid;M
+C65_03;pool2;sample;Beniko;C65;CRI;Poland;C. sativa ssp. sativa var. sativa;Inbred line;High;Fibrimon 24 x Fibrimon 21 selection;Low;Low;Monoecious;Early;Hybrid;M
+C65_04;pool2;sample;Beniko;C65;CRI;Poland;C. sativa ssp. sativa var. sativa;Inbred line;High;Fibrimon 24 x Fibrimon 21 selection;Low;Low;Monoecious;Early;Hybrid;M
+C65_05;pool2;sample;Beniko;C65;CRI;Poland;C. sativa ssp. sativa var. sativa;Inbred line;High;Fibrimon 24 x Fibrimon 21 selection;Low;Low;Monoecious;Early;Hybrid;M
+C65_06;pool2;sample;Beniko;C65;CRI;Poland;C. sativa ssp. sativa var. sativa;Inbred line;High;Fibrimon 24 x Fibrimon 21 selection;Low;Low;Monoecious;Early;Hybrid;M
+C65_07;pool2;sample;Beniko;C65;CRI;Poland;C. sativa ssp. sativa var. sativa;Inbred line;High;Fibrimon 24 x Fibrimon 21 selection;Low;Low;Monoecious;Early;Hybrid;M
+C65_08;pool2;sample;Beniko;C65;CRI;Poland;C. sativa ssp. sativa var. sativa;Inbred line;High;Fibrimon 24 x Fibrimon 21 selection;Low;Low;Monoecious;Early;Hybrid;M
+C65_09;pool2;sample;Beniko;C65;CRI;Poland;C. sativa ssp. sativa var. sativa;Inbred line;High;Fibrimon 24 x Fibrimon 21 selection;Low;Low;Monoecious;Early;Hybrid;M
+C65_10;pool2;sample;Beniko;C65;CRI;Poland;C. sativa ssp. sativa var. sativa;Inbred line;High;Fibrimon 24 x Fibrimon 21 selection;Low;Low;Monoecious;Early;Hybrid;M
+C67_01;pool2;sample;Finola;C67;CRI;Finland;C. sativa ssp. sativa var. sativa;Cross hybrid;High;;Low;Low;Dioecious;Auto;Hybrid;M
+C67_02;pool2;sample;Finola;C67;CRI;Finland;C. sativa ssp. sativa var. sativa;Cross hybrid;High;;Low;Low;Dioecious;Auto;Hybrid;M
+C67_03;pool2;sample;Finola;C67;CRI;Finland;C. sativa ssp. sativa var. sativa;Cross hybrid;High;;Low;Low;Dioecious;Auto;Hybrid;M
+C67_04;pool2;sample;Finola;C67;CRI;Finland;C. sativa ssp. sativa var. sativa;Cross hybrid;High;;Low;Low;Dioecious;Auto;Hybrid;M
+C67_05;pool2;sample;Finola;C67;CRI;Finland;C. sativa ssp. sativa var. sativa;Cross hybrid;High;;Low;Low;Dioecious;Auto;Hybrid;M
+C67_06;pool2;sample;Finola;C67;CRI;Finland;C. sativa ssp. sativa var. sativa;Cross hybrid;High;;Low;Low;Dioecious;Auto;Hybrid;M
+C67_07;pool2;sample;Finola;C67;CRI;Finland;C. sativa ssp. sativa var. sativa;Cross hybrid;High;;Low;Low;Dioecious;Auto;Hybrid;M
+C67_08;pool2;sample;Finola;C67;CRI;Finland;C. sativa ssp. sativa var. sativa;Cross hybrid;High;;Low;Low;Dioecious;Auto;Hybrid;M
+C67_09;pool2;sample;Finola;C67;CRI;Finland;C. sativa ssp. sativa var. sativa;Cross hybrid;High;;Low;Low;Dioecious;Auto;Hybrid;M
+C67_10;pool2;sample;Finola;C67;CRI;Finland;C. sativa ssp. sativa var. sativa;Cross hybrid;High;;Low;Low;Dioecious;Auto;Hybrid;M
+C70_01;pool2;sample;Purini;C70;LVMI Silava;Latvia;C. sativa ssp. sativa;Landrace;Low;;Low;Low;Dioecious;Early;;
+C70_02;pool2;sample;Purini;C70;LVMI Silava;Latvia;C. sativa ssp. sativa;Landrace;Low;;Low;Low;Dioecious;Early;;
+C70_03;pool2;sample;Purini;C70;LVMI Silava;Latvia;C. sativa ssp. sativa;Landrace;Low;;Low;Low;Dioecious;Early;;
+C70_04;pool2;sample;Purini;C70;LVMI Silava;Latvia;C. sativa ssp. sativa;Landrace;Low;;Low;Low;Dioecious;Early;;
+C70_05;pool2;sample;Purini;C70;LVMI Silava;Latvia;C. sativa ssp. sativa;Landrace;Low;;Low;Low;Dioecious;Early;;
+C70_06;pool2;sample;Purini;C70;LVMI Silava;Latvia;C. sativa ssp. sativa;Landrace;Low;;Low;Low;Dioecious;Early;;
+C70_07;pool2;sample;Purini;C70;LVMI Silava;Latvia;C. sativa ssp. sativa;Landrace;Low;;Low;Low;Dioecious;Early;;
+C70_08;pool2;sample;Purini;C70;LVMI Silava;Latvia;C. sativa ssp. sativa;Landrace;Low;;Low;Low;Dioecious;Early;;
+C70_09;pool2;sample;Purini;C70;LVMI Silava;Latvia;C. sativa ssp. sativa;Landrace;Low;;Low;Low;Dioecious;Early;;
+C70_10;pool2;sample;Purini;C70;LVMI Silava;Latvia;C. sativa ssp. sativa;Landrace;Low;;Low;Low;Dioecious;Early;;
+C72_01;pool2;sample;Ferimon;C72;Hanfama GmbH;France;C. sativa ssp. sativa var. sativa;Inbred line;High;Fibrimon 21 selection;Low;Low;Monoecious;Early;Hybrid;M
+C72_02;pool2;sample;Ferimon;C72;Hanfama GmbH;France;C. sativa ssp. sativa var. sativa;Inbred line;High;Fibrimon 21 selection;Low;Low;Monoecious;Early;Hybrid;M
+C72_03;pool2;sample;Ferimon;C72;Hanfama GmbH;France;C. sativa ssp. sativa var. sativa;Inbred line;High;Fibrimon 21 selection;Low;Low;Monoecious;Early;Hybrid;M
+C72_04;pool2;sample;Ferimon;C72;Hanfama GmbH;France;C. sativa ssp. sativa var. sativa;Inbred line;High;Fibrimon 21 selection;Low;Low;Monoecious;Early;Hybrid;M
+C72_05;pool2;sample;Ferimon;C72;Hanfama GmbH;France;C. sativa ssp. sativa var. sativa;Inbred line;High;Fibrimon 21 selection;Low;Low;Monoecious;Early;Hybrid;M
+C72_06;pool2;sample;Ferimon;C72;Hanfama GmbH;France;C. sativa ssp. sativa var. sativa;Inbred line;High;Fibrimon 21 selection;Low;Low;Monoecious;Early;Hybrid;M
+C72_07;pool2;sample;Ferimon;C72;Hanfama GmbH;France;C. sativa ssp. sativa var. sativa;Inbred line;High;Fibrimon 21 selection;Low;Low;Monoecious;Early;Hybrid;M
+C72_08;pool2;sample;Ferimon;C72;Hanfama GmbH;France;C. sativa ssp. sativa var. sativa;Inbred line;High;Fibrimon 21 selection;Low;Low;Monoecious;Early;Hybrid;M
+C72_09;pool2;sample;Ferimon;C72;Hanfama GmbH;France;C. sativa ssp. sativa var. sativa;Inbred line;High;Fibrimon 21 selection;Low;Low;Monoecious;Early;Hybrid;M
+C72_10;pool2;sample;Ferimon;C72;Hanfama GmbH;France;C. sativa ssp. sativa var. sativa;Inbred line;High;Fibrimon 21 selection;Low;Low;Monoecious;Early;Hybrid;M
+C73_01;pool2;sample;Felina 32;C73;Hanfama GmbH;France;C. sativa ssp. sativa var. sativa;Inbred line;High;(Kompolti x Fibrimon 24) x Fibrimon 24;Low;Low;Monoecious;Intermediate;Hybrid;M
+C73_02;pool2;sample;Felina 32;C73;Hanfama GmbH;France;C. sativa ssp. sativa var. sativa;Inbred line;High;(Kompolti x Fibrimon 24) x Fibrimon 24;Low;Low;Monoecious;Intermediate;Hybrid;M
+C73_03;pool2;sample;Felina 32;C73;Hanfama GmbH;France;C. sativa ssp. sativa var. sativa;Inbred line;High;(Kompolti x Fibrimon 24) x Fibrimon 24;Low;Low;Monoecious;Intermediate;Hybrid;M
+C73_04;pool2;sample;Felina 32;C73;Hanfama GmbH;France;C. sativa ssp. sativa var. sativa;Inbred line;High;(Kompolti x Fibrimon 24) x Fibrimon 24;Low;Low;Monoecious;Intermediate;Hybrid;M
+C73_05;pool2;sample;Felina 32;C73;Hanfama GmbH;France;C. sativa ssp. sativa var. sativa;Inbred line;High;(Kompolti x Fibrimon 24) x Fibrimon 24;Low;Low;Monoecious;Intermediate;Hybrid;M
+C73_06;pool2;sample;Felina 32;C73;Hanfama GmbH;France;C. sativa ssp. sativa var. sativa;Inbred line;High;(Kompolti x Fibrimon 24) x Fibrimon 24;Low;Low;Monoecious;Intermediate;Hybrid;M
+C73_07;pool2;sample;Felina 32;C73;Hanfama GmbH;France;C. sativa ssp. sativa var. sativa;Inbred line;High;(Kompolti x Fibrimon 24) x Fibrimon 24;Low;Low;Monoecious;Intermediate;Hybrid;M
+C73_08;pool2;sample;Felina 32;C73;Hanfama GmbH;France;C. sativa ssp. sativa var. sativa;Inbred line;High;(Kompolti x Fibrimon 24) x Fibrimon 24;Low;Low;Monoecious;Intermediate;Hybrid;M
+C73_09;pool2;sample;Felina 32;C73;Hanfama GmbH;France;C. sativa ssp. sativa var. sativa;Inbred line;High;(Kompolti x Fibrimon 24) x Fibrimon 24;Low;Low;Monoecious;Intermediate;Hybrid;M
+C73_10;pool2;sample;Felina 32;C73;Hanfama GmbH;France;C. sativa ssp. sativa var. sativa;Inbred line;High;(Kompolti x Fibrimon 24) x Fibrimon 24;Low;Low;Monoecious;Intermediate;Hybrid;M
+C74_01;pool2;sample;Futura 75;C74;Hanfama GmbH;France;C. sativa ssp. sativa var. sativa;Inbred line;High;(Fibrida x Fibrimon 24) x Fibrimon 24;Low;Low;Monoecious;Late;Hybrid;M
+C74_02;pool2;sample;Futura 75;C74;Hanfama GmbH;France;C. sativa ssp. sativa var. sativa;Inbred line;High;(Fibrida x Fibrimon 24) x Fibrimon 24;Low;Low;Monoecious;Late;Hybrid;M
+C74_03;pool2;sample;Futura 75;C74;Hanfama GmbH;France;C. sativa ssp. sativa var. sativa;Inbred line;High;(Fibrida x Fibrimon 24) x Fibrimon 24;Low;Low;Monoecious;Late;Hybrid;M
+C74_04;pool2;sample;Futura 75;C74;Hanfama GmbH;France;C. sativa ssp. sativa var. sativa;Inbred line;High;(Fibrida x Fibrimon 24) x Fibrimon 24;Low;Low;Monoecious;Late;Hybrid;M
+C74_05;pool2;sample;Futura 75;C74;Hanfama GmbH;France;C. sativa ssp. sativa var. sativa;Inbred line;High;(Fibrida x Fibrimon 24) x Fibrimon 24;Low;Low;Monoecious;Late;Hybrid;M
+C74_06;pool2;sample;Futura 75;C74;Hanfama GmbH;France;C. sativa ssp. sativa var. sativa;Inbred line;High;(Fibrida x Fibrimon 24) x Fibrimon 24;Low;Low;Monoecious;Late;Hybrid;M
+C74_07;pool2;sample;Futura 75;C74;Hanfama GmbH;France;C. sativa ssp. sativa var. sativa;Inbred line;High;(Fibrida x Fibrimon 24) x Fibrimon 24;Low;Low;Monoecious;Late;Hybrid;M
+C74_08;pool2;sample;Futura 75;C74;Hanfama GmbH;France;C. sativa ssp. sativa var. sativa;Inbred line;High;(Fibrida x Fibrimon 24) x Fibrimon 24;Low;Low;Monoecious;Late;Hybrid;M
+C74_09;pool2;sample;Futura 75;C74;Hanfama GmbH;France;C. sativa ssp. sativa var. sativa;Inbred line;High;(Fibrida x Fibrimon 24) x Fibrimon 24;Low;Low;Monoecious;Late;Hybrid;M
+C74_10;pool2;sample;Futura 75;C74;Hanfama GmbH;France;C. sativa ssp. sativa var. sativa;Inbred line;High;(Fibrida x Fibrimon 24) x Fibrimon 24;Low;Low;Monoecious;Late;Hybrid;M
+C75_01;pool2;sample;Orion 33;C75;Hanfama GmbH;France;C. sativa ssp. sativa var. sativa;;;;Low;Low;Monoecious;Intermediate;Hybrid;M
+C75_02;pool2;sample;Orion 33;C75;Hanfama GmbH;France;C. sativa ssp. sativa var. sativa;;;;Low;Low;Monoecious;Intermediate;Hybrid;M
+C75_03;pool2;sample;Orion 33;C75;Hanfama GmbH;France;C. sativa ssp. sativa var. sativa;;;;Low;Low;Monoecious;Intermediate;Hybrid;M
+C75_04;pool2;sample;Orion 33;C75;Hanfama GmbH;France;C. sativa ssp. sativa var. sativa;;;;Low;Low;Monoecious;Intermediate;Hybrid;M
+C75_05;pool2;sample;Orion 33;C75;Hanfama GmbH;France;C. sativa ssp. sativa var. sativa;;;;Low;Low;Monoecious;Intermediate;Hybrid;M
+C75_06;pool2;sample;Orion 33;C75;Hanfama GmbH;France;C. sativa ssp. sativa var. sativa;;;;Low;Low;Monoecious;Intermediate;Hybrid;M
+C75_07;pool2;sample;Orion 33;C75;Hanfama GmbH;France;C. sativa ssp. sativa var. sativa;;;;Low;Low;Monoecious;Intermediate;Hybrid;M
+C75_08;pool2;sample;Orion 33;C75;Hanfama GmbH;France;C. sativa ssp. sativa var. sativa;;;;Low;Low;Monoecious;Intermediate;Hybrid;M
+C75_09;pool2;sample;Orion 33;C75;Hanfama GmbH;France;C. sativa ssp. sativa var. sativa;;;;Low;Low;Monoecious;Intermediate;Hybrid;M
+C75_10;pool2;sample;Orion 33;C75;Hanfama GmbH;France;C. sativa ssp. sativa var. sativa;;;;Low;Low;Monoecious;Intermediate;Hybrid;M
+C76_01;pool2;sample;The Church CBD;C76;Green House Seed Co.;;C. sativa ssp. indica var. indica;;;Afghani 1 x Mexican sativa x Skunk 1;CBD/THC-rich;High;Dioecious;Late;Hybrid;
+C76_02;pool2;sample;The Church CBD;C76;Green House Seed Co.;;C. sativa ssp. indica var. indica;;;Afghani 1 x Mexican sativa x Skunk 1;CBD/THC-rich;High;Dioecious;Late;Hybrid;
+C76_03;pool2;sample;The Church CBD;C76;Green House Seed Co.;;C. sativa ssp. indica var. indica;;;Afghani 1 x Mexican sativa x Skunk 1;CBD/THC-rich;High;Dioecious;Late;Hybrid;
+C76_04;pool2;sample;The Church CBD;C76;Green House Seed Co.;;C. sativa ssp. indica var. indica;;;Afghani 1 x Mexican sativa x Skunk 1;CBD/THC-rich;High;Dioecious;Late;Hybrid;
+C76_05;pool2;sample;The Church CBD;C76;Green House Seed Co.;;C. sativa ssp. indica var. indica;;;Afghani 1 x Mexican sativa x Skunk 1;CBD/THC-rich;High;Dioecious;Late;Hybrid;
+C76_06;pool2;sample;The Church CBD;C76;Green House Seed Co.;;C. sativa ssp. indica var. indica;;;Afghani 1 x Mexican sativa x Skunk 1;CBD/THC-rich;High;Dioecious;Late;Hybrid;
+C76_07;pool2;sample;The Church CBD;C76;Green House Seed Co.;;C. sativa ssp. indica var. indica;;;Afghani 1 x Mexican sativa x Skunk 1;CBD/THC-rich;High;Dioecious;Late;Hybrid;
+C76_08;pool2;sample;The Church CBD;C76;Green House Seed Co.;;C. sativa ssp. indica var. indica;;;Afghani 1 x Mexican sativa x Skunk 1;CBD/THC-rich;High;Dioecious;Late;Hybrid;
+C76_09;pool2;sample;The Church CBD;C76;Green House Seed Co.;;C. sativa ssp. indica var. indica;;;Afghani 1 x Mexican sativa x Skunk 1;CBD/THC-rich;High;Dioecious;Late;Hybrid;
+C76_10;pool2;sample;The Church CBD;C76;Green House Seed Co.;;C. sativa ssp. indica var. indica;;;Afghani 1 x Mexican sativa x Skunk 1;CBD/THC-rich;High;Dioecious;Late;Hybrid;
+C77_01;pool2;sample;Arjans Haze 3;C77;Green House Seed Co.;;C. sativa ssp. indica var. indica;;;(Mexican x Colombian x Thai x Indian) x Laos landrace;THC-rich;High;Dioecious;Late;Hybrid;
+C77_02;pool2;sample;Arjans Haze 3;C77;Green House Seed Co.;;C. sativa ssp. indica var. indica;;;(Mexican x Colombian x Thai x Indian) x Laos landrace;THC-rich;High;Dioecious;Late;Hybrid;
+C77_03;pool2;sample;Arjans Haze 3;C77;Green House Seed Co.;;C. sativa ssp. indica var. indica;;;(Mexican x Colombian x Thai x Indian) x Laos landrace;THC-rich;High;Dioecious;Late;Hybrid;
+C77_04;pool2;sample;Arjans Haze 3;C77;Green House Seed Co.;;C. sativa ssp. indica var. indica;;;(Mexican x Colombian x Thai x Indian) x Laos landrace;THC-rich;High;Dioecious;Late;Hybrid;
+C77_05;pool2;sample;Arjans Haze 3;C77;Green House Seed Co.;;C. sativa ssp. indica var. indica;;;(Mexican x Colombian x Thai x Indian) x Laos landrace;THC-rich;High;Dioecious;Late;Hybrid;
+C77_06;pool2;sample;Arjans Haze 3;C77;Green House Seed Co.;;C. sativa ssp. indica var. indica;;;(Mexican x Colombian x Thai x Indian) x Laos landrace;THC-rich;High;Dioecious;Late;Hybrid;
+C77_07;pool2;sample;Arjans Haze 3;C77;Green House Seed Co.;;C. sativa ssp. indica var. indica;;;(Mexican x Colombian x Thai x Indian) x Laos landrace;THC-rich;High;Dioecious;Late;Hybrid;
+C77_08;pool2;sample;Arjans Haze 3;C77;Green House Seed Co.;;C. sativa ssp. indica var. indica;;;(Mexican x Colombian x Thai x Indian) x Laos landrace;THC-rich;High;Dioecious;Late;Hybrid;
+C77_09;pool2;sample;Arjans Haze 3;C77;Green House Seed Co.;;C. sativa ssp. indica var. indica;;;(Mexican x Colombian x Thai x Indian) x Laos landrace;THC-rich;High;Dioecious;Late;Hybrid;
+C77_10;pool2;sample;Arjans Haze 3;C77;Green House Seed Co.;;C. sativa ssp. indica var. indica;;;(Mexican x Colombian x Thai x Indian) x Laos landrace;THC-rich;High;Dioecious;Late;Hybrid;
+C8_01;pool1;sample;Carmagnola;C8;Hanfama GmbH;Italy;C. sativa ssp. sativa var. sativa;Landrace;Low;;Low;Low;Dioecious;Late;;M
+C8_02;pool1;sample;Carmagnola;C8;Hanfama GmbH;Italy;C. sativa ssp. sativa var. sativa;Landrace;Low;;Low;Low;Dioecious;Late;;M
+C8_03;pool1;sample;Carmagnola;C8;Hanfama GmbH;Italy;C. sativa ssp. sativa var. sativa;Landrace;Low;;Low;Low;Dioecious;Late;;M
+C8_04;pool1;sample;Carmagnola;C8;Hanfama GmbH;Italy;C. sativa ssp. sativa var. sativa;Landrace;Low;;Low;Low;Dioecious;Late;;M
+C8_05;pool1;sample;Carmagnola;C8;Hanfama GmbH;Italy;C. sativa ssp. sativa var. sativa;Landrace;Low;;Low;Low;Dioecious;Late;;M
+C8_06;pool1;sample;Carmagnola;C8;Hanfama GmbH;Italy;C. sativa ssp. sativa var. sativa;Landrace;Low;;Low;Low;Dioecious;Late;;M
+C8_07;pool1;sample;Carmagnola;C8;Hanfama GmbH;Italy;C. sativa ssp. sativa var. sativa;Landrace;Low;;Low;Low;Dioecious;Late;;M
+C8_08;pool1;sample;Carmagnola;C8;Hanfama GmbH;Italy;C. sativa ssp. sativa var. sativa;Landrace;Low;;Low;Low;Dioecious;Late;;M
+C8_09;pool1;sample;Carmagnola;C8;Hanfama GmbH;Italy;C. sativa ssp. sativa var. sativa;Landrace;Low;;Low;Low;Dioecious;Late;;M
+C8_10;pool1;sample;Carmagnola;C8;Hanfama GmbH;Italy;C. sativa ssp. sativa var. sativa;Landrace;Low;;Low;Low;Dioecious;Late;;M
+C86_01;pool2;sample;Hindu Kush;C86;Sensi Seeds;Afghanistan;C. sativa ssp. indica var. indica;Landrace;Low;;THC-rich;High;Dioecious;;;
+C86_02;pool2;sample;Hindu Kush;C86;Sensi Seeds;Afghanistan;C. sativa ssp. indica var. indica;Landrace;Low;;THC-rich;High;Dioecious;;;
+C86_03;pool2;sample;Hindu Kush;C86;Sensi Seeds;Afghanistan;C. sativa ssp. indica var. indica;Landrace;Low;;THC-rich;High;Dioecious;;;
+C86_04;pool2;sample;Hindu Kush;C86;Sensi Seeds;Afghanistan;C. sativa ssp. indica var. indica;Landrace;Low;;THC-rich;High;Dioecious;;;
+C86_05;pool2;sample;Hindu Kush;C86;Sensi Seeds;Afghanistan;C. sativa ssp. indica var. indica;Landrace;Low;;THC-rich;High;Dioecious;;;
+C86_06;pool2;sample;Hindu Kush;C86;Sensi Seeds;Afghanistan;C. sativa ssp. indica var. indica;Landrace;Low;;THC-rich;High;Dioecious;;;
+C86_07;pool2;sample;Hindu Kush;C86;Sensi Seeds;Afghanistan;C. sativa ssp. indica var. indica;Landrace;Low;;THC-rich;High;Dioecious;;;
+C86_08;pool2;sample;Hindu Kush;C86;Sensi Seeds;Afghanistan;C. sativa ssp. indica var. indica;Landrace;Low;;THC-rich;High;Dioecious;;;
+C87_01;pool3;sample;Afghani 1;C87;Sensi Seeds;Afghanistan;C. sativa ssp. indica var. indica;Landrace;Low;;THC-rich;High;Dioecious;Late;;M
+C87_02;pool3;sample;Afghani 1;C87;Sensi Seeds;Afghanistan;C. sativa ssp. indica var. indica;Landrace;Low;;THC-rich;High;Dioecious;Late;;M
+C87_03;pool3;sample;Afghani 1;C87;Sensi Seeds;Afghanistan;C. sativa ssp. indica var. indica;Landrace;Low;;THC-rich;High;Dioecious;Late;;M
+C87_04;pool3;sample;Afghani 1;C87;Sensi Seeds;Afghanistan;C. sativa ssp. indica var. indica;Landrace;Low;;THC-rich;High;Dioecious;Late;;M
+C87_05;pool3;sample;Afghani 1;C87;Sensi Seeds;Afghanistan;C. sativa ssp. indica var. indica;Landrace;Low;;THC-rich;High;Dioecious;Late;;M
+C87_06;pool3;sample;Afghani 1;C87;Sensi Seeds;Afghanistan;C. sativa ssp. indica var. indica;Landrace;Low;;THC-rich;High;Dioecious;Late;;M
+C87_07;pool3;sample;Afghani 1;C87;Sensi Seeds;Afghanistan;C. sativa ssp. indica var. indica;Landrace;Low;;THC-rich;High;Dioecious;Late;;M
+C87_08;pool3;sample;Afghani 1;C87;Sensi Seeds;Afghanistan;C. sativa ssp. indica var. indica;Landrace;Low;;THC-rich;High;Dioecious;Late;;M
+C87_09;pool3;sample;Afghani 1;C87;Sensi Seeds;Afghanistan;C. sativa ssp. indica var. indica;Landrace;Low;;THC-rich;High;Dioecious;Late;;M
+C87_10;pool3;sample;Afghani 1;C87;Sensi Seeds;Afghanistan;C. sativa ssp. indica var. indica;Landrace;Low;;THC-rich;High;Dioecious;Late;;M
+C88_01;pool3;sample;Skunk 1;C88;Sensi Seeds;;C. sativa ssp. indica var. indica;Cross hybrid;High;Afghani 1 x Mexican acapulco gold x Colombian gold;THC-rich;High;Dioecious;Late;Hybrid;
+C88_02;pool3;sample;Skunk 1;C88;Sensi Seeds;;C. sativa ssp. indica var. indica;Cross hybrid;High;Afghani 1 x Mexican acapulco gold x Colombian gold;THC-rich;High;Dioecious;Late;Hybrid;
+C88_03;pool3;sample;Skunk 1;C88;Sensi Seeds;;C. sativa ssp. indica var. indica;Cross hybrid;High;Afghani 1 x Mexican acapulco gold x Colombian gold;THC-rich;High;Dioecious;Late;Hybrid;
+C88_04;pool3;sample;Skunk 1;C88;Sensi Seeds;;C. sativa ssp. indica var. indica;Cross hybrid;High;Afghani 1 x Mexican acapulco gold x Colombian gold;THC-rich;High;Dioecious;Late;Hybrid;
+C88_05;pool3;sample;Skunk 1;C88;Sensi Seeds;;C. sativa ssp. indica var. indica;Cross hybrid;High;Afghani 1 x Mexican acapulco gold x Colombian gold;THC-rich;High;Dioecious;Late;Hybrid;
+C88_06;pool3;sample;Skunk 1;C88;Sensi Seeds;;C. sativa ssp. indica var. indica;Cross hybrid;High;Afghani 1 x Mexican acapulco gold x Colombian gold;THC-rich;High;Dioecious;Late;Hybrid;
+C88_07;pool3;sample;Skunk 1;C88;Sensi Seeds;;C. sativa ssp. indica var. indica;Cross hybrid;High;Afghani 1 x Mexican acapulco gold x Colombian gold;THC-rich;High;Dioecious;Late;Hybrid;
+C88_08;pool3;sample;Skunk 1;C88;Sensi Seeds;;C. sativa ssp. indica var. indica;Cross hybrid;High;Afghani 1 x Mexican acapulco gold x Colombian gold;THC-rich;High;Dioecious;Late;Hybrid;
+C88_09;pool3;sample;Skunk 1;C88;Sensi Seeds;;C. sativa ssp. indica var. indica;Cross hybrid;High;Afghani 1 x Mexican acapulco gold x Colombian gold;THC-rich;High;Dioecious;Late;Hybrid;
+C88_10;pool3;sample;Skunk 1;C88;Sensi Seeds;;C. sativa ssp. indica var. indica;Cross hybrid;High;Afghani 1 x Mexican acapulco gold x Colombian gold;THC-rich;High;Dioecious;Late;Hybrid;
+C89_01;pool3;sample;Ruderalis Indica;C89;Sensi Seeds;;C. sativa ssp. indica var. indica x ssp. sativa var. spontanea;Cross hybrid;High;;CBD-rich;High;Dioecious;Auto;Hybrid;M
+C89_02;pool3;sample;Ruderalis Indica;C89;Sensi Seeds;;C. sativa ssp. indica var. indica x ssp. sativa var. spontanea;Cross hybrid;High;;CBD-rich;High;Dioecious;Auto;Hybrid;M
+C89_03;pool3;sample;Ruderalis Indica;C89;Sensi Seeds;;C. sativa ssp. indica var. indica x ssp. sativa var. spontanea;Cross hybrid;High;;CBD-rich;High;Dioecious;Auto;Hybrid;M
+C89_04;pool3;sample;Ruderalis Indica;C89;Sensi Seeds;;C. sativa ssp. indica var. indica x ssp. sativa var. spontanea;Cross hybrid;High;;CBD-rich;High;Dioecious;Auto;Hybrid;M
+C89_05;pool3;sample;Ruderalis Indica;C89;Sensi Seeds;;C. sativa ssp. indica var. indica x ssp. sativa var. spontanea;Cross hybrid;High;;CBD-rich;High;Dioecious;Auto;Hybrid;M
+C89_06;pool3;sample;Ruderalis Indica;C89;Sensi Seeds;;C. sativa ssp. indica var. indica x ssp. sativa var. spontanea;Cross hybrid;High;;CBD-rich;High;Dioecious;Auto;Hybrid;M
+C89_07;pool3;sample;Ruderalis Indica;C89;Sensi Seeds;;C. sativa ssp. indica var. indica x ssp. sativa var. spontanea;Cross hybrid;High;;CBD-rich;High;Dioecious;Auto;Hybrid;M
+C89_08;pool3;sample;Ruderalis Indica;C89;Sensi Seeds;;C. sativa ssp. indica var. indica x ssp. sativa var. spontanea;Cross hybrid;High;;CBD-rich;High;Dioecious;Auto;Hybrid;M
+C89_09;pool3;sample;Ruderalis Indica;C89;Sensi Seeds;;C. sativa ssp. indica var. indica x ssp. sativa var. spontanea;Cross hybrid;High;;CBD-rich;High;Dioecious;Auto;Hybrid;M
+C89_10;pool3;sample;Ruderalis Indica;C89;Sensi Seeds;;C. sativa ssp. indica var. indica x ssp. sativa var. spontanea;Cross hybrid;High;;CBD-rich;High;Dioecious;Auto;Hybrid;M
+C9_01;pool1;sample;Santhica 27;C9;Hanfama GmbH;France;C. sativa ssp. sativa var. sativa;;;;Low;Low;Monoecious;Intermediate;Hybrid;M
+C9_02;pool1;sample;Santhica 27;C9;Hanfama GmbH;France;C. sativa ssp. sativa var. sativa;;;;Low;Low;Monoecious;Intermediate;Hybrid;M
+C9_03;pool1;sample;Santhica 27;C9;Hanfama GmbH;France;C. sativa ssp. sativa var. sativa;;;;Low;Low;Monoecious;Intermediate;Hybrid;M
+C9_04;pool1;sample;Santhica 27;C9;Hanfama GmbH;France;C. sativa ssp. sativa var. sativa;;;;Low;Low;Monoecious;Intermediate;Hybrid;M
+C9_05;pool1;sample;Santhica 27;C9;Hanfama GmbH;France;C. sativa ssp. sativa var. sativa;;;;Low;Low;Monoecious;Intermediate;Hybrid;M
+C9_06;pool1;sample;Santhica 27;C9;Hanfama GmbH;France;C. sativa ssp. sativa var. sativa;;;;Low;Low;Monoecious;Intermediate;Hybrid;M
+C9_07;pool1;sample;Santhica 27;C9;Hanfama GmbH;France;C. sativa ssp. sativa var. sativa;;;;Low;Low;Monoecious;Intermediate;Hybrid;M
+C9_08;pool1;sample;Santhica 27;C9;Hanfama GmbH;France;C. sativa ssp. sativa var. sativa;;;;Low;Low;Monoecious;Intermediate;Hybrid;M
+C9_09;pool1;sample;Santhica 27;C9;Hanfama GmbH;France;C. sativa ssp. sativa var. sativa;;;;Low;Low;Monoecious;Intermediate;Hybrid;M
+C9_11;pool1;sample;Santhica 27;C9;Hanfama GmbH;France;C. sativa ssp. sativa var. sativa;;;;Low;Low;Monoecious;Intermediate;Hybrid;M
+C90_01;pool3;sample;Mexican Sativa;C90;Sensi Seeds;;C. sativa ssp. indica var. indica;Cross hybrid;High;Oaxaca x Durban x Hash Pakistan;THC-rich;High;Dioecious;Late;Hybrid;M
+C90_02;pool3;sample;Mexican Sativa;C90;Sensi Seeds;;C. sativa ssp. indica var. indica;Cross hybrid;High;Oaxaca x Durban x Hash Pakistan;THC-rich;High;Dioecious;Late;Hybrid;M
+C90_03;pool3;sample;Mexican Sativa;C90;Sensi Seeds;;C. sativa ssp. indica var. indica;Cross hybrid;High;Oaxaca x Durban x Hash Pakistan;THC-rich;High;Dioecious;Late;Hybrid;M
+C90_04;pool3;sample;Mexican Sativa;C90;Sensi Seeds;;C. sativa ssp. indica var. indica;Cross hybrid;High;Oaxaca x Durban x Hash Pakistan;THC-rich;High;Dioecious;Late;Hybrid;M
+C90_05;pool3;sample;Mexican Sativa;C90;Sensi Seeds;;C. sativa ssp. indica var. indica;Cross hybrid;High;Oaxaca x Durban x Hash Pakistan;THC-rich;High;Dioecious;Late;Hybrid;M
+C90_06;pool3;sample;Mexican Sativa;C90;Sensi Seeds;;C. sativa ssp. indica var. indica;Cross hybrid;High;Oaxaca x Durban x Hash Pakistan;THC-rich;High;Dioecious;Late;Hybrid;M
+C90_07;pool3;sample;Mexican Sativa;C90;Sensi Seeds;;C. sativa ssp. indica var. indica;Cross hybrid;High;Oaxaca x Durban x Hash Pakistan;THC-rich;High;Dioecious;Late;Hybrid;M
+C90_08;pool3;sample;Mexican Sativa;C90;Sensi Seeds;;C. sativa ssp. indica var. indica;Cross hybrid;High;Oaxaca x Durban x Hash Pakistan;THC-rich;High;Dioecious;Late;Hybrid;M
+C90_09;pool3;sample;Mexican Sativa;C90;Sensi Seeds;;C. sativa ssp. indica var. indica;Cross hybrid;High;Oaxaca x Durban x Hash Pakistan;THC-rich;High;Dioecious;Late;Hybrid;M
+C90_10;pool3;sample;Mexican Sativa;C90;Sensi Seeds;;C. sativa ssp. indica var. indica;Cross hybrid;High;Oaxaca x Durban x Hash Pakistan;THC-rich;High;Dioecious;Late;Hybrid;M
+C91_01;pool3;sample;Master Kush;C91;Sensi Seeds;Afghanistan;C. sativa ssp. indica var. indica;Selected line;Low;Hindu Kush ;THC-rich;High;Dioecious;Late;Hybrid;
+C91_02;pool3;sample;Master Kush;C91;Sensi Seeds;Afghanistan;C. sativa ssp. indica var. indica;Selected line;Low;Hindu Kush ;THC-rich;High;Dioecious;Late;Hybrid;
+C91_03;pool3;sample;Master Kush;C91;Sensi Seeds;Afghanistan;C. sativa ssp. indica var. indica;Selected line;Low;Hindu Kush ;THC-rich;High;Dioecious;Late;Hybrid;
+C91_04;pool3;sample;Master Kush;C91;Sensi Seeds;Afghanistan;C. sativa ssp. indica var. indica;Selected line;Low;Hindu Kush ;THC-rich;High;Dioecious;Late;Hybrid;
+C91_05;pool3;sample;Master Kush;C91;Sensi Seeds;Afghanistan;C. sativa ssp. indica var. indica;Selected line;Low;Hindu Kush ;THC-rich;High;Dioecious;Late;Hybrid;
+C91_06;pool3;sample;Master Kush;C91;Sensi Seeds;Afghanistan;C. sativa ssp. indica var. indica;Selected line;Low;Hindu Kush ;THC-rich;High;Dioecious;Late;Hybrid;
+C91_07;pool3;sample;Master Kush;C91;Sensi Seeds;Afghanistan;C. sativa ssp. indica var. indica;Selected line;Low;Hindu Kush ;THC-rich;High;Dioecious;Late;Hybrid;
+C91_08;pool3;sample;Master Kush;C91;Sensi Seeds;Afghanistan;C. sativa ssp. indica var. indica;Selected line;Low;Hindu Kush ;THC-rich;High;Dioecious;Late;Hybrid;
+C91_09;pool3;sample;Master Kush;C91;Sensi Seeds;Afghanistan;C. sativa ssp. indica var. indica;Selected line;Low;Hindu Kush ;THC-rich;High;Dioecious;Late;Hybrid;
+C91_10;pool3;sample;Master Kush;C91;Sensi Seeds;Afghanistan;C. sativa ssp. indica var. indica;Selected line;Low;Hindu Kush ;THC-rich;High;Dioecious;Late;Hybrid;
+Mock_P1;pool1;M;M1;Mock;;;;;;;;;;;;
+Mock_P2;pool2;M;M2;Mock;;;;;;;;;;;;
+Mock_P3;pool3;M;M3;Mock;;;;;;;;;;;;
+NC_P1_PCR;pool1;NC;NC1;NC;;;;;;;;;;;;
+NC_P1_K;pool1;NC;NC1;NC;;;;;;;;;;;;
+NC_P2_PCR;pool2;NC;NC2;NC;;;;;;;;;;;;
+NC_P2_K;pool2;NC;NC2;NC;;;;;;;;;;;;
+NC_P3_PCR;pool3;NC;NC3;NC;;;;;;;;;;;;
+NC_P3_K;pool3;NC;NC3;NC;;;;;;;;;;;;
