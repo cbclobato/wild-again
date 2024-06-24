@@ -8,27 +8,27 @@ contact: cbotocourinhalobato@tugraz.at
 ```text
 project/
 ├── data/
-│       └── metadata/
-│           ├── CB1/
-│               ├── bcpr-fw.fasta
-│               ├── bcpr-rv.fasta
-│               ├── cat.sh
-│               └── manifest.csv
-│           ├── CB2/
-│               ├── bcpr-fw.fasta
-│               ├── bcpr-rv.fasta
-│               ├── cat.sh
-│               └── manifest.csv
-│           ├── CB3/
-│               ├── bcpr-fw.fasta
-│               ├── bcpr-rv.fasta
-│               ├── cat.sh
-│               └── manifest.csv
-│           ├── metadata.csv
-│           ├── pouches1.tsv
-│           ├── pouches2.tsv
-│           ├── field23.tsv
-│           └── PLaBase-krona-mod.tsv
+│   └── metadata/
+│       ├── CB1/
+│       │   ├── bcpr-fw.fasta
+│       │   ├── bcpr-rv.fasta
+│       │   ├── cat.sh
+│       │   └── manifest.csv
+│       ├── CB2/
+│       │   ├── bcpr-fw.fasta
+│       │   ├── bcpr-rv.fasta
+│       │   ├── cat.sh
+│       │   └── manifest.csv
+│       ├── CB3/
+│       │   ├── bcpr-fw.fasta
+│       │   ├── bcpr-rv.fasta
+│       │   ├── cat.sh
+│       │   └── manifest.csv
+│       ├── metadata.csv
+│       ├── pouches-ind.tsv
+│       ├── pouches-exp.tsv
+│       ├── field23.tsv
+│       └── PLaBase.tsv
 ├── scripts/
 │   ├── qiime2/
 │   │   └── bioprocessing_pipeline.sh
@@ -53,9 +53,13 @@ project/
 - data/
   - metadata/  This subdirectory contains:
       - fasta barcode files for each pool (bcpr-fw.fasta and bcpr-rv.fasta).
-      - the concatenating files (cat.sh).
-      - the manifest files (manifest.csv).
-      - the sample information for the analysis (metadata.csv).
+      - the concatenating files for each pool (cat.sh).
+      - the manifest files for each pool (manifest.csv).
+      - the sample information for the metabarcoding analysis (metadata.csv).
+      - the metadata and measurements at individual-level in lab trials (pouches-ind.tsv)
+      - the metadata and measurments related to each replicate experiment in lab trials (pouches-exp.tsv)
+      - the metadata and measurements of the field trials (field23.tsv)
+      - the output gene class table from PLaBase (PLaBase.tsv)
 
 - scripts/
   - qiime2/  This subdirectory contains the pipeline used for:
