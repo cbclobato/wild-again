@@ -96,10 +96,10 @@ core.75.ib <- unlist(core.list[["Inbred line"]], recursive = F); core.75.ib # 11
 #      file = "outputs/r/fig_3/inbred_lines/ib-c75.RData")
 ```
 
-# Prep Biomarker list according to model predictions
+# Prep Biomarker list according to XGBoost model predictions
 
 ```{r}
-## Model prediction ran through scripts on utils/biomarkers/
+## Model prediction ran through scripts/utils/biomarkers/run-all.R
 
 pos.bmk.land <- c("ASV 3151: Pseudomonas_putida", 
                   "ASV 3399: Yersiniaceae",

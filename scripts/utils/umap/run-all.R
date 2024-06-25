@@ -5,26 +5,22 @@
 rm(list = ls())
 
 library(phyloseq)
-library(RColorBrewer)
 
-
-source("scripts/r/umap/data.R")
-source("scripts/r/umap/project.R")
-source("scripts/r/umap/cluster-analysis.R")
+source("scripts/utils/umap/data.R")
+source("scripts/utils/umap/project.R")
 
 # Config =======================================================================
 
 # General
 seed <- 1234
 set.seed(seed)
-input_path <- "data/umap"
-output_path <- "outputs/umap"
+input_path <- "outputs/r/fig_2/umap"
+output_path <- "outputs/r/fig_2/umap"
 dir.create(input_path, FALSE, TRUE)
 dir.create(output_path, FALSE, TRUE)
 
 # Preprocessing
 true_false <- c(TRUE)
-# true_false <- c(TRUE, FALSE)
 
 # Data
 name <- "domestication"
@@ -50,15 +46,13 @@ cfg$random_seed = 5432
 
 # Figure
 label_name <- "domestication"
-# label_name <- "dom2"
-
 
 # Preprocessing ================================================================
 print("Preprocessing...")
 # true_false <- c(TRUE, FALSE)
 
 
-load("outputs/r/supplementary/bh.RData")
+load("outputs/r/setup/bh.RData")
 dataset <- preprocess_umap_asv(bh,
                                name = name,
                                normalize = normalized)
@@ -86,54 +80,6 @@ df_postproc <-
   )
 
 save(df_postproc, file = "outputs/r/fig_2/UMAP.RData")
-
-# Cluster analysis =============================================================
-source("scripts/r/umap/cluster-analysis.R")
-embeds <- df_postproc[,c("UMAP 1", "UMAP 2")]
-labels <- df_postproc[,"Domestication"]
-p <- silhouette_plot(embeds, labels)
-print(p)
-# Test
-# embeds <- df_postproc [,c("UMAP 1", "UMAP 2")]
-# labels <- df_postproc[,"Domestication"]
-# labels_int <- as.integer(labels)
-# sil.obj <-
-#   silhouette(labels_int, dist(embeds, method = "euclidean"), full = TRUE)
-# fviz_silhouette(sil.obj)
-
-
-# Figures ======================================================================
-p1 <-
-  ggplot(df_postproc,
-         aes(
-           x = `UMAP 1`,
-           y = `UMAP 2`,
-           color = Domestication,
-           shape = Chemotype
-         )) +
-  geom_point() +
-  scale_color_discrete(type = palette_domestication) +
-  scale_shape_manual(values = c(19, 1, 4)) + # 13
-  guides(color = guide_legend(order = 1), shape = guide_legend(order = 2)) +
-  theme_classic()
-print(p1)
-
-palette_genotype <- colorRampPalette(brewer.pal(46, "Paired"))(46)
-p2 <- ggplot(df_postproc, aes(x = `UMAP 1`, y = `UMAP 2`, color = Genotype)) +
-  geom_point() +
-  scale_color_discrete(type = palette_genotype) +
-  guides(color = guide_legend(order = 1), shape = guide_legend(order = 2)) +
-  theme_classic()
-print(p2)
-
-# Query ========================================================================
-domestication_val = "Cross hybrid"
-chemotype_val = "Low"
-df_postproc %>%
-  filter(`UMAP 2` < 8 & `UMAP 1` < 10 &
-           Domestication == "Cross hybrid" &
-           Chemotype == "Low")
-
 
 # End ==========================================================================
 print("Complete!")

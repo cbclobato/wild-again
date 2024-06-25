@@ -158,12 +158,12 @@ sig.pwa <- asremlPlus::plotPvalues(pwadonis_wide_df,
 
 ## UMAP
 
-## Cluster analysis
-
 ```{r}
-source("scripts/utils/umap/cluster-analysis.R")
+# source("scripts/utils/umap/run-all.R")
 load("outputs/r/fig_2/UMAP.RData") #df_postproc from utils/umap/run-all.R
+source("scripts/utils/umap/cluster-analysis.R")
 
+## Cluster analysis
 df_postproc2 <- df_postproc %>% 
   filter(Domestication != "NA")
 
@@ -172,13 +172,7 @@ labels <- df_postproc2[,"Domestication"]
 ca <- silhouette_plot(embeds, labels)
 print(ca)
 
-p3 <- ca$p; p3
-```
-
-## Plot
-
-```{r}
-load("outputs/r/fig_2/UMAP.RData") #df_postproc from utils/umap/run-all.R
+p0 <- ca$p; p0
 
 palette_domestication <-
   c("#0EA5E9", "#ff6682", "#6159a4", "#feae01", "#a6a6a6")
@@ -212,13 +206,13 @@ p1 <-
     legend.background = element_rect(fill = "transparent", 
                                      color = "transparent"),
     legend.box = "horizontal") +
-  annotation_custom(ggplotGrob(p3),
+  annotation_custom(ggplotGrob(p0),
                     xmin = 11, xmax = 14,
                     ymin = -3, ymax = 0)
 p1
 
 save(p1,
-     file = "outputs/r/fig_2/umap.RData")
+     file = "outputs/r/fig_2/umapplot.RData")
 
 palette_genotype <- colorRampPalette(brewer.pal(46, "Paired"))(46)
 p2 <- ggplot(df_postproc, aes(x = `UMAP 1`, y = `UMAP 2`, color = Genotype)) +
@@ -468,7 +462,7 @@ save(bp_g1,
 
 ```{r}
 load("outputs/r/fig_2/heat-tree.RData") # ht
-load("outputs/r/fig_2/umap.RData") # p1
+load("outputs/r/fig_2/umapplot.RData") # p1
 load("outputs/r/fig_2/barplot.RData") # bp_g1
 
 fig2 <- cowplot::plot_grid(ht,

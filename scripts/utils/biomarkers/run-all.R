@@ -9,9 +9,9 @@ rm(list = ls())
 # library(foreach)
 # library(doParallel)
 
-source("scripts/r/biomarkers/data.R")
-source("scripts/r/biomarkers/train-eval.R")
-source("scripts/r/biomarkers/feature-importance.R")
+source("scripts/utils/biomarkers/data.R")
+source("scripts/utils/biomarkers/train-eval.R")
+source("scripts/utils/biomarkers/feature-importance.R")
 
 # cluster <- makeCluster(2)
 # registerDoParallel(cluster)
@@ -21,29 +21,26 @@ source("scripts/r/biomarkers/feature-importance.R")
 
 # General
 seed <- 12345
-input_path <- "data/biomarkers"
-output_path <- "outputs/biomarkers"
+input_path <- "outputs/r/fig_3/biomarkers"
+output_path <- "outputs/r/fig_3/biomarkers"
 
 # Preprocessing
 has_preprocess <- TRUE
 true_false <- c(TRUE)
-# true_false <- c(TRUE, FALSE)
 
 # Data
 dataset_names <- c("domestication")
-# dataset_names <- c("domestication", "domestication-2")
 filtered <- TRUE
 normalized <- TRUE
 
 # Models
-# model_names <- c("xgboost")
-model_names <- c("lda", "xgboost")
+model_names <- c("xgboost", "lda")
 eval_model <- FALSE
 
 # Feature importance
 top_n <- 10
 fill <- "#fca50a"
-label_color <- "#769C64"# , "#4A623E", "#94C47D"
+label_color <- "#769C64"
 
 dir.create(input_path, FALSE, TRUE)
 dir.create(output_path, FALSE, TRUE)
@@ -51,15 +48,13 @@ set.seed(seed)
 
 # Preprocessing ================================================================
 print("Preprocessing...")
-# true_false <- c(TRUE, FALSE)
-
 
 if (has_preprocess) {
   # foreach(dataset_name = dataset_names) %dopar% {
   for (dataset_name in dataset_names) {
     for (normalize in true_false) {
       for (filter_features in true_false) {
-        load("outputs/r/supplementary/bh.RData")
+        load("outputs/r/setup/bh.RData")
         dataset <- preprocess(bh,
                               dataset_name,
                               normalize = normalize,
@@ -97,7 +92,7 @@ for (dataset_name in dataset_names) {
 print("Feature Importance and Biomarker discovery...")
 results.imp <- list()
 for (dataset_name in dataset_names) {
-  source("scripts/r/biomarkers/feature-importance.R")
+  source("scripts/utils/biomarkers/feature-importance.R")
   result <- results[[dataset_name]]
   lda_fit_engine  <- result[["lda"]]$fit_engine
   xgb_fit_engine  <- result[["xgboost"]]$fit_engine
@@ -129,7 +124,6 @@ save(df_plot, file = "outputs/r/fig_3/biomarkers.RData")
              color = Kind,
              fill = Kind
            )) +
-    # geom_bar(stat="identity", position="dodge") +
     geom_point(position = position_dodge(width = 0.8))
   if (dataset_name == "domestication") {
     p <- p +
@@ -151,7 +145,6 @@ save(df_plot, file = "outputs/r/fig_3/biomarkers.RData")
     guides(fill = guide_legend(nrow = 1)) + 
     labs(x = "", 
          y = "")
-  # ggsave
 }
 print(plots[["domestication"]])
 

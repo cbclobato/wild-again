@@ -189,4 +189,7 @@ p5 <- ggplot(data,
             inherit.aes = F) + # Add base line information
   labs(fill = "Class")
 p5
+
+save(p5,
+     file = "outputs/r/fig_5/polar-plot.RData")
 ```

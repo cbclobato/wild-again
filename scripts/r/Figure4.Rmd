@@ -297,8 +297,7 @@ p_lab <- cowplot::plot_grid(plab2, plab3,
                            axis = "lb"); p_lab
 
 save(p_lab,
-     file = "outputs/r/fig_4/field-line_AB.RData")
-
+     file = "outputs/r/fig_4/lab-barplots.RData")
 ```
 
 ## Categorical traits
@@ -971,5 +970,5 @@ p_field <- cowplot::plot_grid(p_AB, p_CD,
                            greedy = T)
 
 save(p_field,
-     file = "outputs/r/fig_4/field-line.RData")
+     file = "outputs/r/fig_4/all-plots.RData")
 ```
