@@ -19,7 +19,7 @@ library(ranacapa)
 library(tidyverse) 
 ```
 
-# Import Data
+# Import Data ======================================================
 
 ```{r, echo = FALSE}
 ## Import metadata file
@@ -76,7 +76,7 @@ save(ps0,
      file = "outputs/r/setup/ps0.RData")
 ```
 
-# Decontam
+# Decontam =========================================================
 
 ```{r, echo = FALSE}
 load("outputs/r/setup/ps0.RData")
@@ -135,7 +135,7 @@ ggplot(data = df.pa,
   ylab("Prevalence (True Samples)")
 ```
 
-# Clean
+# Clean ===========================================================
 
 ```{r, echo = FALSE}
 load("outputs/r/setup/ps0-decontam.RData") # ps0_nc
@@ -236,7 +236,7 @@ write.table(otutable,
             quote = F)
 ```
 
-# Rarefy Samples
+# Rarefy Samples ===================================================
 
 ```{r, echo = FALSE}
 load("outputs/r/setup/bh.RData")

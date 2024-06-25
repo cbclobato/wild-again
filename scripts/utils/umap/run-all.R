@@ -118,8 +118,6 @@ p1 <-
   theme_classic()
 print(p1)
 
-#plotly::ggplotly(p1)
-
 palette_genotype <- colorRampPalette(brewer.pal(46, "Paired"))(46)
 p2 <- ggplot(df_postproc, aes(x = `UMAP 1`, y = `UMAP 2`, color = Genotype)) +
   geom_point() +
@@ -127,8 +125,6 @@ p2 <- ggplot(df_postproc, aes(x = `UMAP 1`, y = `UMAP 2`, color = Genotype)) +
   guides(color = guide_legend(order = 1), shape = guide_legend(order = 2)) +
   theme_classic()
 print(p2)
-
-plotly::ggplotly(p2)
 
 # Query ========================================================================
 domestication_val = "Cross hybrid"

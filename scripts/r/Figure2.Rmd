@@ -5,6 +5,8 @@ date: "2024-01-29"
 output: html_document
 ---
 
+***Microbiome structure and composition***
+
 # Load Libraries
 
 ```{r include = FALSE}
@@ -22,7 +24,7 @@ library(asremlPlus)
 library(RColorBrewer)
 ```
 
-# Beta-diversity
+# Beta-diversity ===================================================
 
 ## Distances
 
@@ -160,7 +162,7 @@ sig.pwa <- asremlPlus::plotPvalues(pwadonis_wide_df,
 
 ```{r}
 source("scripts/utils/umap/cluster-analysis.R")
-load("outputs/r/fig_2/UMAP.RData") #df_postproc
+load("outputs/r/fig_2/UMAP.RData") #df_postproc from utils/umap/run-all.R
 
 df_postproc2 <- df_postproc %>% 
   filter(Domestication != "NA")
@@ -176,7 +178,7 @@ p3 <- ca$p; p3
 ## Plot
 
 ```{r}
-load("outputs/r/fig_2/UMAP.RData") #df_postproc
+load("outputs/r/fig_2/UMAP.RData") #df_postproc from utils/umap/run-all.R
 
 palette_domestication <-
   c("#0EA5E9", "#ff6682", "#6159a4", "#feae01", "#a6a6a6")
@@ -228,7 +230,7 @@ p2 <- ggplot(df_postproc, aes(x = `UMAP 1`, y = `UMAP 2`, color = Genotype)) +
 plotly::ggplotly(p2)
 ```
 
-# Dominant taxa
+# Dominant taxa ====================================================
 
 ```{r, echo = FALSE}
 load("outputs/r/supplementary/bh.RData")
@@ -330,7 +332,7 @@ print(p_mc)
 
 to_plot <- p_mc %>%
   metacoder::filter_taxa(taxon_ranks == "Genus", 
-                         supertaxa = TRUE, 
+                         supertaxa = T, 
                          reassign_obs = F) %>%
   metacoder::filter_taxa(grepl(pattern = "^[a-zA-Z]+$", 
                                taxon_names), 
@@ -491,7 +493,7 @@ fig2_final <- cowplot::plot_grid(fig2,
             fontface = "bold")
 ```
 
-# Replicates
+# Replicates =======================================================
 
 ## Setup
 

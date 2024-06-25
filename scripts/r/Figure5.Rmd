@@ -5,25 +5,19 @@ date: "2024-03-22"
 output: html_document
 ---
 
+***WGS***
+
 # Load Libraries
 
 ```{r, include = F}
 library(tidyverse)
 ```
 
-# WGS
+# Import
 
 ```{r}
-genes <- read.table(
-  "data/metadata/PLaBase-genefreq.tsv",
-  sep = "\t",
-  header = TRUE,
-  fill = TRUE) #1726
-
-stat <- genes$freq %>% sum() #3186
-
 krona <- read.table(
-  "data/metadata/PLaBase-krona-mod.tsv",
+  "metadata/PLaBase.tsv",
   sep = "\t",
   header = TRUE,
   fill = TRUE) #3196
@@ -31,8 +25,6 @@ krona <- read.table(
 # Excluding putative entries (n = 21) and repeated genes (n = 3)
 krona %>% summary() # length = 3196, min = 1, median = 1.83, max = 38
 sapply(krona, function(x) n_distinct(x))
-# level1 level2 level3 level4 level5 level6   code   freq 
-#      2      7     41    215    908   1572   1578     17
 
 krona2 <- krona
 krona2$freq <- 1 * ((krona2$freq > 0) == 1)
@@ -42,23 +34,9 @@ df <- krona2 %>%
   mutate(n_genes = n_genes*2, n_genes) %>%
   as.data.frame()
 df %>% summary() # length = 41, min = 2, 1st = 30, median = 80, max = 1108
-
-df_pivot <- krona2 %>%
-  select(level3, level5, level6) %>%
-  as.data.frame() %>% 
-  count(level3, level5, level6,  name = "Count")
-  # pivot_wider(names_from = level6, values_from = level3) %>%
-  # t() %>%
-  # list()
-# 
-# print(df_pivot)
-# common.ft <- Reduce(intersect, df_pivot); common.ft
-# all.ft <- Reduce(union, df_pivot); all.ft
-# ft <- unlist(df_pivot[[1]], recursive = F); ft
-
 ```
 
-## Prep
+# Prep
 
 ```{r}
 # Set a number of 'empty bar' to add at the end of each group
@@ -119,10 +97,9 @@ grid_data$start <- grid_data$start - 1
 grid_data <- grid_data[-1, ]
 ```
 
-## Plot
+# Plot
 
 ```{r}
-#mycolors <- colorRampPalette(brewer.pal(42, "Paired"))(42)
 mycolors <- c("#db3f29","#feae01","#E65E93",
               "#5964a4","#69d1a2","#2cb5f2","#0a719f",
               "#cc0025") 
@@ -212,12 +189,4 @@ p5 <- ggplot(data,
             inherit.aes = F) + # Add base line information
   labs(fill = "Class")
 p5
-
-ggsave("outputs/visual/fig_5/WGS.png",
-       width = 45,
-       height = 31,
-       units = "cm",
-       bg = "white",
-       scale = 1,
-       dpi = 600)
 ```

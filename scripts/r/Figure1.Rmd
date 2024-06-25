@@ -5,6 +5,8 @@ date: "23/02/2023"
 output: html_document
 ---
 
+***Alpha diversity measures***
+
 # Load Libraries
 
 ```{r, include = FALSE}
@@ -15,7 +17,7 @@ library(asremlPlus)
 library(cowplot)
 ```
 
-# Diversity Metrics
+# Diversity Metrics ================================================
 
 ```{r, echo = FALSE}
 load("outputs/r/setup/bh-raref.RData")
@@ -74,7 +76,7 @@ write.table(alpha_x,
             "outputs/r/fig_1/alpha-stat-dom.csv", #change
             sep = "\t",
             row.names = T,
-            quote = FALSE)
+            quote = F)
 ```
 
 ### Significance
@@ -178,7 +180,7 @@ M <- cowplot::plot_grid(sig_obs,
                         nrow = 1)
 ```
 
-# Plot
+# Plot ===========================================================
 
 ## Genotype Observed
 
@@ -279,7 +281,7 @@ p_alpha_dom_obs <- phyloseq::plot_richness(
                     na.translate = T) +
   scale_y_continuous(breaks = breaks, labels = breaks, limits = c(0, 180),
                      expand = expand_scale(mult = c(0.01, 0.03))) + 
-  scale_x_discrete(position = "bottom") + # na.translate = FALSE
+  scale_x_discrete(position = "bottom") + # na.translate = F
   labs(x = "", y = "") +
   facet_wrap(~factor(domestication, levels = c("Landrace", 
                                                "Selected line", 

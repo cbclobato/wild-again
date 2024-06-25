@@ -5,24 +5,23 @@ date: "2024-01-30"
 output: html_document
 ---
 
+***Identification of the bacterial core and signatures linked to plant domestication***
+
 # Load Libraries
 
 ```{r, include = F}
 library(phyloseq)
 library(microbiome)
 library(tidyverse)
-library(ggplot2)
 library(ggrepel)
-library(colorspace)
 library(tidytext)
-# library(packcircles)
-# library(hpackedbubble)
+library(cowplot)
 ```
 
 # Prep Phy-obj
 
 ```{r, echo = FALSE}
-load("outputs/r/supplementary/bh.RData")
+load("outputs/r/setup/bh.RData")
 
 bac_core <- microbiome::core(bh,
                              detection = 0.1,
@@ -60,7 +59,7 @@ sample_names(x_gen)
 # Prep Core-list
 
 ```{r}
-load("outputs/r/supplementary/bh.RData")
+load("outputs/r/setup/bh.RData")
 
 core.list <- c()
 metadata <- sample_data(bh)
@@ -97,9 +96,11 @@ core.75.ib <- unlist(core.list[["Inbred line"]], recursive = F); core.75.ib # 11
 #      file = "outputs/r/fig_3/inbred_lines/ib-c75.RData")
 ```
 
-# Prep Biomarker list
+# Prep Biomarker list according to model predictions
 
 ```{r}
+## Model prediction ran through scripts on utils/biomarkers/
+
 pos.bmk.land <- c("ASV 3151: Pseudomonas_putida", 
                   "ASV 3399: Yersiniaceae",
                   "ASV 2716: Oenococcus_oeni",
@@ -149,7 +150,6 @@ pos.bmk.ib <- c("ASV 3353: Pantoea_agglomerans") # 1
 
 ```{r, echo = FALSE}
 # Select one
-
 # load("outputs/r/fig_3/landraces/land-bac.RData") # x_bac
 # load("outputs/r/fig_3/selections/sel-bac.RData") # x_bac
 # load("outputs/r/fig_3/cross_hybrids/cxh-bac.RData") # x_bac
@@ -195,10 +195,6 @@ asv_gen <- asv_tdf_meta %>%
   group_by(code) %>%
   summarise_each(list(sum))
 
-# small paper data
-# asv_gen_sel1 <- asv_gen[-c(2:327, 329:369, 371:2118, 2121:5300)]
-# asv_gen_sel2 <- asv_gen[-c(2:2138, 2140:2239, 2242:5300)]
-
 # make a ASV P/A table
 asv_gen_PA <- 1 * ((asv_gen > 0) == 1)
 
@@ -225,7 +221,7 @@ asv_prev_rel_taxo_gen_obs <- merge(asv_prev_rel_taxo,
 
 ```
 
-## Prep Scatter Plot
+## Prep Scatter Plot ==============================================
 
 ```{r}
 # Select one
@@ -252,9 +248,9 @@ asv_prev_rel_taxo_gen_obs_core_bmk <-
   asv_prev_rel_taxo_gen_obs %>%
   mutate(biomarkers = ASV %in% pos.bmk.ib) %>% # change
   mutate(core_asv = ASV %in% core.75.ib) %>% # change
-  mutate(bmk_core_asv = if_else(.$biomarkers == TRUE,
+  mutate(bmk_core_asv = if_else(.$biomarkers == T,
                             "Biomarker",
-                            if_else(.$core_asv == TRUE,
+                            if_else(.$core_asv == T,
                             "Core",
                             "Flexible"))) %>%
   mutate(asv_rel_p = asv_rel * 100, asv_prev_p = asv_prev * 100)
@@ -269,7 +265,7 @@ asv_prev_rel_taxo_gen_obs_core_all <-
   mutate(core_asv = ASV %in% bac_ctaxa) %>%
   mutate(core_asv = if_else(.$ASV == "ASV 3007: Bacillus",
                             "Flexible",
-                            if_else(.$core_asv == TRUE,
+                            if_else(.$core_asv == T,
                             "Core",
                             "Flexible"))) %>%
   mutate(asv_rel_p = asv_rel * 100, asv_prev_p = asv_prev * 100)
@@ -531,18 +527,11 @@ p_core_flex1_lsci <- cowplot::plot_grid(p_core_flex1_land,
                                         rel_widths = c(0.3, 0.3, 0.3, 0.3),
                                         greedy = T); p_core_flex1_lsci
 
-# png("outputs/visual/fig_3/core_flex1-final.png",
-#     bg = "white",
-#     width = 45,
-#     height = 31,
-#     units = "cm",
-#     res = 600); print(p_core_flex1_lsci); dev.off()
-
-# save(p_core_flex1_lsci,
-#      file = "outputs/r/fig_3/core_flex1-final.RData")
+save(p_core_flex1_lsci,
+     file = "outputs/r/fig_3/core_flex1-final.RData")
 ```
 
-## Prep Barplot Core
+## Prep Barplot Core ==============================================
 
 ```{r}
 # Select one
@@ -564,7 +553,7 @@ load("outputs/r/fig_3/all-prev-rel-taxo-gen-obs.RData") # asv_prev_rel_taxo_gen_
 asv_prev_rel_taxo_gen_obs_core <-
   asv_prev_rel_taxo_gen_obs %>% 
   mutate(core_asv = ASV %in% bac_ctaxa) %>% #change
-  mutate(core_asv = if_else(.$core_asv == TRUE, 
+  mutate(core_asv = if_else(.$core_asv == T, 
                             "Core", 
                             "Flexible")) %>% 
   mutate(asv_rel_p = asv_rel * 100, asv_prev_p = asv_prev * 100)
@@ -584,7 +573,7 @@ asv_prev_rel_taxo_gen_obs_core_all <-
   mutate(core_asv = ASV %in% bac_ctaxa) %>%
   mutate(core_asv = if_else(.$ASV == "ASV 3007: Bacillus",
                             "Flexible",
-                            if_else(.$core_asv == TRUE,
+                            if_else(.$core_asv == T,
                             "Core",
                             "Flexible"))) %>%
   mutate(asv_rel_p = asv_rel * 100, asv_prev_p = asv_prev * 100)
@@ -791,7 +780,7 @@ p_core_flex2_all <-
 p_core_flex2_all
 ```
 
-## Prep Barplot Taxa Core
+## Prep Barplot Taxa Core =========================================
 
 ```{r}
 # Select one
@@ -1134,15 +1123,9 @@ p_core_flex2_lsci <- cowplot::plot_grid(p_core_flex2_land,
                                                        0.25, 0.75, 0.25, 0.75),
                                         greedy = T); p_core_flex2_lsci
 
-# png("outputs/visual/fig_3/core_flex2-final.png",
-#     bg = "white",
-#     width = 45,
-#     height = 31,
-#     units = "cm",
-#     res = 600); print(p_core_flex2_lsci); dev.off()
-# 
-# save(p_core_flex2_lsci,
-#      file = "outputs/r/fig_3/core_flex2-final.RData")
+
+save(p_core_flex2_lsci,
+     file = "outputs/r/fig_3/core_flex2-final.RData")
 ```
 
 # Merge core whole dataset
@@ -1159,25 +1142,17 @@ p_core_flex_all <- cowplot::plot_grid(p_core_flex1_all,
                                       align = "b",
                                       scale = c(1, 0.95, 0.95)); p_core_flex_all
 
-# png("outputs/visual/supplementary/core_flex-final-all.png",
-#     bg = "white",
-#     width = 34,
-#     height = 24,
-#     units = "cm",
-#     res = 600); print(p_core_flex_all); dev.off()
-# 
-# save(p_core_flex_all,
-#      file = "outputs/r/supplementary/core_flex-final-all.RData")
+save(p_core_flex_all,
+     file = "outputs/r/supplementary/core_flex-final-all.RData")
 ```
 
-# Biomarkers
+# Biomarkers ======================================================
 
 ## Lollypop
 
 ```{r}
 load("outputs/r/fig_3/biomarkers.RData") #df_plot
 
-# mycolors <- c("#feae01","#0ea5e9","#ff6682")
 mycolors <- c("#ff6682")
 
 df_plot2 <- df_plot %>%
@@ -1228,226 +1203,8 @@ p_core_flex3_lsci <-
   coord_flip()
 p_core_flex3_lsci
 
-# ggsave("outputs/visual/fig_3/biomarkers-lolly-flip.png",
-#         width = 45,
-#         height = 31,
-#         units = "cm",
-#         scale = 1,
-#         dpi = 600)
-# 
-# save(p_core_flex3_lsci,
-#      file = "outputs/r/fig_3/core_flex3-final.RData")
-```
-
-## Circular packing
-
-```{r}
-load("outputs/r/fig_3/biomarkers.RData") #df_plot
-
-df_plot3 <- df_plot %>%
-  pivot_wider(names_from = Kind, 
-              values_from = Importance) %>%
-  filter(Score > 0.01) %>%
-  pivot_longer(cols = (4:6),
-               names_to = "Method",
-               values_to = "Importance") %>%
-  separate_wider_delim(ASV, ":", names = c("ASV1", "ASV2")) %>%
-  mutate_at(vars(ASV2), ~ paste0(":", .)) %>%
-  mutate(ASV_ordered = str_remove(ASV_ordered, ASV2))
-```
-
-### LAND: Plot
-
-```{r}
-lda <- c("ASV 2973", "ASV 3007", "ASV 3151", "ASV 3399", "ASV 3511")
-
-df_plot3_land <- df_plot3 %>% 
-  filter(Method == "Score") %>%
-  filter(Domestication == "Landrace") %>%
-  mutate(lda = ifelse(ASV1 %in% lda, "lda", "score"))
-
-mycolors <- c("#aadb84","#053c55") 
-
-mycolors <- c("#feae01","#ff6682","#0ea5e9")
-
-"#2cb5f2","#76cff7","#9bdcf9","#51c2f5","#0c8bc4","#0a719f","#07567a"
-
-# Generate the layout
-packing <- circleProgressiveLayout(df_plot3_land$Importance, sizetype = "area")
-packing$radius <- 0.95*packing$radius
-data <- cbind(df_plot3_land, packing) %>% 
-  rownames_to_column("id")
-dat.gg <- circleLayoutVertices(packing, npoints = 50)
-
-datapoly <- merge(data, dat.gg, by = c("id"))
-
-# Plot 
-cp_land <- ggplot() + 
-  geom_polygon(data = datapoly, 
-               aes(x.y, y.y, group = id, fill = lda, colour = lda),
-               alpha = 1) +
-  scale_fill_manual(values = mycolors) +
-  scale_color_manual(values = mycolors) +
-  geom_text(data = datapoly, 
-            aes(x.x, y.x, 
-                size = Importance, 
-                label = ASV1), 
-            color = "white") +
-  theme_void() + 
-  theme(legend.position = "none") +
-#  labs(fill = "", size = "") +
-  coord_equal(); cp_land
-```
-
-### SEL: Plot
-
-```{r}
-lda <- c("ASV 2328", "ASV 3055", "ASV 4090", "ASV 2062")
-
-df_plot3_sel <- df_plot3 %>% 
-  filter(Method == "Score") %>%
-  filter(Domestication == "Selection") %>%
-  mutate(lda = ifelse(ASV1 %in% lda, "lda", "score"))
-
-mycolors <- c("#aadb84","#053c55") 
-
-mycolors <- c("#feae01","#ff6682","#0ea5e9")
-
-"#2cb5f2","#76cff7","#9bdcf9","#51c2f5","#0c8bc4","#0a719f","#07567a"
-
-# Generate the layout
-packing <- circleProgressiveLayout(df_plot3_sel$Importance, sizetype = "area")
-packing$radius <- 0.95*packing$radius
-data <- cbind(df_plot3_sel, packing) %>% 
-  rownames_to_column("id")
-dat.gg <- circleLayoutVertices(packing, npoints = 50)
-
-datapoly <- merge(data, dat.gg, by = c("id"))
-
-# Plot 
-cp_sel <- ggplot() + 
-  geom_polygon(data = datapoly, 
-               aes(x.y, y.y, group = id, fill = lda, colour = lda),
-               alpha = 1) +
-  scale_fill_manual(values = mycolors) +
-  scale_color_manual(values = mycolors) +
-  geom_text(data = datapoly, 
-            aes(x.x, y.x, 
-                size = Importance, 
-                label = ASV1), 
-            color = "white") +
-  theme_void() + 
-  theme(legend.position = "none") +
-#  labs(fill = "", size = "") +
-  coord_equal(); cp_sel
-```
-
-### CXH: Plot
-
-```{r}
-lda <- c("ASV 2970", "ASV 4674")
-
-df_plot3_cxh <- df_plot3 %>% 
-  filter(Method == "Score") %>%
-  filter(Domestication == "Cross hybrid") %>%
-  mutate(lda = ifelse(ASV1 %in% lda, "lda", "score"))
-
-mycolors <- c("#aadb84","#053c55") 
-
-mycolors <- c("#feae01","#ff6682","#0ea5e9")
-
-"#2cb5f2","#76cff7","#9bdcf9","#51c2f5","#0c8bc4","#0a719f","#07567a"
-
-# Generate the layout
-packing <- circleProgressiveLayout(df_plot3_cxh$Importance, sizetype = "area")
-packing$radius <- 0.95*packing$radius
-data <- cbind(df_plot3_cxh, packing) %>% 
-  rownames_to_column("id")
-dat.gg <- circleLayoutVertices(packing, npoints = 50)
-
-datapoly <- merge(data, dat.gg, by = c("id"))
-
-# Plot 
-cp_cxh <- ggplot() + 
-  geom_polygon(data = datapoly, 
-               aes(x.y, y.y, group = id, fill = lda, colour = lda),
-               alpha = 1) +
-  scale_fill_manual(values = mycolors) +
-  scale_color_manual(values = mycolors) +
-  geom_text(data = datapoly, 
-            aes(x.x, y.x, 
-                size = Importance, 
-                label = ASV1), 
-            color = "white") +
-  theme_void() + 
-  theme(legend.position = "none") +
-#  labs(fill = "", size = "") +
-  coord_equal(); cp_cxh
-```
-
-### IBL: Plot
-
-```{r}
-lda <- c("ASV 3353")
-
-df_plot3_ib <- df_plot3 %>% 
-  filter(Method == "Score") %>%
-  filter(Domestication == "Inbred line") %>%
-  mutate(lda = ifelse(ASV1 %in% lda, "lda", "score"))
-
-mycolors <- c("#aadb84","#053c55") 
-
-mycolors <- c("#feae01","#ff6682","#0ea5e9")
-
-"#2cb5f2","#76cff7","#9bdcf9","#51c2f5","#0c8bc4","#0a719f","#07567a"
-
-# Generate the layout
-packing <- circleProgressiveLayout(df_plot3_ib$Importance, sizetype = "area")
-packing$radius <- 0.95*packing$radius
-data <- cbind(df_plot3_ib, packing) %>% 
-  rownames_to_column("id")
-dat.gg <- circleLayoutVertices(packing, npoints = 50)
-
-datapoly <- merge(data, dat.gg, by = c("id"))
-
-# Plot 
-cp_ib <- ggplot() + 
-  geom_polygon(data = datapoly, 
-               aes(x.y, y.y, group = id, fill = lda, colour = lda),
-               alpha = 1) +
-  scale_fill_manual(values = mycolors) +
-  scale_color_manual(values = mycolors) +
-  geom_text(data = datapoly, 
-            aes(x.x, y.x, 
-                size = Importance, 
-                label = ASV1), 
-            color = "white") +
-  theme_void() + 
-  theme(legend.position = "none") +
-#  labs(fill = "", size = "") +
-  coord_equal(); cp_ib
-```
-
-# Merge Circles
-
-```{r}
-p_core_flex4_lsci <- cowplot::plot_grid(cp_land,
-                                        cp_sel,
-                                        cp_cxh,
-                                        cp_ib,
-                                        labels = c("", "", "", ""),
-                                        nrow = 1,
-                                        greedy = T); p_core_flex4_lsci
-
-# png("outputs/visual/fig_3/core_flex4-final.png",
-#     bg = "white",
-#     width = 45,
-#     height = 31,
-#     units = "cm",
-#     res = 600); print(p_core_flex3_lsci); dev.off()
-
-# save(p_core_flex4_lsci,
-#      file = "outputs/r/fig_3/core_flex4-final.RData")
+save(p_core_flex3_lsci,
+     file = "outputs/r/fig_3/core_flex3-final.RData")
 ```
 
 # Merge all
@@ -1488,13 +1245,6 @@ p_core_flex_lsci_f123_final <- p_core_flex_lsci_f123 +
                 label = "Inbred line"),
             size = 5,
             fontface = "bold"); p_core_flex_lsci_f123_final
-
-png("outputs/visual/fig_3/core_flex-final-1-2-3-flip.png",
-    bg = "white",
-    width = 45,
-    height = 31,
-    units = "cm",
-    res = 600); print(p_core_flex_lsci_f123_final); dev.off()
 
 save(p_core_flex_lsci_f123_final,
      file = "outputs/r/fig_3/core_flex-final-1-2-3.RData")

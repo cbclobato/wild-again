@@ -5,6 +5,8 @@ date: "2024-03-22"
 output: html_document
 ---
 
+***Effects of the treatments on Cannabis growth and fitness***
+
 # Load Libraries
 
 ```{r, include = F}
@@ -13,42 +15,36 @@ library(ggrepel)
 library(tidytext)
 library(stats)
 library(corrplot)
+library(ggpubr)
 ```
 
 # Import tables
 
 ```{r, echo = FALSE}
 pouches1 <- read.table(
-  "data/metadata/pouches1-ext.tsv",
+  "metadata/pouches-ind.tsv",
   sep = "\t",
-  header = TRUE,
-  fill = TRUE,
+  header = T,
+  fill = T,
   row.names = "ID")
 
 pouches2 <- read.table(
-  "data/metadata/pouches2-ext.tsv",
+  "metadata/pouches-exp.tsv",
   sep = "\t",
-  header = TRUE,
-  fill = TRUE,
-  row.names = "ID")
-
-assays <- read.table(
-  "data/metadata/phy-assays.tsv",
-  sep = "\t",
-  header = TRUE,
-  fill = TRUE,
+  header = T,
+  fill = T,
   row.names = "ID")
 
 field23 <- read.table(
-  "data/metadata/field23.tsv",
+  "metadata/field23.tsv",
   sep = "\t",
-  header = TRUE,
-  fill = TRUE,
+  header = T,
+  fill = T,
   row.names = "ID") %>%
   filter(hydrodots == "No")
 ```
 
-# Lab
+# Lab ===========================================================
 
 ## Test normality
 
@@ -62,7 +58,7 @@ hist(pouches1[pouches1$treatment == "C37B_M1_R1", x], 10)
 hist(pouches1[pouches1$treatment == "C11_M4_B1", x], 10)
 
 # Normality test: p < 0.05 implies sign. differences from the normal dist.
-shapiro.test(pouches1[pouches1$germination == TRUE, x]) 
+shapiro.test(pouches1[pouches1$germination == T, x]) 
 # shoot_length: W = 0.99276, p-value = 0.01031 -> KW
 # root_length: W = 0.9866, p-value = 7.274e-05 -> KW
 # total_length: W = 0.98272, p-value = 5.105e-06 -> KW
@@ -71,38 +67,6 @@ summary(pouches1) # 540 samples, 180 NAs
 ```
 
 ## Length
-
-### Boxplot
-
-```{r}
-dflab1 <- pouches1 %>%
-  select(ASV,
-         shoot_length,
-         root_length, 
-         total_length) %>%
-  drop_na() %>%
-  pivot_longer(-ASV,
-               names_to = "type", 
-               values_to = "value") %>%
-  mutate(ASV = fct_relevel(ASV,
-                           "Control",
-                           "ASV 3007",
-                           "ASV 3055",
-                           "ASV 3140",
-                           "ASV 3151",
-                           "ASV 4090"))
-
-my_colors <- c("#564787", "#9a93d9", "#BEBAEC")
-
-plab1 <- ggplot(data = dflab1, 
-            aes(x = ASV, 
-                y = value,
-                fill = type)) +
-  geom_boxplot(position = "dodge") +
-  theme_classic() +
-  scale_fill_manual(values = my_colors)
-plab1
-```
 
 ### Barplot
 
@@ -181,15 +145,8 @@ plab2 <- ggplot(data = dflab2,
     legend.text = element_text(size = 12)) +
   scale_fill_manual(values = my_colors) +
   scale_y_continuous(expand = c(0, 0)) +
-  labs(x = "", y = "Length [cm]", fill = "") # Add pairwise comparisons p-value
+  labs(x = "", y = "Length [cm]", fill = "")
 plab2
-
-# ggsave("outputs/visual/fig_4/length-ext.png",
-#         width = 20,
-#         height = 18,
-#         units = "cm",
-#         scale = 1,
-#         dpi = 600)
 ```
 
 ### Significance
@@ -200,7 +157,7 @@ kt_RL <- kruskal.test(root_length ~ ASV, pouches1); kt_RL # p = 0.0005625 SIG
 kt_TL <- kruskal.test(total_length ~ ASV, pouches1); kt_TL # p = 3.07e-05 SIG
 
 # Pairwise shoot_length
-wt_SL_ref <- ggpubr::compare_means(shoot_length ~ ASV,                          
+wt_SL_ref <- ggpubr::compare_means(shoot_length ~ ASV,
                                    ref.group = "Control",
                                    method = "wilcox.test",
                                    p.adjust.method = "bonferroni",
@@ -221,6 +178,8 @@ wt_TL_ref <- ggpubr::compare_means(total_length ~ ASV,
 ```
 
 ## Biomass
+
+### Barplot
 
 ```{r}
 dflab3a <- pouches2 %>%
@@ -296,14 +255,6 @@ plab3 <- ggplot(data = dflab3,
   scale_y_continuous(expand = c(0, 0)) +
   labs(x = "", y = "", fill = "")
 plab3
-
-# ggsave("outputs/visual/fig_4/biomass-ext.png",
-#         width = 20,
-#         height = 18,
-#         units = "cm",
-#         scale = 1,
-#         dpi = 600)
-
 ```
 
 ### Significance
@@ -345,13 +296,6 @@ p_lab <- cowplot::plot_grid(plab2, plab3,
                            rel_heights = c(1, 1),
                            axis = "lb"); p_lab
 
-png("outputs/visual/fig_4/lab-bar.png",
-    bg = "white",
-    width = 23,
-    height = 16,
-    units = "cm",
-    res = 600); print(p_lab); dev.off()
-
 save(p_lab,
      file = "outputs/r/fig_4/field-line_AB.RData")
 
@@ -361,7 +305,7 @@ save(p_lab,
 
 ### Significance
 
-#### Chi-sqr: The proportion of "parameter x" differs between treatments.
+#### Chi-sqr
 
 ```{r}
 dflab4_stat <- pouches1 %>%
@@ -688,25 +632,9 @@ plab4 <- ggplot(dflab4, aes(interaction(ASV), per)) +
   geom_text(data = sig,
   mapping = aes(x = x, y = y, label = label),
   color = "black", size = 5); plab4
-
-ggsave("outputs/visual/fig_4/traits-ext-per.png", #stack
-        width = 20,
-        height = 18,
-        units = "cm",
-        scale = 1,
-        dpi = 600)
-
 ```
 
-## Physiological assays: Add table on Supp
-
-## GC-MS
-
-```{r}
-
-```
-
-# Field
+# Field ===========================================================
 
 ## Test normality
 
@@ -731,7 +659,6 @@ shapiro.test(field23[field23$hydrodots == "No", x])
 # weight: W = 0.90368, p-value = 1.012e-05
 
 summary(field23) # 89
-
 ```
 
 ### Significance
@@ -770,9 +697,7 @@ wt_W_ref <- ggpubr::compare_means(weight ~ treatment2,
                                   data = field23); wt_W_ref
 ```
 
-## Boxplot
-
-### Weight
+## Weight
 
 ```{r}
 dfwies1 <- field23 %>%
@@ -829,134 +754,10 @@ pwies1 <- ggplot(data = dfwies1,
                 label = "****"),
             color = "black",
             size = 5)
-# pwies1$layers[1] <- NULL # don't use with cowplot
 pwies1
-
-# ggsave("outputs/visual/fig_4/weight-boxplot.png",
-#         width = 20,
-#         height = 18,
-#         units = "cm",
-#         scale = 1,
-#         dpi = 600)
 ```
 
-### Height
-
-```{r}
-dfwies2 <- field23 %>%
-  select(name,
-         H1,
-         H2, 
-         H3,
-         H4) %>%
-  drop_na() %>%
-  pivot_longer(-name,
-               names_to = "timepoint", 
-               values_to = "height") %>% 
-  mutate(timepoint = recode(timepoint, 
-                            "H1" = "1", 
-                            "H2" = "2",
-                            "H3" = "3",
-                            "H4" = "4")) %>%
-  mutate(name = fct_relevel(name,
-                            "Control",
-                            "Serratia plymunthica RR2-5-10",
-                            "Bacillus frigotolerans C1141"))
-
-my_colors <- c("#564787", "#9a93d9", "#BEBAEC")
-pwies2 <- ggplot(data = dfwies2, 
-            aes(x = timepoint, 
-                y = height,
-                color = name)) +
-  geom_point(aes(color = name),
-              size = 1.5,
-              width = 0.2,
-             position = position_jitterdodge()) +
-  geom_boxplot(position = "dodge",
-               alpha = 0) +
-  theme_classic() +
-  theme(
-    axis.title.x = element_text(size = 12),
-    axis.title.y = element_text(size = 12),
-    axis.text.x = element_text(size = 12,
-                               angle = 0,
-                               hjust = 1),
-    legend.position = "none",
-    legend.title = element_text(size = 12),
-    legend.text = element_text(size = 12)) +
-  scale_color_manual(values = my_colors) +
-  labs(x = "", y = "Height (cm)", color = "Treatment")
-pwies2
-pwies2$layers[1] <- NULL
-
-# ggsave("outputs/visual/fig_4/height-boxplot.png",
-#         width = 20,
-#         height = 18,
-#         units = "cm",
-#         scale = 1,
-#         dpi = 600)
-```
-
-### Stalk diameter
-
-```{r}
-dfwies3 <- field23 %>%
-  select(name,
-         S1,
-         S2, 
-         S3,
-         S4) %>%
-  drop_na() %>%
-  pivot_longer(-name,
-               names_to = "timepoint", 
-               values_to = "stalk") %>% 
-  mutate(timepoint = recode(timepoint, 
-                            "S1" = "1", 
-                            "S2" = "2",
-                            "S3" = "3",
-                            "S4" = "4")) %>%
-  mutate(name = fct_relevel(name,
-                            "Control",
-                            "Serratia plymunthica RR2-5-10",
-                            "Bacillus frigotolerans C1141"))
-
-my_colors <- c("#564787", "#9a93d9", "#BEBAEC")
-pwies3 <- ggplot(data = dfwies3, 
-            aes(x = timepoint, 
-                y = stalk,
-                color = name)) +
-  geom_point(aes(color = name),
-              size = 1.5,
-              width = 0.2,
-             position = position_jitterdodge()) +
-  geom_boxplot(position = "dodge",
-               alpha = 0) +
-  theme_classic() +
-  theme(
-    axis.title.x = element_text(size = 12),
-    axis.title.y = element_text(size = 12),
-    axis.text.x = element_text(size = 12,
-                               angle = 0,
-                               hjust = 1),
-    legend.position = "none",
-    legend.title = element_text(size = 12),
-    legend.text = element_text(size = 12)) +
-  scale_color_manual(values = my_colors) +
-  labs(x = "Timepoint", y = "Stalk diameter (cm)", color = "Treatment"); pwies3
-pwies3$layers[1] <- NULL
-
-# ggsave("outputs/visual/fig_4/stalk-boxplot.png",
-#         width = 20,
-#         height = 18,
-#         units = "cm",
-#         scale = 1,
-#         dpi = 600)
-
-```
-
-## Lineplot
-
-### Height
+## Height
 
 ```{r}
 dfwies4a <- field23 %>%
@@ -1043,13 +844,6 @@ pwies4 <- ggplot(data = dfwies4,
             color = "black", size = 5) +
   geom_text(aes(x = 4, y = 162, label = "*"),
             color = "black", size = 5); pwies4
-
-# ggsave("outputs/visual/fig_4/height-lineplot.png",
-#         width = 20,
-#         height = 18,
-#         units = "cm",
-#         scale = 1,
-#         dpi = 600)
 ```
 
 ### Stalk Diameter
@@ -1146,14 +940,6 @@ pwies5 <- ggplot(data = dfwies5,
             color = "black", size = 5) +
   geom_text(aes(x = 4, y = 22, label = "***"),
             color = "black", size = 5); pwies5
-
-# ggsave("outputs/visual/fig_4/stalk-lineplot.png",
-#         width = 20,
-#         height = 18,
-#         units = "cm",
-#         scale = 1,
-#         dpi = 600)
-
 ```
 
 ## Merge plots
@@ -1167,16 +953,6 @@ p_AB <- cowplot::plot_grid(plab4, pwies1,
                            rel_heights = c(1, 1),
                            axis = "lb"); p_AB
 
-# png("outputs/visual/fig_4/field-line-AB.png",
-#     bg = "white",
-#     width = 20,
-#     height = 18,
-#     units = "cm",
-#     res = 600); print(p_AB); dev.off()
-# 
-# save(p_AB,
-#      file = "outputs/r/fig_4/field-line_AB.RData")
-
 p_CD <- cowplot::plot_grid(pwies4, pwies5,
                            labels = c("c", "d"),
                            label_size = 12,
@@ -1185,15 +961,6 @@ p_CD <- cowplot::plot_grid(pwies4, pwies5,
                            rel_heights = c(1, 1),
                            axis = "lb"); p_CD
 
-png("outputs/visual/fig_4/field-line-CD.png",
-    bg = "white",
-    width = 20,
-    height = 18,
-    units = "cm",
-    res = 600); print(p_CD); dev.off()
-
-# save(p_CD,
-#      file = "outputs/r/fig_4/field-line.RData")
 
 p_field <- cowplot::plot_grid(p_AB, p_CD,
                            labels = c("", ""),
@@ -1203,14 +970,6 @@ p_field <- cowplot::plot_grid(p_AB, p_CD,
                            axis = "bt",
                            greedy = T)
 
-# png("outputs/visual/fig_4/field-line2.png",
-#     bg = "white",
-#     width = 45,
-#     height = 31,
-#     units = "cm",
-#     res = 600); print(p_field); dev.off()
-# 
-# save(p_field,
-#      file = "outputs/r/fig_4/field-line.RData")
-
+save(p_field,
+     file = "outputs/r/fig_4/field-line.RData")
 ```
