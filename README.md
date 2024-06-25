@@ -86,8 +86,8 @@ project/
       - qiime2r.sh for converting .biom to .tsv format and back,
       - install.R for installing the necessary packages in R.
       - plot_composition_v2 modified microbiome::plot_composition function for running when the microbiome version is above 1.6.
-      - umap/ with important scrips containing the functions used for beta diversity representation with UMAP shown in Figure2.
-      - biomarkers/ with important scripts containing the functions used for biomarker assessment shown in Figure3.
+      - umap/ contains the scrips used for beta diversity representation with UMAP shown in Figure2.
+      - biomarkers/ contains the scripts used for biomarker assessment shown in Figure3.
    
 ### Further content
 The 16S rRNA gene amplicon raw FASTQ files were deposited at the European Nucleotide Archive (ENA; https://www.ebi.ac.uk/ena) under the accession number PRJEB64469.
