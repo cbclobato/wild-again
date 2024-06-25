@@ -56,6 +56,9 @@ project/
 │           ├── sv-importance-patch.R
 │           ├── train-eval.R 
 │           └── run-all.R
+├── outputs/
+│   ├── qiime2/
+│   └── r/
 ├── README.md
 └── LICENSE
 ```
@@ -88,6 +91,8 @@ project/
       - plot_composition_v2 modified microbiome::plot_composition function for running when the microbiome version is above 1.6.
       - umap/ contains the scrips used for beta diversity representation with UMAP shown in Figure2.
       - biomarkers/ contains the scripts used for biomarker assessment shown in Figure3.
+   
+- outputs/ contains qiime2 and r saved outputs.
    
 ### Further content
 The 16S rRNA gene amplicon raw FASTQ files were deposited at the European Nucleotide Archive (ENA; https://www.ebi.ac.uk/ena) under the accession number PRJEB64469.
