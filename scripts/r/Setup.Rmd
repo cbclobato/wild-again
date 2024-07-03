@@ -114,7 +114,7 @@ View(data.frame(tax_table(contam)))
 
 samples <- prune_samples(sample_data(contam)$type == "sample", contam)
 
-sum(sample_sums(samples))/sum(sample_sums(ps0)) * 100 # 6.5%
+sum(sample_sums(samples))/sum(sample_sums(ps0)) * 100
 
 ## PA phy-obj for NTC and true samples
 ps.pa <- transform_sample_counts(ps0, function(abund) 1 * (abund > 0))
@@ -142,7 +142,6 @@ load("outputs/r/setup/ps0-decontam.RData") # ps0_nc
 
 ps_clean <- subset_samples(ps0_nc, type != "M")
 ps_clean <- subset_samples(ps_clean, type != "NC")
-ps_clean <- subset_samples(ps_clean, replicates != "C34_01B")
 ps_clean <- prune_samples(sample_sums(ps_clean) > 0, ps_clean)
 ps_clean <- subset_taxa(ps_clean, Domain != "d__Archaea")
 ps_clean <- prune_taxa(taxa_sums(ps_clean) > 0, ps_clean)
