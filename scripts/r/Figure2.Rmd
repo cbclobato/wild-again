@@ -32,16 +32,16 @@ library(RColorBrewer)
 load("outputs/r/setup/bh.RData")
 x <- meta(bh)
 
-bh_new <- subset_samples(bh_raref, domestication != ""); bh_new #chemotype2 
+bh_new <- subset_samples(bh, chemotype2 != ""); bh_new #chemotype2 
 bh_new <- prune_taxa(taxa_sums(bh_new) > 0, bh_new); bh_new
 check <- unique(bh_new@sam_data[["replicates"]]);check
 
-bh_prov <- subset_samples(bh_raref, provider == "Sensi Seeds"); bh_prov
+bh_prov <- subset_samples(bh, provider == "Sensi Seeds"); bh_prov
 bh_prov <- prune_taxa(taxa_sums(bh_prov) > 0, bh_prov); bh_prov
 check <- unique(bh_prov@sam_data[["replicates"]]);check
 
 # Correct uneven sequencing depth using cumulative sum scaling (CSS)
-bh_css <- metagMisc::phyloseq_transform_css(bh_new, #bh 
+bh_css <- metagMisc::phyloseq_transform_css(bh, #bh_new 
                                             norm = T, 
                                             log = T); bh_css
 
@@ -56,7 +56,7 @@ bh_css_bray <- vegan::vegdist(dist_matrix_t,
                               method = "bray")
 
 # Test significance
-vegan::adonis2(bh_css_bray ~ chemotype2,
+vegan::adonis2(bh_css_bray ~ genotype, #chemotype2, genotype 
                data = df_css)
 
 # Transpose if necessary to test pairwise significance
