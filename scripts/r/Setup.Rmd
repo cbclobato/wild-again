@@ -199,6 +199,13 @@ write.table(conversion, "outputs/r/setup/tax-conv.csv")
 bh <- microbiomeutilities::format_to_besthit(ps_clean)
 taxa_names(bh) <- sub(": [a-z0-9]*:[a-z_]{0,3}", ": ", taxa_names(bh))
 taxa_names(bh)[1:5]
+
+## Remove tax level indicator in the beginning of each taxa
+tax_table(bh)[, colnames(tax_table(bh))] <- 
+  gsub(tax_table(bh)[, colnames(tax_table(bh))],
+  pattern = "[a-z]__",
+  replacement = "")
+
 save(bh, file = "outputs/r/setup/bh.RData")
 
 ## Get number of taxa across different levels:

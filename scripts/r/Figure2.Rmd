@@ -192,7 +192,7 @@ p1 <-
   theme(
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank(),
-    plot.margin = margin(0.025, 0.025, 0.025, 0.025, unit = "cm"),
+    plot.margin = margin(0, 0, 0, 0, unit = "cm"),
     axis.text.x = (element_text(angle = 0,
                                 hjust = 0.5,
                                 size = 12)),
@@ -211,17 +211,17 @@ p1 <-
                     ymin = -3, ymax = 0)
 p1
 
-save(p1,
-     file = "outputs/r/fig_2/umapplot.RData")
+# save(p1,
+#      file = "outputs/r/fig_2/umapplot.RData")
 
-palette_genotype <- colorRampPalette(brewer.pal(46, "Paired"))(46)
-p2 <- ggplot(df_postproc, aes(x = `UMAP 1`, y = `UMAP 2`, color = Genotype)) +
-  geom_point() +
-  scale_color_discrete(type = palette_genotype) +
-  guides(color = guide_legend(order = 1, ncol = 2),
-         shape = guide_legend(order = 2)) +
-  theme_classic()
-plotly::ggplotly(p2)
+# palette_genotype <- colorRampPalette(brewer.pal(46, "Paired"))(46)
+# p2 <- ggplot(df_postproc, aes(x = `UMAP 1`, y = `UMAP 2`, color = Genotype)) +
+#   geom_point() +
+#   scale_color_discrete(type = palette_genotype) +
+#   guides(color = guide_legend(order = 1, ncol = 2),
+#          shape = guide_legend(order = 2)) +
+#   theme_classic()
+# plotly::ggplotly(p2)
 ```
 
 # Dominant taxa ====================================================
@@ -348,8 +348,8 @@ ht <- heat_tree(to_plot,
                 node_color_axis_label = "", #Rel. abundance (%)
                 repel_labels = T,
                 margin_size = c(0, 0, 0, 0))
-save(ht,
-     file = "outputs/r/fig_2/heat-tree.RData")
+# save(ht,
+#      file = "outputs/r/fig_2/heat-tree.RData")
 ```
 
 ## Plot most abundant Genus by genotype
@@ -398,7 +398,7 @@ sorting_asv <- ordered(
              "Other"))
 
 sorting_idx <- order(sorting_asv, decreasing = F, na.last = NA)
-otu_order <- bh_agr@tax_table@.Data[sorting_idx, "Genus"]
+otu_order <- as.character(bh_agr@tax_table@.Data[sorting_idx, "Genus"])
 color <- c("#032230","#053c55","#07567a","#0a719f","#0c8bc4",
            "#0ea5e9","#2cb5f2","#51c2f5","#76cff7","#9bdcf9",
            "#db3f29","#db4e29","#db5d29","#e1834b","#e69a6c","#ecb18e",
@@ -426,8 +426,7 @@ bp_g1 <- plot_composition(bh_agr,
                                 fill = NA, 
                                 size = 1),
     strip.background = element_blank(),
-    strip.text = element_text(size = 12,
-                              face = "bold"),
+    strip.text = element_blank(), #element_text(size = 12, face = "bold"),
     axis.text.x = element_text(size = 12, 
                                angle = 0, 
                                hjust = 0.5),
@@ -437,8 +436,7 @@ bp_g1 <- plot_composition(bh_agr,
     legend.key.size = unit(0.5, 'cm'),
     legend.background = element_rect(fill = "transparent", color = "transparent"),
     legend.text = element_text(size = 12),
-    legend.title = element_text(size = 12,
-                                face = "bold")) +
+    legend.title = element_text(size = 12)) +
   labs(x = "", 
        y = "Relative abundance [%]", 
        fill = "Genus") +
@@ -451,11 +449,10 @@ bp_g1 <- plot_composition(bh_agr,
                                 "Inbred line",
                                 NA)),
              scales = "free_x",
-             space = "free")
-bp_g1
+             space = "free"); bp_g1
 
-save(bp_g1,
-     file = "outputs/r/fig_2/barplot.RData")
+# save(bp_g1,
+#      file = "outputs/r/fig_2/barplot.RData")
 ```
 
 # Merge
