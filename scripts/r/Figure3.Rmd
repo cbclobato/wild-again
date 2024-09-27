@@ -527,8 +527,8 @@ p_core_flex1_lsci <- cowplot::plot_grid(p_core_flex1_land,
                                         rel_widths = c(0.3, 0.3, 0.3, 0.3),
                                         greedy = T); p_core_flex1_lsci
 
-save(p_core_flex1_lsci,
-     file = "outputs/r/fig_3/core_flex1-final.RData")
+# save(p_core_flex1_lsci,
+#      file = "outputs/r/fig_3/core_flex1-final.RData")
 ```
 
 ## Prep Barplot Core ==============================================
@@ -1217,7 +1217,7 @@ load("outputs/r/fig_3/core_flex3-final.RData")
 p_core_flex_lsci_f123 <- cowplot::plot_grid(p_core_flex2_lsci,
                                             p_core_flex3_lsci,
                                             p_core_flex1_lsci,
-                                            labels = c("a", "b", "C"),
+                                            labels = c("A", "B", "C"),
                                             label_size = 12,
                                             ncol = 1,
                                             rel_widths = c(1, 1, 1),
@@ -1246,6 +1246,6 @@ p_core_flex_lsci_f123_final <- p_core_flex_lsci_f123 +
             size = 5,
             fontface = "bold"); p_core_flex_lsci_f123_final
 
-save(p_core_flex_lsci_f123_final,
-     file = "outputs/r/fig_3/core_flex-final-1-2-3.RData")
+# save(p_core_flex_lsci_f123_final,
+#      file = "outputs/r/fig_3/core_flex-final-1-2-3.RData")
 ```

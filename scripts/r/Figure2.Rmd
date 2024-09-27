@@ -172,8 +172,9 @@ labels <- df_postproc2[,"Domestication"]
 ca <- silhouette_plot(embeds, labels)
 print(ca)
 
-p0 <- ca$p; p0
-
+p0 <- ca$p + 
+  theme(plot.background = element_rect(fill = "transparent", 
+                                       color = "transparent")); p0
 palette_domestication <-
   c("#0EA5E9", "#ff6682", "#6159a4", "#feae01", "#a6a6a6")
 p1 <-
@@ -183,7 +184,7 @@ p1 <-
            y = `UMAP 2`,
            color = Domestication,
            shape = Chemotype)) +
-  geom_point(size = 5) +
+  geom_point(size = 3) +
   scale_color_discrete(type = palette_domestication) +
   scale_shape_manual(values = c(1, 19, 4)) +
   guides(color = guide_legend(order = 1), 
@@ -193,28 +194,26 @@ p1 <-
     panel.grid.major = element_blank(),
     panel.grid.minor = element_blank(),
     plot.margin = margin(0, 0, 0, 0, unit = "cm"),
-    axis.text.x = (element_text(angle = 0,
+    axis.text.x = element_text(angle = 0,
                                 hjust = 0.5,
-                                size = 12)),
-    axis.text.y = (element_text(angle = 0,
+                                size = 10),
+    axis.text.y = element_text(angle = 0,
                                 hjust = 0.5,
-                                size = 12)),
-    legend.title = (element_text(face = "bold",
-                                 size = 12)),
-    legend.text = (element_text(size = 12)),
-    legend.position = c(0.18, 0.9),
+                                size = 10),
+    axis.title = element_text(size = 10),
+    legend.title = element_text(size = 10),
+    legend.text = element_text(size = 8),
+    legend.position = c(0.145, 0.84),
     legend.background = element_rect(fill = "transparent", 
                                      color = "transparent"),
     legend.box = "horizontal") +
   annotation_custom(ggplotGrob(p0),
-                    xmin = 11, xmax = 14,
-                    ymin = -3, ymax = 0)
-p1
+                    xmin = 11.75, xmax = 14.75,
+                    ymin = -4.5, ymax = -1.25); p1
 
-# save(p1,
-#      file = "outputs/r/fig_2/umapplot.RData")
+# save(p1, file = "outputs/r/fig_2/umapplot.RData")
 
-# palette_genotype <- colorRampPalette(brewer.pal(46, "Paired"))(46)
+palette_genotype <- colorRampPalette(brewer.pal(46, "Paired"))(46)
 # p2 <- ggplot(df_postproc, aes(x = `UMAP 1`, y = `UMAP 2`, color = Genotype)) +
 #   geom_point() +
 #   scale_color_discrete(type = palette_genotype) +
@@ -355,8 +354,8 @@ ht <- heat_tree(to_plot,
 ## Plot most abundant Genus by genotype
 
 ```{r, echo = FALSE}
-# source("scripts/utils/plot_composition_v2.R")
 load("outputs/r/setup/bh.RData")
+source("scripts/utils/plot_composition_patch.R")
 
 bh_rel <- microbiome::transform(bh, "compositional")
 bh_agr <- microbiome::aggregate_rare(
@@ -407,8 +406,7 @@ color <- c("#032230","#053c55","#07567a","#0a719f","#0c8bc4",
            "#ff6682","#ff8da2",
            "#a6a6a6")
 
-par(omi = c(12, 8, 8, 8) + 0.1)
-bp_g1 <- plot_composition(bh_agr,
+bp_g1 <- plot_composition_v2(bh_agr,
                           plot.type = "barplot",
                           group_by = "domestication",
                           average_by = "code",
@@ -416,31 +414,33 @@ bp_g1 <- plot_composition(bh_agr,
                           sample.sort = "neatmap") +
   geom_bar(stat = "identity",
            position = "stack") +
-  scale_fill_manual(values = color) +
+  scale_fill_manual(values = color,
+                    labels = substring(as.factor(otu_order), 1, 16)) +
   scale_y_continuous(expand = c(0, 0), 
                      label = function(x) paste0(x*100)) +
   scale_x_discrete(expand = c(0, 0)) +
   theme_classic() +
   theme(
+    plot.margin = margin(0.8,0,0,0, "cm"),
     panel.border = element_rect(color = "black",
                                 fill = NA, 
                                 size = 1),
     strip.background = element_blank(),
-    strip.text = element_blank(), #element_text(size = 12, face = "bold"),
-    axis.text.x = element_text(size = 12, 
+    strip.text = element_blank(),
+    axis.text.x = element_text(size = 10, 
                                angle = 0, 
                                hjust = 0.5),
-    axis.text.y = element_text(size = 12),
-    axis.title.y = element_text(size = 12),
+    axis.text.y = element_text(size = 10),
+    axis.title.y = element_text(size = 10),
     legend.position = "bottom",
-    legend.key.size = unit(0.5, 'cm'),
+    legend.key.size = unit(0.4, 'cm'),
     legend.background = element_rect(fill = "transparent", color = "transparent"),
-    legend.text = element_text(size = 12),
-    legend.title = element_text(size = 12)) +
+    legend.text = element_text(size = 6),
+    legend.title = element_text(size = 10)) +
   labs(x = "", 
        y = "Relative abundance [%]", 
        fill = "Genus") +
-  guides(fill = guide_legend(nrow = 4, 
+  guides(fill = guide_legend(nrow = 2, 
                              byrow = F)) +
   facet_grid(~factor(Group, 
                      levels = c("Landrace",
@@ -451,37 +451,52 @@ bp_g1 <- plot_composition(bh_agr,
              scales = "free_x",
              space = "free"); bp_g1
 
-# save(bp_g1,
-#      file = "outputs/r/fig_2/barplot.RData")
+save(bp_g1, file = "outputs/r/fig_2/barplot.RData")
 ```
 
 # Merge
 
 ```{r}
-load("outputs/r/fig_2/heat-tree.RData") # ht
+load("outputs/r/fig_2/heat-tree.RData") # ht2
 load("outputs/r/fig_2/umapplot.RData") # p1
 load("outputs/r/fig_2/barplot.RData") # bp_g1
 
-fig2 <- cowplot::plot_grid(ht,
+Fig2AB <- cowplot::plot_grid(ht2,
                            p1, 
-                           labels = c("a", "b"),
+                           labels = c("A", "B"),
                            nrow = 1,
-                           rel_widths = c(1.15, 1),
-                           label_size = 12,
+                           rel_widths = c(1, 1.1),
+                           label_size = 15,
                            greedy = T)
 
-fig2_final <- cowplot::plot_grid(fig2,
-                                 bp_g1, 
-                   labels = c("", "c"),
+Fig2 <- cowplot::plot_grid(Fig2AB,
+                           bp_g1, 
+                   labels = c("", "C"),
                    rel_heights = c(1.5, 1),
-                   label_size = 12, 
+                   label_size = 15, 
                    ncol = 1,
                    greedy = T) +
-   geom_text(aes(x = c(0.275, 0.295, 0.379, 0.569, 0.59, 0.608, 0.76, 0.947, 0.968),
-                 y = rep(0.1, 9),
-                label = "*"),
+  theme(plot.margin = margin(0.1,0,0,0, "cm")) +
+  geom_text(aes(x = c(0.165, 0.345, 0.51, 0.672, 0.87),
+                y = rep(0.37, 5)),
+            label = c("LANDRACES", "SELECTED LINES", "CROSS HYBRIDS", "INBRED LINES", "NA"),
+            size = 3,
+            angle = 0) +
+   geom_text(aes(x = c(0.27, 0.291, 0.376, 0.568, 0.59, 0.61, 0.762, 0.95, 0.973),
+                 y = rep(0.1, 9)),
+            label = "*",
             size = 5,
-            fontface = "bold")
+            fontface = "bold"); Fig2
+
+cowplot::save_plot(
+  plot = Fig2,
+  "outputs/r/fig_2/fig2-final.png",
+  base_width = 40,
+  base_height = 20,
+  units = "cm",
+  scale = 1,
+  bg = "white",
+  dpi = 600)
 ```
 
 # Replicates =======================================================
