@@ -110,6 +110,7 @@ plot_composition_v2 <- function(x,
   }
   
   # Sort taxa
+  print(taxa)
   if (is.null(otu.sort) || all(otu.sort == "none")) {  # Patch
     # No sorting
     otu.sort <- taxa(x)
@@ -121,7 +122,7 @@ plot_composition_v2 <- function(x,
   } else if (length(otu.sort) == 1 && otu.sort %in%
              colnames(tax_table(x))) {
     otu.sort <- rownames(sample_data(x))[order(tax_table(x)[[otu.sort]])]
-  } else if (all(otu.sort %in% taxa(x))) {
+  } else if (all(otu.sort %in% microbiome::taxa(x))) { # !
     # Use predefined order
     otu.sort <- otu.sort
   } else if (length(otu.sort) == 1 && otu.sort == "neatmap") {

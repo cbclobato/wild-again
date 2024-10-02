@@ -608,29 +608,32 @@ plab4 <- ggplot(dflab4, aes(interaction(ASV), per)) +
   scale_fill_manual(values = my_colors) +
   theme_classic() +
   theme(
+    plot.margin = margin(0,0.2,0.2,0.2, "cm"),
     panel.grid.major.y = element_blank(),
     panel.grid.minor.y = element_blank(),
     strip.text = element_blank(),
-    axis.title.y = element_text(size = 12),
-    axis.title.x = element_text(size = 12),
+    axis.title.y = element_text(size = 10),
+    axis.title.x = element_text(size = 10),
     axis.text.x = element_text(angle = 0, 
                                hjust = 0.5,
                                vjust = 1,
-                               size = 12),
-    axis.text.y = element_text(size = 12),
+                               size = 10),
+    axis.text.y = element_text(size = 10),
+    axis.line = element_blank(),
+    axis.ticks.x = element_blank(),
     legend.position = "right",
     legend.box = "vertical",
     legend.direction = "vertical",
-    legend.text = element_text(size = 12),
-    legend.title = element_text(size = 12, face = "bold")) +
-    labs(x = "", y = "Individuals [%]", fill = "Traits") +
+    legend.text = element_text(size = 10),
+    legend.title = element_text(size = 10)) +
+    labs(x = "", y = "Proportion of plants [%]", fill = "Traits") +
   guides(fill = guide_legend(ncol = 1)) +
   facet_wrap(~ interaction(ASV),
              scales = "free_x",
              ncol = 6) + 
   geom_text(data = sig,
-  mapping = aes(x = x, y = y, label = label),
-  color = "black", size = 5); plab4
+            mapping = aes(x = x, y = y, label = label),
+            color = "black", size = 4); plab4
 ```
 
 # Field ===========================================================
@@ -705,7 +708,7 @@ dfwies1 <- field23 %>%
   drop_na() %>%
   mutate(name = fct_relevel(name,
                             "Control",
-                            "Serratia plymunthica RR2-5-10",
+                            "Serratia plymuthica RR2-5-10",
                             "Bacillus frigotolerans C1141"))
 
 dfwies1x <- dfwies1 %>%
@@ -729,31 +732,36 @@ pwies1 <- ggplot(data = dfwies1,
               width = 0.2) +
   theme_classic() +
   theme(
-    axis.title.x = element_text(size = 12),
+    plot.margin = margin(0.2,0.2,0,0.2, "cm"),
+    panel.grid.major.y = element_blank(),
+    axis.title.x = element_text(size = 10),
     axis.ticks.x = element_blank(),
-    axis.title.y = element_text(size = 12),
-    axis.text.x = element_text(size = 12),
-    axis.text.y = element_text(size = 12),
-    legend.title = element_text(size = 12, face = "bold"),
-    legend.text = element_text(size = 12),
+    axis.title.y = element_text(size = 10),
+    axis.text.x = element_text(size = 10),
+    axis.text.y = element_text(size = 10),
+    axis.line = element_blank(),
+    legend.box.margin = margin(0,0,0,0, "cm"),
+    legend.box.spacing = unit(0, "lines"),
+    legend.spacing = unit(0, "lines"),
+    legend.title = element_text(size = 10),
+    legend.text = element_text(size = 10),
     legend.position = "right") +
   scale_color_manual(values = my_colors) +
   scale_fill_manual(values = my_colors) +
   scale_x_discrete(labels = c("Control" = "",
-                              "Serratia plymunthica RR2-5-10" = "",
+                              "Serratia plymuthica RR2-5-10" = "",
                               "Bacillus frigotolerans C1141" = "")) +
   labs(x = "", y = "Plant biomass at harvest [Kg]", color = "Treatment") +
   geom_text(aes(x = 2,
                 y = 2,
                 label = "**"),
             color = "black",
-            size = 5) +
+            size = 4) +
   geom_text(aes(x = 3,
                 y = 2,
                 label = "****"),
             color = "black",
-            size = 5)
-pwies1
+            size = 4); pwies1
 ```
 
 ## Height
@@ -820,29 +828,30 @@ pwies4 <- ggplot(data = dfwies4,
                 alpha = 0.7) +
   theme_classic() +
   theme(
+    plot.margin = margin(0,0,0.2,0.2, "cm"),
     panel.grid.major.y = element_blank(),
     panel.grid.minor.y = element_blank(),
-    axis.title.x = element_text(size = 12),
-    axis.title.y = element_text(size = 12),
-    axis.text.x = element_text(size = 12,
+    axis.title.x = element_text(size = 10),
+    axis.title.y = element_text(size = 10),
+    axis.text.x = element_text(size = 10,
                                angle = 0,
                                hjust = 1),
-    axis.text.y = element_text(size = 12),
+    axis.text.y = element_text(size = 10),
     legend.position = "none",
-    legend.title = element_text(size = 12),
-    legend.text = element_text(size = 12)) +
+    legend.title = element_text(size = 10),
+    legend.text = element_text(size = 10)) +
   scale_color_manual(values = my_colors) +
   scale_y_continuous(expand = expand_scale(mult = c(0, 0.05))) +
   scale_x_discrete(expand = expand_scale(mult = c(0.05, 0.05))) +
-  labs(x = "", y = "Height [cm]", color = "") +
+  labs(x = "", y = "Plant height [cm]", color = "") +
   geom_text(aes(x = 2, y = 130, label = "****"),
-            color = "black", size = 5) +
+            color = "black", size = 4) +
   geom_text(aes(x = 3, y = 189, label = "****"),
-            color = "black", size = 5) +
+            color = "black", size = 4) +
   geom_text(aes(x = 4, y = 200, label = "****"),
-            color = "black", size = 5) +
+            color = "black", size = 4) +
   geom_text(aes(x = 4, y = 162, label = "*"),
-            color = "black", size = 5); pwies4
+            color = "black", size = 4); pwies4
 ```
 
 ### Stalk Diameter
@@ -910,65 +919,81 @@ pwies5 <- ggplot(data = dfwies5,
                 alpha = 0.7) +
   theme_classic() +
   theme(
+    plot.margin = margin(0.2,0,0,0.2, "cm"),
     panel.grid.major.y = element_blank(),
     panel.grid.minor.y = element_blank(),
-    axis.title.x = element_text(size = 12),
-    axis.title.y = element_text(size = 12),
-    axis.text.x = element_text(size = 12,
+    axis.title.x = element_text(size = 10),
+    axis.title.y = element_text(size = 10),
+    axis.text.x = element_text(size = 10,
                                angle = 0,
                                hjust = 1),
-    axis.text.y = element_text(size = 12),
+    axis.text.y = element_text(size = 10),
     legend.position = "none",
-    legend.title = element_text(size = 12),
-    legend.text = element_text(size = 12)) +
+    legend.title = element_text(size = 10),
+    legend.text = element_text(size = 10)) +
   scale_color_manual(values = my_colors) +
   scale_y_continuous(expand = expand_scale(mult = c(0, 0.05))) +
   scale_x_discrete(expand = expand_scale(mult = c(0.05, 0.05))) +
-  labs(x = "Timepoint", y = "Stalk diameter [cm]", color = "") +
+  labs(x = "Timepoint", y = "Plant stalk diameter [cm]", color = "") +
   geom_text(aes(x = 1, y = 8, label = "***"),
-            color = "black", size = 5) +
+            color = "black", size = 4) +
   geom_text(aes(x = 2, y = 19, label = "****"),
-            color = "black", size = 5) +
+            color = "black", size = 4) +
   geom_text(aes(x = 2, y = 15, label = "*"),
-            color = "black", size = 5) +
+            color = "black", size = 4) +
   geom_text(aes(x = 3, y = 28.4, label = "****"),
-            color = "black", size = 5) +
+            color = "black", size = 4) +
   geom_text(aes(x = 3, y = 21.5, label = "***"),
-            color = "black", size = 5) +
+            color = "black", size = 4) +
   geom_text(aes(x = 4, y = 29, label = "****"),
-            color = "black", size = 5) +
+            color = "black", size = 4) +
   geom_text(aes(x = 4, y = 22, label = "***"),
-            color = "black", size = 5); pwies5
+            color = "black", size = 4); pwies5
 ```
 
 ## Merge plots
 
 ```{r}
 p_AB <- cowplot::plot_grid(plab4, pwies1,
-                           labels = c("a", "b"),
-                           label_size = 12,
+                           labels = c("A", "B"),
+                           label_size = 15,
+                           label_x = -0.01,
                            ncol = 1,
                            rel_widths = c(1, 1),
                            rel_heights = c(1, 1),
-                           axis = "lb"); p_AB
+                           axis = "lb")+ 
+  theme(plot.margin = margin(0,0.2,0,0, "cm")); p_AB
 
 p_CD <- cowplot::plot_grid(pwies4, pwies5,
-                           labels = c("c", "d"),
-                           label_size = 12,
+                           labels = c("C", "D"),
+                           label_size = 15,
+                           label_x = -0.01,
                            ncol = 1,
                            rel_widths = c(1, 1),
                            rel_heights = c(1, 1),
-                           axis = "lb"); p_CD
+                           axis = "lb",
+                           align = "v") + 
+  theme(plot.margin = margin(0,0,0,0.2, "cm")); p_CD
 
 
-p_field <- cowplot::plot_grid(p_AB, p_CD,
+Fig4 <- cowplot::plot_grid(p_AB, p_CD,
                            labels = c("", ""),
                            ncol = 2,
-                           rel_widths = c(1, 0.75),
-                           rel_heights = c(1, 1),
+                           rel_widths = c(1, 0.7),
+                           rel_heights = c(1, 0.7),
                            axis = "bt",
+                           align = "hv",
                            greedy = T)
 
-save(p_field,
-     file = "outputs/r/fig_4/all-plots.RData")
+# save(Fig4, file = "outputs/r/fig_4/all-plots.RData")
+
+# cowplot::save_plot(
+#   plot = Fig4,
+#   "outputs/r/fig_4/fig4-final.png",
+#   base_width = 37,
+#   base_height = 23,
+#   units = "cm",
+#   scale = 1,
+#   bg = "white",
+#   dpi = 600)
 ```

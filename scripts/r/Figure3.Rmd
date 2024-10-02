@@ -287,6 +287,15 @@ asv_prev_rel_taxo_gen_obs_core_all$core_asv <-
 #      file = "outputs/r/fig_3/all-asv-rel-taxo.RData")
 ```
 
+# Figure Settings
+
+```{r}
+size_p = 3
+size_l = 3.5
+size_ti = 10
+size_tx = 8
+```
+
 ### LAND: Scatter Plot
 
 ```{r}
@@ -296,7 +305,8 @@ color_core = c(Biomarker = "#ff6682",
                Core = "#ce232a", 
                Flexible = "#918bc0")
 
-counts <- asv_prev_rel_taxo_gen_obs_core_bmk %>% dplyr::count(Domain = "Bacteria")
+counts <- asv_prev_rel_taxo_gen_obs_core_bmk %>% 
+  dplyr::count(Domain = "Bacteria")
 bmks <- subset(asv_prev_rel_taxo_gen_obs_core_bmk, bmk_core_asv == "Biomarker") %>%
    mutate(ASV = recode(ASV,
                       "ASV 2716: Oenococcus_oeni" = "ASV 2716: O. oeni",
@@ -304,29 +314,33 @@ bmks <- subset(asv_prev_rel_taxo_gen_obs_core_bmk, bmk_core_asv == "Biomarker") 
 
 p_core_flex1_land <-
   ggplot(asv_prev_rel_taxo_gen_obs_core_bmk, aes(x = asv_rel_p, y = asv_prev_p)) +
-  geom_point(aes(color = bmk_core_asv), size = 3, alpha = 0.7) + 
+  geom_point(aes(color = bmk_core_asv), size = size_p, alpha = 0.7) + 
   ggrepel::geom_text_repel(data = bmks, max.overlaps = 20,
                            aes(asv_rel_p,
                                asv_prev_p,
                                color = bmk_core_asv,
                                label = ASV),
-                           size = 3.5, show.legend = F) +
-  geom_label(data = counts, aes(x = 10, y = 5, label = n, fontface = "bold"), size = 5) +
+                           size = size_l, show.legend = F) +
+  geom_text(data = counts, 
+            aes(x = 9.5, y = 5, label = n, fontface = "bold"), 
+            size = size_l) +
   geom_hline(yintercept = 75, linetype = "dashed", color = "black") +
   geom_vline(xintercept = 0.1, linetype = "dotted", color = "black", show.legend = T) +
   theme_classic() +
   theme(
     plot.margin = margin(t = 0, r = 0, b = 0, l = 0, unit = "cm"),
-    axis.title.x = element_text(size = 12),
-    axis.title.y = element_text(size = 12), 
-    axis.text = element_text(size = 12),
-    legend.text = element_text(size = 12),
+    axis.title.x = element_text(size = size_ti),
+    axis.title.y = element_blank(), 
+    axis.text = element_text(size = size_tx),
+    axis.line = element_blank(),
+    legend.text = element_text(size = size_ti),
     legend.position = c(0.2, 0.95), 
     legend.direction = "vertical",
     legend.background = element_rect(fill = "transparent", color = "transparent"),
     legend.margin = margin(0, 0, 0, 0),
     panel.spacing = unit(0.1, "lines")) +
-  scale_x_log10(breaks = c(10, 1, 0.1, 0.01, 0.001), labels = c(10, 1, 0.1, 0.01, 0.001)) +
+  scale_x_log10(breaks = c(10, 1, 0.1, 0.01, 0.001), 
+                labels = c(10, 1, 0.1, 0.01, 0.001)) +
   scale_y_continuous(expand = expand_scale(mult = c(0, 0.05)), limits = c(0, 101)) +
   scale_color_manual(values = color_core)	+
   labs(x = "Relative abundance [%]", y = "Prevalence [%]", color = "")
@@ -349,29 +363,32 @@ bmks <- subset(asv_prev_rel_taxo_gen_obs_core_bmk, bmk_core_asv == "Biomarker") 
 
 p_core_flex1_sel <-
   ggplot(asv_prev_rel_taxo_gen_obs_core_bmk, aes(x = asv_rel_p, y = asv_prev_p)) +
-  geom_point(aes(color = bmk_core_asv), size = 3, alpha = 0.7) + 
+  geom_point(aes(color = bmk_core_asv), size = size_p, alpha = 0.7) + 
   ggrepel::geom_text_repel(data = bmks, max.overlaps = 20,
                            aes(asv_rel_p,
                                asv_prev_p,
                                color = bmk_core_asv,
                                label = ASV),
-                           size = 3.5, show.legend = F) +
-  geom_label(data = counts, aes(x = 10, y = 5, label = n, fontface = "bold"), size = 5) +
+                           size = size_l, show.legend = F) +
+  geom_text(data = counts, aes(x = 9.5, y = 5, label = n, fontface = "bold"), 
+            size = size_l) +
   geom_hline(yintercept = 75, linetype = "dashed", color = "black") +
   geom_vline(xintercept = 0.1, linetype = "dotted", color = "black", show.legend = T) +
   theme_classic() +
   theme(
     plot.margin = margin(t = 0, r = 0, b = 0, l = 0, unit = "cm"),
-    axis.title.x = element_text(size = 12),
+    axis.title.x = element_text(size = size_ti),
     axis.title.y = element_blank(),
-    axis.text = element_text(size = 12),
-    legend.text = element_text(size = 12),
+    axis.text = element_text(size = size_tx),
+    axis.line = element_blank(),
+    legend.text = element_text(size = size_ti),
     legend.position = "none",
     legend.direction = "vertical",
     legend.background = element_rect(fill = "transparent", color = "transparent"),
     legend.margin = margin(0, 0, 0, 0),
     panel.spacing = unit(0.1, "lines")) +
-  scale_x_log10(breaks = c(10, 1, 0.1, 0.01, 0.001), labels = c(10, 1, 0.1, 0.01, 0.001)) +
+  scale_x_log10(breaks = c(10, 1, 0.1, 0.01, 0.001), 
+                labels = c(10, 1, 0.1, 0.01, 0.001)) +
   scale_y_continuous(expand = expand_scale(mult = c(0, 0.05)), limits = c(0, 101)) +
   scale_color_manual(values = color_core)	+
   labs(x = "Relative abundance [%]", y = "Prevalence [%]", color = "")
@@ -398,29 +415,32 @@ bmks <- subset(asv_prev_rel_taxo_gen_obs_core_bmk, bmk_core_asv == "Biomarker") 
 
 p_core_flex1_cxh <-
   ggplot(asv_prev_rel_taxo_gen_obs_core_bmk, aes(x = asv_rel_p, y = asv_prev_p)) +
-  geom_point(aes(color = bmk_core_asv), size = 3, alpha = 0.7) + 
+  geom_point(aes(color = bmk_core_asv), size = size_p, alpha = 0.7) + 
   ggrepel::geom_text_repel(data = bmks, max.overlaps = 20,
                            aes(asv_rel_p,
                                asv_prev_p,
                                color = bmk_core_asv,
                                label = ASV),
-                           size = 3.5, show.legend = F) +
-  geom_label(data = counts, aes(x = 10, y = 5, label = n, fontface = "bold"), size = 5) +
+                           size = size_l, show.legend = F) +
+  geom_text(data = counts, aes(x = 9.5, y = 5, label = n, fontface = "bold"), 
+            size = size_l) +
   geom_hline(yintercept = 75, linetype = "dashed", color = "black") +
   geom_vline(xintercept = 0.1, linetype = "dotted", color = "black", show.legend = T) +
   theme_classic() +
   theme(
     plot.margin = margin(t = 0, r = 0, b = 0, l = 0, unit = "cm"),
-    axis.title.x = element_text(size = 12),
+    axis.title.x = element_text(size = size_ti),
     axis.title.y = element_blank(),
-    axis.text = element_text(size = 12),
-    legend.text = element_text(size = 12),
+    axis.text = element_text(size = size_tx),
+    axis.line = element_blank(),
+    legend.text = element_text(size = size_ti),
     legend.position = "none",
     legend.direction = "vertical",
     legend.background = element_rect(fill = "transparent", color = "transparent"),
     legend.margin = margin(0, 0, 0, 0),
     panel.spacing = unit(0.1, "lines")) +
-  scale_x_log10(breaks = c(10, 1, 0.1, 0.01, 0.001), labels = c(10, 1, 0.1, 0.01, 0.001)) +
+  scale_x_log10(breaks = c(10, 1, 0.1, 0.01, 0.001),
+                labels = c(10, 1, 0.1, 0.01, 0.001)) +
   scale_y_continuous(expand = expand_scale(mult = c(0, 0.05)), limits = c(0, 101)) +
   scale_color_manual(values = color_core)	+
   labs(x = "Relative abundance [%]", y = "Prevalence [%]", color = "")
@@ -443,29 +463,32 @@ bmks <- subset(asv_prev_rel_taxo_gen_obs_core_bmk, bmk_core_asv == "Biomarker") 
 
 p_core_flex1_ib <-
   ggplot(asv_prev_rel_taxo_gen_obs_core_bmk, aes(x = asv_rel_p, y = asv_prev_p)) +
-  geom_point(aes(color = bmk_core_asv), size = 3, alpha = 0.7) + 
+  geom_point(aes(color = bmk_core_asv), size = size_p, alpha = 0.7) + 
   ggrepel::geom_text_repel(data = bmks, max.overlaps = 20,
                            aes(asv_rel_p,
                                asv_prev_p,
                                color = bmk_core_asv,
                                label = ASV),
-                           size = 3.5, show.legend = F) +
-  geom_label(data = counts, aes(x = 10, y = 5, label = n, fontface = "bold"), size = 5) +
+                           size = size_l, show.legend = F) +
+  geom_text(data = counts, aes(x = 9.5, y = 5, label = n, fontface = "bold"), 
+            size = size_l) +
   geom_hline(yintercept = 75, linetype = "dashed", color = "black") +
   geom_vline(xintercept = 0.1, linetype = "dotted", color = "black", show.legend = T) +
   theme_classic() +
   theme(
     plot.margin = margin(t = 0, r = 0, b = 0, l = 0, unit = "cm"),
-    axis.title.x = element_text(size = 12),
+    axis.title.x = element_text(size = size_ti),
     axis.title.y = element_blank(),
-    axis.text = element_text(size = 12),
-    legend.text = element_text(size = 12),
+    axis.text = element_text(size = size_tx),
+    axis.line = element_blank(),
+    legend.text = element_text(size = size_ti),
     legend.position = "none",
     legend.direction = "vertical",
     legend.background = element_rect(fill = "transparent", color = "transparent"),
     legend.margin = margin(0, 0, 0, 0),
     panel.spacing = unit(0.1, "lines")) +
-  scale_x_log10(breaks = c(10, 1, 0.1, 0.01, 0.001), labels = c(10, 1, 0.1, 0.01, 0.001)) +
+  scale_x_log10(breaks = c(10, 1, 0.1, 0.01, 0.001), 
+                labels = c(10, 1, 0.1, 0.01, 0.001)) +
   scale_y_continuous(expand = expand_scale(mult = c(0, 0.05)), limits = c(0, 101)) +
   scale_color_manual(values = color_core)	+
   labs(x = "Relative abundance [%]", y = "Prevalence [%]", color = "")
@@ -483,9 +506,13 @@ color_core = c(Core = "#ce232a",
 counts <- asv_prev_rel_taxo_gen_obs_core_all %>% dplyr::count(Domain = "Bacteria")
 
 p_core_flex1_all <- 
-  ggplot(asv_prev_rel_taxo_gen_obs_core_all, aes(x = asv_rel_p, y = asv_prev_p)) +
-  geom_point(aes(color = core_asv), size = 3, alpha = 0.7) + 
-  ggrepel::geom_text_repel(data = subset(asv_prev_rel_taxo_gen_obs_core_all, core_asv == "Core"),
+  ggplot(asv_prev_rel_taxo_gen_obs_core_all, 
+         aes(x = asv_rel_p, y = asv_prev_p)) +
+  geom_point(aes(color = core_asv), 
+             size = 3, 
+             alpha = 0.7) + 
+  ggrepel::geom_text_repel(data = subset(asv_prev_rel_taxo_gen_obs_core_all, 
+                                         core_asv == "Core"),
                            max.overlaps = 20,
                            aes(asv_rel_p,
                                asv_prev_p,
@@ -493,7 +520,7 @@ p_core_flex1_all <-
                                label = ASV),
                            size = 3,
                            show.legend = F) +
-  geom_label(data = counts, aes(x = 10, y = 5, label = n,  fontface = "bold"), size = 5) +
+  geom_text(data = counts, aes(x = 9.5, y = 5, label = n,  fontface = "bold"), size = 4) +
   geom_hline(yintercept = 75, linetype = "dashed", color = "black") +
   geom_vline(xintercept = 0.1, linetype = "dotted", color = "black", show.legend = T) +
   theme_classic() +
@@ -502,17 +529,18 @@ p_core_flex1_all <-
     axis.title.x = element_text(size = 12),
     axis.title.y = element_text(size = 12),
     axis.text = element_text(size = 12),
+    axis.line = element_blank(),
     legend.text = element_text(size = 12),
     legend.position = c(0.16, 0.6),
     legend.direction = "vertical",
     legend.background = element_rect(fill = "transparent", color = "transparent"),
     legend.margin = margin(0, 0, 0, 0),
     panel.spacing = unit(0.1, "lines")) +
-  scale_x_log10(breaks = c(10, 1, 0.1, 0.01, 0.001), labels = c(10, 1, 0.1, 0.01, 0.001)) +
+  scale_x_log10(breaks = c(10, 1, 0.1, 0.01, 0.001), 
+                labels = c(10, 1, 0.1, 0.01, 0.001)) +
   scale_y_continuous(expand = c(0, 0), limits = c(0, 101)) +
   scale_color_manual(values = color_core)	+
-  labs(x = "Relative abundance [%]", y = "Prevalence [%]", color = "")
-p_core_flex1_all
+  labs(x = "Relative abundance [%]", y = "Prevalence [%]", color = ""); p_core_flex1_all
 ```
 
 # Merge Scatters
@@ -527,8 +555,7 @@ p_core_flex1_lsci <- cowplot::plot_grid(p_core_flex1_land,
                                         rel_widths = c(0.3, 0.3, 0.3, 0.3),
                                         greedy = T); p_core_flex1_lsci
 
-# save(p_core_flex1_lsci,
-#      file = "outputs/r/fig_3/core_flex1-final.RData")
+# save(p_core_flex1_lsci, file = "outputs/r/fig_3/core_flex1-final.RData")
 ```
 
 ## Prep Barplot Core ==============================================
@@ -595,6 +622,14 @@ df <- asv_prev_rel_taxo_gen_obs_core_all %>%
 # save(df, file = "outputs/r/fig_3/all-c75-rel.RData")
 ```
 
+# Figure Settings
+
+```{r}
+width = 0.25
+size_tx = 8
+size_sb = 8
+```
+
 ### LAND: Barplot Core
 
 ```{r}
@@ -609,27 +644,29 @@ p_core_flex2_land <-
              y = rel_ab, 
              fill = core_asv)) +
   geom_bar(stat = "identity", 
-           position = "stack") + 
+           position = "stack",
+           width = width) + 
   geom_text(aes(label = n_taxa,
                 fontface = "bold",
                 colour = core_asv, 
-                size = 12),
+                size = size_l),
             position = position_stack(vjust = 0.5)) +
   theme_classic() +
-  theme(axis.title.x = element_text(size = 12),
-        axis.title.y = element_text(size = 12),
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
         axis.ticks.x = element_blank(),
-        axis.text = element_text(size = 12),
+        axis.line = element_blank(),
+        axis.text = element_text(size = size_tx),
         legend.position = "none",
         plot.margin = margin(t = 0.2, r = 0, b = 0, l = 0, unit = "cm")) +
   scale_y_continuous(expand = c(0, 0)) +
   scale_x_discrete(expand = c(0, 0)) +
   scale_fill_manual(values = color_core) +
   scale_color_manual(values = color_num) +
+  # coord_fixed(ratio = 0.05) +
   labs(x = "", 
        y = "Relative abundance [%]", 
-       fill = "")
-p_core_flex2_land
+       fill = ""); p_core_flex2_land
 ```
 
 ### SEL: Barplot Core
@@ -646,27 +683,29 @@ p_core_flex2_sel <-
              y = rel_ab, 
              fill = core_asv)) +
   geom_bar(stat = "identity", 
-           position = "stack") + 
+           position = "stack",
+           width = width) + 
   geom_text(aes(label = n_taxa,
                 fontface = "bold",
                 colour = core_asv, 
-                size = 12),
+                size = size_l),
             position = position_stack(vjust = 0.5)) +
   theme_classic() +
-  theme(axis.title.x = element_text(size = 12),
+  theme(axis.title.x = element_blank(),
         axis.title.y = element_blank(),
         axis.ticks.x = element_blank(),
-        axis.text = element_text(size = 12),
+        axis.line = element_blank(),
+        axis.text = element_text(size = size_tx),
         legend.position = "none",
-        plot.margin = margin(t = 0.2, r = 0.5, b = 0, l = 0, unit = "cm")) +
+        plot.margin = margin(t = 0.2, r = 0, b = 0, l = 0, unit = "cm")) +
   scale_y_continuous(expand = c(0, 0)) +
   scale_x_discrete(expand = c(0, 0)) +
   scale_fill_manual(values = color_core) +
   scale_color_manual(values = color_num) +
+  # coord_fixed(ratio = 0.05) +
   labs(x = "", 
        y = "Relative abundance [%]", 
-       fill = "")
-p_core_flex2_sel
+       fill = ""); p_core_flex2_sel
 ```
 
 ### CXH: Barplot Core
@@ -683,27 +722,29 @@ p_core_flex2_cxh <-
              y = rel_ab, 
              fill = core_asv)) +
   geom_bar(stat = "identity", 
-           position = "stack") + 
+           position = "stack",
+           width = width) + 
   geom_text(aes(label = n_taxa,
                 fontface = "bold",
                 colour = core_asv, 
-                size = 12),
+                size = size_l),
             position = position_stack(vjust = 0.5)) +
   theme_classic() +
-  theme(axis.title.x = element_text(size = 12),
+  theme(axis.title.x = element_blank(),
         axis.title.y = element_blank(),
         axis.ticks.x = element_blank(),
-        axis.text = element_text(size = 12),
+        axis.line = element_blank(),
+        axis.text = element_text(size = size_tx),
         legend.position = "none",
-        plot.margin = margin(t = 0.2, r = 0.5, b = 0, l = 0, unit = "cm")) +
+        plot.margin = margin(t = 0.2, r = 0, b = 0, l = 0, unit = "cm")) +
   scale_y_continuous(expand = c(0, 0)) +
   scale_x_discrete(expand = c(0, 0)) +
   scale_fill_manual(values = color_core) +
   scale_color_manual(values = color_num) +
+  # coord_fixed(ratio = 0.05) +
   labs(x = "", 
        y = "Relative abundance [%]", 
-       fill = "")
-p_core_flex2_cxh
+       fill = ""); p_core_flex2_cxh
 ```
 
 ### IBL: Barplot Core
@@ -720,27 +761,28 @@ p_core_flex2_ib <-
              y = rel_ab, 
              fill = core_asv)) +
   geom_bar(stat = "identity", 
-           position = "stack") + 
+           position = "stack",
+           width = width) + 
   geom_text(aes(label = n_taxa,
                 fontface = "bold",
                 colour = core_asv, 
-                size = 12),
+                size = size_l),
             position = position_stack(vjust = 0.5)) +
   theme_classic() +
-  theme(axis.title.x = element_text(size = 12),
-        axis.title.y = element_blank(),
+  theme(axis.title = element_blank(),
         axis.ticks.x = element_blank(),
-        axis.text = element_text(size = 12),
+        axis.line = element_blank(),
+        axis.text = element_text(size = size_tx),
         legend.position = "none",
-        plot.margin = margin(t = 0.2, r = 0.5, b = 0, l = 0, unit = "cm")) + 
+        plot.margin = margin(t = 0.2, r = 0, b = 0, l = 0, unit = "cm")) + 
   scale_y_continuous(expand = c(0, 0)) +
   scale_x_discrete(expand = c(0, 0)) +
   scale_fill_manual(values = color_core) +
   scale_color_manual(values = color_num) +
+  # coord_fixed(ratio = 0.05) +
   labs(x = "", 
        y = "Relative abundance [%]", 
-       fill = "")
-p_core_flex2_ib
+       fill = ""); p_core_flex2_ib
 ```
 
 ### ALL: Barplot Core
@@ -761,13 +803,13 @@ p_core_flex2_all <-
   geom_text(aes(label = n_taxa,
                 fontface = "bold",
                 colour = core_asv, 
-                size = 12),
+                size = size_tx),
             position = position_stack(vjust = 0.5)) +
   theme_classic() +
-  theme(axis.title.x = element_text(size = 12),
-        axis.title.y = element_text(size = 12),
+  theme(axis.title = element_blank(),
+        axis.title.y = element_blank(),
         axis.ticks.x = element_blank(),
-        axis.text = element_text(size = 12),
+        axis.text = element_text(size = size_tx),
         legend.position = "none",
         plot.margin = margin(t = 0.2, r = 0.5, b = 0, l = 0, unit = "cm")) +
   scale_y_continuous(expand = c(0, 0)) +
@@ -776,8 +818,7 @@ p_core_flex2_all <-
   scale_color_manual(values = color_num) +
   labs(x = "", 
        y = "Relative abundance [%]", 
-       fill = "")
-p_core_flex2_all
+       fill = ""); p_core_flex2_all
 ```
 
 ## Prep Barplot Taxa Core =========================================
@@ -863,7 +904,6 @@ mycolors_land <- c("#fec74f", # Shingomonas
                    "#07567a", # Enhydro_c
                    "#9a93d9") # Rhodococcus_c
 
-
 p_core_flex3_land <-
   ggplot(data = core.rel.long.mod, 
          aes(x = "", 
@@ -871,15 +911,19 @@ p_core_flex3_land <-
              fill = ASV)) +
   geom_bar(aes(), 
            stat = "identity", 
-           position = "stack") +
+           position = "stack",
+           width = width) +
   theme_classic() +
-  theme(axis.title.x = element_text(size = 12),
-        axis.title.y = element_blank(),
-        axis.ticks.x = element_blank(),
-        axis.text = element_text(size = 12),
-        legend.text = element_text(size = 12),
-        legend.title = element_text(size = 12),
-        legend.key.size = unit(0.3, "cm"), 
+  theme(axis.title = element_blank(),
+        axis.ticks = element_blank(),
+        axis.line = element_blank(),
+        axis.text = element_blank(),
+        legend.text = element_text(size = size_sb),
+        legend.key.size = unit(0.3, "cm"),
+        legend.key.spacing.x = unit(0.5, "lines"),
+        legend.box.margin = margin(0,0,0,0, "cm"),
+        legend.box.spacing = unit(0, "lines"),
+        legend.spacing = unit(0, "lines"),
         legend.position = "right",
         legend.direction = "vertical",
         plot.margin = margin(t = 0.2, r = 0, b = 0, l = 0, unit = "cm")) +
@@ -889,8 +933,7 @@ p_core_flex3_land <-
   scale_y_continuous(expand = c(0, 0), limits = c(0, 100)) +
   scale_x_discrete(expand = c(0, 0)) +
   scale_fill_manual(values = mycolors_land) +
-  guides(fill = guide_legend(ncol = 1))
-p_core_flex3_land
+  guides(fill = guide_legend(ncol = 1)); p_core_flex3_land
 ```
 
 ### SEL: Barplot Taxa Core
@@ -919,7 +962,6 @@ mycolors_sel <- c("#2cb5f2", # Pelomonas_c
                   "#a6a6a6", # BD7-11
                   "#9a93d9") # Rhodococcus_c
 
-
 p_core_flex3_sel <-
   ggplot(data = core.rel.long.mod, 
          aes(x = "", 
@@ -927,15 +969,19 @@ p_core_flex3_sel <-
              fill = ASV)) +
   geom_bar(aes(), 
            stat = "identity", 
-           position = "stack") +
+           position = "stack",
+           width = width) +
   theme_classic() +
-  theme(axis.title.x = element_text(size = 12),
-        axis.title.y = element_blank(),
-        axis.ticks.x = element_blank(),
-        axis.text = element_text(size = 12),
-        legend.text = element_text(size = 12),
-        legend.title = element_text(size = 12),
-        legend.key.size = unit(0.3, "cm"), 
+  theme(axis.title = element_blank(),
+        axis.ticks = element_blank(),
+        axis.line = element_blank(),
+        axis.text = element_blank(),
+        legend.text = element_text(size = size_sb),
+        legend.key.size = unit(0.3, "cm"),
+        legend.key.spacing.x = unit(0.5, "lines"),
+        legend.box.margin = margin(0,0,0,0, "cm"),
+        legend.box.spacing = unit(0, "lines"),
+        legend.spacing = unit(0, "lines"),
         legend.position = "right",
         legend.direction = "vertical",
         plot.margin = margin(t = 0.2, r = 0, b = 0, l = 0, unit = "cm")) +
@@ -978,15 +1024,19 @@ p_core_flex3_cxh <-
              fill = ASV)) +
   geom_bar(aes(), 
            stat = "identity", 
-           position = "stack") +
+           position = "stack",
+           width = width) +
   theme_classic() +
-  theme(axis.title.x = element_text(size = 12),
-        axis.title.y = element_blank(), 
-        axis.text = element_text(size = 12),
-        axis.ticks.x = element_blank(),
-        legend.text = element_text(size = 12),
-        legend.title = element_text(size = 12),
-        legend.key.size = unit(0.3, "cm"), 
+  theme(axis.title = element_blank(), 
+        axis.ticks = element_blank(),
+        axis.line = element_blank(),
+        axis.text = element_blank(),
+        legend.text = element_text(size = size_sb),
+        legend.key.size = unit(0.3, "cm"),
+        legend.key.spacing.x = unit(0.5, "lines"),
+        legend.box.margin = margin(0,0,0,0, "cm"),
+        legend.box.spacing = unit(0, "lines"),
+        legend.spacing = unit(0, "lines"),
         legend.position = "right",
         legend.direction = "vertical",
         plot.margin = margin(t = 0.2, r = 0, b = 0, l = 0, unit = "cm")) +
@@ -1031,18 +1081,22 @@ p_core_flex3_ib <-
              fill = ASV)) +
   geom_bar(aes(), 
            stat = "identity", 
-           position = "stack") +
+           position = "stack",
+           width = width) +
   theme_classic() +
-  theme(axis.title.x = element_text(size = 12),
-        axis.title.y = element_blank(),
-        axis.ticks.x = element_blank(),
-        axis.text = element_text(size = 12),
-        legend.text = element_text(size = 12),
-        legend.title = element_text(size = 12),
-        legend.key.size = unit(0.3, "cm"), 
+  theme(axis.title = element_blank(),
+        axis.ticks = element_blank(),
+        axis.line = element_blank(),
+        axis.text = element_blank(),
+        legend.text = element_text(size = size_sb),
+        legend.key.size = unit(0.3, "cm"),
+        legend.key.spacing.x = unit(0.5, "lines"),
+        legend.box.margin = margin(0,0,0,0, "cm"),
+        legend.box.spacing = unit(0, "lines"),
+        legend.spacing = unit(0, "lines"),
         legend.position = "right",
         legend.direction = "vertical",
-        plot.margin = margin(t = 0.2, r = 0, b = 0, l = 0, unit = "cm")) +
+        plot.margin = margin(t = 0, r = 0, b = 0, l = 0, unit = "cm")) +
   labs(y = "Relative abundance [%]", 
        x = "", 
        fill = "") + 
@@ -1085,24 +1139,24 @@ p_core_flex3_all <-
            stat = "identity", 
            position = "stack") +
   theme_classic() +
-  theme(axis.title.x = element_text(size = 12),
-        axis.title.y = element_blank(), 
-        axis.text = element_text(size = 12),
+  theme(axis.title = element_blank(), 
+        axis.ticks = element_blank(),
+        axis.line = element_blank(),
+        axis.text = element_blank(),
         legend.text = element_text(size = 12),
-        axis.ticks.x = element_blank(),
         legend.title = element_text(size = 12),
         legend.key.size = unit(0.3, "cm"), 
         legend.position = "right",
         legend.direction = "vertical",
-        plot.margin = margin(t = 0.2, r = 0, b = 0, l = 0, unit = "cm")) +
+        plot.margin = margin(t = 0, r = 0, b = 0, l = 0, unit = "cm")) +
   labs(y = "Relative abundance [%]", 
        x = "", 
        fill = "") + 
   scale_y_continuous(expand = c(0, 0), limits = c(0, 100)) +
   scale_x_discrete(expand = c(0, 0)) +
   scale_fill_manual(values = mycolors_all) +
-  guides(fill = guide_legend(ncol = 1))
-p_core_flex3_all
+  coord_fixed(ratio = 0.05) +
+  guides(fill = guide_legend(ncol = 1)); p_core_flex3_all
 ```
 
 # Merge Barplots
@@ -1116,16 +1170,13 @@ p_core_flex2_lsci <- cowplot::plot_grid(p_core_flex2_land,
                                         p_core_flex3_cxh,
                                         p_core_flex2_ib,
                                         p_core_flex3_ib,
-                                        labels = c("", "", "", "",
-                                                   "", "", "", ""),
                                         nrow = 1,
-                                        rel_widths = c(0.25, 0.75, 0.25, 0.75,
-                                                       0.25, 0.75, 0.25, 0.75),
-                                        greedy = T); p_core_flex2_lsci
+                                        rel_widths = c(0.1, 0.25, 0.1, 0.25,
+                                                       0.1, 0.25, 0.1, 0.25),
+                                        align = "h",
+                                        greedy = F); p_core_flex2_lsci
 
-
-save(p_core_flex2_lsci,
-     file = "outputs/r/fig_3/core_flex2-final.RData")
+# save(p_core_flex2_lsci, file = "outputs/r/fig_3/core_flex2-final.RData")
 ```
 
 # Merge core whole dataset
@@ -1142,8 +1193,8 @@ p_core_flex_all <- cowplot::plot_grid(p_core_flex1_all,
                                       align = "b",
                                       scale = c(1, 0.95, 0.95)); p_core_flex_all
 
-save(p_core_flex_all,
-     file = "outputs/r/supplementary/core_flex-final-all.RData")
+# save(p_core_flex_all,
+#      file = "outputs/r/supplementary/core_flex-final-all.RData")
 ```
 
 # Biomarkers ======================================================
@@ -1174,7 +1225,7 @@ p_core_flex3_lsci <-
              color = Method,
              fill = Method)) +
   geom_point(position = position_dodge(width = 1),
-             size = 6,
+             size = 5,
              alpha = 0.7) +
   geom_linerange(aes(xmin = 0,
                      xmax = Importance,
@@ -1189,63 +1240,68 @@ p_core_flex3_lsci <-
   scale_color_manual(values = mycolors) +
   scale_fill_manual(values = mycolors) +
   theme_classic() +
-  theme(axis.text.y = element_text(size = 12),
-        axis.text.x = element_text(size = 10, 
+  theme(axis.text.y = element_text(size = 8),
+        axis.text.x = element_text(size = 8, 
                                    angle = 45,
                                    hjust = 1),
+        axis.line = element_blank(),
         strip.background = element_blank(),
         strip.text = element_blank(),
-        legend.position = "none", #c(0.95, 0.85)
+        legend.position = "none",
         plot.margin = margin(0, 0, 0, 0, unit = "cm")) +
   guides(fill = guide_legend(ncol = 1)) + 
-  labs(x = "", 
+  labs(x = "",
        y = "") +
-  coord_flip()
-p_core_flex3_lsci
+  coord_flip(); p_core_flex3_lsci
 
-save(p_core_flex3_lsci,
-     file = "outputs/r/fig_3/core_flex3-final.RData")
+# save(p_core_flex3_lsci, file = "outputs/r/fig_3/core_flex3-final.RData")
 ```
 
 # Merge all
 
 ```{r}
-load("outputs/r/fig_3/core_flex1-final.RData")
-load("outputs/r/fig_3/core_flex2-final.RData")
-load("outputs/r/fig_3/core_flex3-final.RData")
+# load("outputs/r/fig_3/core_flex1-final.RData")
+# load("outputs/r/fig_3/core_flex2-final.RData")
+# load("outputs/r/fig_3/core_flex3-final.RData")
 
 p_core_flex_lsci_f123 <- cowplot::plot_grid(p_core_flex2_lsci,
                                             p_core_flex3_lsci,
                                             p_core_flex1_lsci,
                                             labels = c("A", "B", "C"),
-                                            label_size = 12,
+                                            label_size = 15,
+                                            label_x = -0.01,
+                                            label_y = c(1.13, 1.09, 1.05),
                                             ncol = 1,
                                             rel_widths = c(1, 1, 1),
-                                            rel_heights = c(0.75, 0.5, 1)); p_core_flex_lsci_f123
+                                            rel_heights = c(0.88, 0.52, 0.9)); p_core_flex_lsci_f123
 
-p_core_flex_lsci_f123_final <- p_core_flex_lsci_f123 +
-  theme(plot.margin = margin(1.2,0,0,0, "cm")) +
-  geom_text(aes(x = 0.15,
-                y = 1.03,
-                label = "Landrace"),
-            size = 5,
-            fontface = "bold") +
-  geom_text(aes(x = 0.41,
-                y = 1.03,
-                label = "Selected line"),
-            size = 5,
-            fontface = "bold") +
-  geom_text(aes(x = 0.65,
-                y = 1.03,
-                label = "Cross hybrid"),
-            size = 5,
-            fontface = "bold") +
-  geom_text(aes(x = 0.89,
-                y = 1.03,
-                label = "Inbred line"),
-            size = 5,
-            fontface = "bold"); p_core_flex_lsci_f123_final
+Fig3 <- p_core_flex_lsci_f123 +
+  theme(plot.margin = margin(1,0,0,0.25, "cm")) +
+  geom_text(aes(x = rep(-0.004, 3),
+                y = c(0.825, 0.52, 0.2)),
+            label = c("Relative abundance [%]", 
+                      "Ft.importance", 
+                      "Prevalence [%]"),
+            size = 3.25,
+            angle = 90) +
+  geom_text(aes(x = c(0.27, 0.77),
+                y = rep(1.03, 2)),
+            label = c("LOW DOMESTICATION", "HIGH DOMESTICATION"),
+            size = 3.5) +
+  geom_text(aes(x = c(0.15, 0.4, 0.65, 0.89), 
+                y = rep(1.01, 4)),
+            label = c("LANDRACES", "SELECTED LINES", "CROSS HYBRIDS", "INBRED LINES"),
+            size = 3); Fig3
 
-# save(p_core_flex_lsci_f123_final,
-#      file = "outputs/r/fig_3/core_flex-final-1-2-3.RData")
+# save(Fig3, file = "outputs/r/fig_3/fig3-final.RData")
+
+# cowplot::save_plot(
+#   plot = Fig3,
+#   "outputs/r/fig_3/fig3-final.png",
+#   base_width = 35,
+#   base_height = 25,
+#   units = "cm",
+#   scale = 1,
+#   bg = "white",
+#   dpi = 600)
 ```
