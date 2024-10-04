@@ -113,40 +113,30 @@ Fig5 <- ggplot(data,
                fill = level2),
            stat = "identity",
            alpha = 1) +
-  geom_segment(data = grid_data, aes(x = end, y = 1108,
-                                     xend = start, yend = 1108), 
+    # Segments
+  geom_segment(data = grid_data, aes(x = 0, y = 1108,
+                                     xend = 47.5, yend = 1108), 
                colour = "#a6a6a6", alpha = 0.6, size = 0.3, inherit.aes = F) +
-  geom_segment(data = grid_data, aes(x = end, y = 200,
-                                     xend = start, yend = 200), 
+  geom_segment(data = grid_data, aes(x = 0, y = 200,
+                                     xend = 47.5, yend = 200),
                colour = "#a6a6a6", alpha = 0.6, size = 0.3, inherit.aes = F) +
-  geom_segment(data = grid_data, aes(x = end, y = 80,
-                                     xend = start, yend = 80), 
+  geom_segment(data = grid_data, aes(x = 0, y = 80,
+                                     xend = 47.5, yend = 80),
                colour = "#a6a6a6", alpha = 0.6, size = 0.3, inherit.aes = F) +
-  geom_segment(data = grid_data, aes(x = end, y = 30,
-                                     xend = start, yend = 30), 
+  geom_segment(data = grid_data, aes(x = 0, y = 30,
+                                     xend = 47.5, yend = 30),
                colour = "#a6a6a6", alpha = 0.6, size = 0.3, inherit.aes = F) +
-  geom_segment(data = grid_data, aes(x = end, y = 2,
-                                     xend = start, yend = 2), 
+  geom_segment(data = grid_data, aes(x = 0, y = 2,
+                                     xend = 47.5, yend = 2),
                colour = "#a6a6a6", alpha = 0.6, size = 0.3, inherit.aes = F) +
-  # Top segments
-  geom_segment(data = grid_data, aes(x = 45, y = 1108,
-                                     xend = 47, yend = 1108), 
-               colour = "#a6a6a6", alpha = 0.6, size = 0.3, inherit.aes = F) +
-  geom_segment(data = grid_data, aes(x = 45, y = 200,
-                                     xend = 47, yend = 200), 
-               colour = "#a6a6a6", alpha = 0.6, size = 0.3, inherit.aes = F) +
-  geom_segment(data = grid_data, aes(x = 45, y = 80,
-                                     xend = 47, yend = 80), 
-               colour = "#a6a6a6", alpha = 0.6, size = 0.3, inherit.aes = F) +
-  geom_segment(data = grid_data, aes(x = 45, y = 30,
-                                     xend = 47, yend = 30), 
-               colour = "#a6a6a6", alpha = 0.6, size = 0.3, inherit.aes = F) +
-  geom_segment(data = grid_data, aes(x = 45, y = 2,
-                                     xend = 47, yend = 2), 
-               colour = "#a6a6a6", alpha = 0.6, size = 0.3, inherit.aes = F) +
-  # Top labels
+  geom_bar(aes(x = as.factor(id),
+               y = n_genes,
+               fill = level2),
+           stat = "identity",
+           alpha = 1) +
+     # Top labels
   annotate("label", 
-           x = rep(max(data$id)-1, 5), 
+           x = rep(max(data$id)-0.75, 5), #-1
            y = c(2, 30, 80, 200, 1108), 
            label = c("1", "15", "40", "100", "554"),
            color = "#a6a6a6",
@@ -156,7 +146,7 @@ Fig5 <- ggplot(data,
            hjust = 0.5,
            label.size = NA,
            fill = "white") +
-  # Bottom labels
+     # Bottom labels
   annotate("label",
            x = rep(24, 5),
            y = c(2, 30, 80, 200, 1108),
@@ -192,20 +182,21 @@ Fig5 <- ggplot(data,
   scale_y_continuous(trans = "log10",
                      limits = c(0.001, 5540)) +
   coord_polar() + 
-  geom_segment(data = base_data, 
-               aes(x = start, 
-                   y = 0.5, 
-                   xend = end, 
-                   yend = 0.5), 
-               colour = "black", 
+  geom_segment(data = base_data,
+               aes(x = start,
+                   y = 0.5,
+                   xend = end,
+                   yend = 0.5),
+               colour = "black",
                alpha = 0.6,
                size = 0.6,
                inherit.aes = F) +
+       # Add base line information
   geom_text(data = base_data,
             aes(x = title,
                 y = 0.15,
                 label = level1),
-            hjust = c(0.45, 0.45),
+            hjust = c(0.5, 0.5),
             angle = c(270, 90),
             alpha = 0.6,
             size = 3.5,
@@ -219,7 +210,7 @@ Fig5 <- ggplot(data,
             alpha = 0.6,
             size = 3,
             angle = label_data$angle,
-            inherit.aes = F) + # Add base line information
+            inherit.aes = F) + 
   guides(fill = guide_legend(nrow = 3, 
                              byrow = F)) +
   labs(fill = "Class"); Fig5
