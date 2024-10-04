@@ -196,7 +196,7 @@ Fig5 <- ggplot(data,
             aes(x = title,
                 y = 0.15,
                 label = level1),
-            hjust = c(0.5, 0.5),
+            hjust = c(0.45, 0.45),
             angle = c(270, 90),
             alpha = 0.6,
             size = 3.5,
@@ -217,7 +217,7 @@ Fig5 <- ggplot(data,
 
 # save(Fig5,
 #      file = "outputs/r/fig_5/polar-plot.RData")
-
+# 
 # cowplot::save_plot(
 #   plot = Fig5,
 #   "outputs/r/fig_5/fig5-final.png",
