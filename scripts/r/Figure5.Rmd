@@ -122,22 +122,52 @@ Fig5 <- ggplot(data,
   geom_segment(data = grid_data, aes(x = end, y = 80,
                                      xend = start, yend = 80), 
                colour = "#a6a6a6", alpha = 0.6, size = 0.3, inherit.aes = F) +
-    geom_segment(data = grid_data, aes(x = end, y = 30,
+  geom_segment(data = grid_data, aes(x = end, y = 30,
                                      xend = start, yend = 30), 
                colour = "#a6a6a6", alpha = 0.6, size = 0.3, inherit.aes = F) +
   geom_segment(data = grid_data, aes(x = end, y = 2,
                                      xend = start, yend = 2), 
                colour = "#a6a6a6", alpha = 0.6, size = 0.3, inherit.aes = F) +
-  annotate("text", 
+  # Top segments
+  geom_segment(data = grid_data, aes(x = 45, y = 1108,
+                                     xend = 47, yend = 1108), 
+               colour = "#a6a6a6", alpha = 0.6, size = 0.3, inherit.aes = F) +
+  geom_segment(data = grid_data, aes(x = 45, y = 200,
+                                     xend = 47, yend = 200), 
+               colour = "#a6a6a6", alpha = 0.6, size = 0.3, inherit.aes = F) +
+  geom_segment(data = grid_data, aes(x = 45, y = 80,
+                                     xend = 47, yend = 80), 
+               colour = "#a6a6a6", alpha = 0.6, size = 0.3, inherit.aes = F) +
+  geom_segment(data = grid_data, aes(x = 45, y = 30,
+                                     xend = 47, yend = 30), 
+               colour = "#a6a6a6", alpha = 0.6, size = 0.3, inherit.aes = F) +
+  geom_segment(data = grid_data, aes(x = 45, y = 2,
+                                     xend = 47, yend = 2), 
+               colour = "#a6a6a6", alpha = 0.6, size = 0.3, inherit.aes = F) +
+  # Top labels
+  annotate("label", 
            x = rep(max(data$id)-1, 5), 
            y = c(2, 30, 80, 200, 1108), 
            label = c("1", "15", "40", "100", "554"),
            color = "#a6a6a6",
            size = 3.5,
            angle = 0,
-           alpha = 0.6,
            fontface = "bold",
-           hjust = 0.5) +
+           hjust = 0.5,
+           label.size = NA,
+           fill = "white") +
+  # Bottom labels
+  annotate("label",
+           x = rep(24, 5),
+           y = c(2, 30, 80, 200, 1108),
+           label = c("1", "15", "40", "100", "554"),
+           color = "#a6a6a6",
+           size = 3.5,
+           angle = 0,
+           fontface = "bold",
+           hjust = 0.5,
+           label.size = NA,
+           fill = "white") +
   theme_classic() +
   theme(
     axis.line.y = element_blank(), 
