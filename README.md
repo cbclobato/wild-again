@@ -1,7 +1,7 @@
 ## Wild again: Recovery of a beneficial Cannabis seed endophyte from low domestication genotypes
 Authors: Carolina Lobato, João Machado de Freitas, Daniel Habich, Isabella Kögl, Gabriele Berg & Tomislav Cernava
 
-[Institute of Environmental Biotechnology (UBT)](https://www.tugraz.at/institute/ubt/home/), Graz University of Technology, Graz (Austria)
+[Institute of Environmental Biotechnology (UBT)](https://www.tugraz.at/institute/ubt/home/) — TU Graz
 
 
 ### Project structure
