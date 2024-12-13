@@ -81,7 +81,7 @@ project/
       - importing into QIIME2 v2023.5 and the further bioinformatic processing steps using the DADA2 pipeline and the VSEARCH algorithm using the SILVA v138 reference database, which generated the feature table, taxonomy file, representative sequences and phylogenetic tree.
       - exporting from QIIME2.
     
-  - r/  This subdirectory contains the scripts used in R to create the phyloseq objects, preprocess the data and prepare the figures in the manuscript.
+  - r/  This subdirectory contains the scripts used in R to create the phyloseq objects, preprocess the data, and prepare the figures for the manuscript.
     
   -  utils/  This subdirectory contains utility scripts that are used by other scripts in the project, such as:
       - csv2fasta.sh for converting .csv to .fasta format.
