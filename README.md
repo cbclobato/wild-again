@@ -1,4 +1,4 @@
-## Wild again: Recovery of a beneficial Cannabis seed endophyte from low domestication genotypes
+## Wild again: Recovery of a beneficial *Cannabis* seed endophyte from low domestication genotypes
 Authors: Carolina Lobato, João Machado de Freitas, Daniel Habich, Isabella Kögl, Gabriele Berg & Tomislav Cernava
 
 [Institute of Environmental Biotechnology (UBT)](https://www.tugraz.at/institute/ubt/home/) — TU Graz
@@ -100,4 +100,4 @@ The 16S rRNA gene amplicon raw FASTQ files were deposited in [ENA](https://www.e
 The assembled genome of *Bacillus frigotolerans*, with the associated annotations, was deposited in [NCBI](https://www.ncbi.nlm.nih.gov/) under accession number PRJNA1113337.
 
 ### References
-Lobato, C., de Freitas, J.M., Habich, D. et al. Wild again: recovery of a beneficial Cannabis seed endophyte from low domestication genotypes. Microbiome 12, 239 (2024). https://doi.org/10.1186/s40168-024-01951-5
+Lobato, C., de Freitas, J.M., Habich, D. et al. Wild again: recovery of a beneficial *Cannabis* seed endophyte from low domestication genotypes. Microbiome 12, 239 (2024). https://doi.org/10.1186/s40168-024-01951-5
