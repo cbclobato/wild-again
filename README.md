@@ -46,7 +46,7 @@ project/
 │       ├── QIIME22R.sh
 │       ├── install.R
 │       ├── plot_composition_v2.R
-│       ├── umap/
+│       ├── UMAP/
 │       │   ├── data.R
 │       │   ├── project.R
 │       │   ├── cluster-analysis.R
