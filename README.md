@@ -93,7 +93,7 @@ project/
       - QIIME22R.sh for converting .biom to .tsv format and back,
       - install.R for installing the necessary packages in R.
       - plot_composition_v2 modified microbiome::plot_composition function for running when the microbiome version is above 1.6.
-      - umap/ contains the scripts used for beta diversity representation with UMAP, as shown in Figure 2.
+      - UMAP/ contains the scripts used for beta diversity representation with UMAP, as shown in Figure 2.
       - biomarkers/ contains the scripts used for biomarker assessment shown in Figure 3.
    
 - outputs/ contains QIIME2 and R saved outputs.
