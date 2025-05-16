@@ -83,7 +83,7 @@ project/
       2. Importing into QIIME2
       3. Bioinformatic processing steps using the DADA2 pipeline and VSEARCH with the SILVA v138 reference database to generate the feature table, taxonomy file, representative sequences, and the phylogenetic tree
       4. Exporting from QIIME2
-      - Genome assembly of *Bacillus frigoritolerans* using [FLYE v2.9.3](https://github.com/mikolmogorov/Flye) and annotation with [DRAM](https://github.com/WrightonLabCSU/DRAM)
+    - Genome assembly of *Bacillus frigoritolerans* using [FLYE v2.9.3](https://github.com/mikolmogorov/Flye) and annotation with [DRAM](https://github.com/WrightonLabCSU/DRAM)
     
   - R/  This subdirectory contains the scripts used in R to create the phyloseq objects, preprocess the data, and prepare the figures for the manuscript.
     
