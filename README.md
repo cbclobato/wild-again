@@ -43,7 +43,7 @@ project/
 │   └── utils/
 │       ├── csv2fasta.sh
 │       ├── csv2tsv.sh
-│       ├── qiime2r.sh
+│       ├── QIIME22R.sh
 │       ├── install.R
 │       ├── plot_composition_v2.R
 │       ├── umap/
@@ -58,7 +58,7 @@ project/
 │           ├── train-eval.R 
 │           └── run-all.R
 ├── outputs/
-│   ├── qiime2/
+│   ├── QIIME2/
 │   └── R/
 ├── README.md
 └── LICENSE
